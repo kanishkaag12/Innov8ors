@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Requirement Analyzer</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<h2>AI Requirement Analyzer</h2>
+
+<textarea id="desc" placeholder="Enter project description"></textarea>
+
+<br><br>
+
+<button onclick="generate()">Generate Milestones</button>
+
+<pre id="result"></pre>
+
+<script>
+
+async function generate(){
+
+const description = document.getElementById("desc").value;
+
+const res = await fetch("/api/generate-milestones",{
+
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+
+body: JSON.stringify({ description })
+
+});
+
+const data = await res.json();
+
+document.getElementById("result").innerText =
+data.milestones;
+
+}
+
+</script>
+
+</body>
+</html>
