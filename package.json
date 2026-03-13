@@ -1,0 +1,22 @@
+{
+  "name": "synapescrow-backend",
+  "version": "1.0.0",
+  "description": "SynapEscrow backend for project, milestone, escrow, and AI verification workflows",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "nodemon backend/server.js",
+    "start": "node backend/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.5.1",
+    "openai": "^4.57.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
