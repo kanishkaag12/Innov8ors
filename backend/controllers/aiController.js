@@ -16,7 +16,8 @@ async function analyzeRequirement(req, res) {
 
     res.json({
       success: true,
-      milestones: result
+      project_title: result.project_title,
+      milestones: result.milestones
     });
 
   } catch (error) {

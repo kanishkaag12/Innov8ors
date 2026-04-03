@@ -10,6 +10,8 @@ export const approveProjectMilestones = (projectId, payload) =>
   api.post(`/projects/${projectId}/milestones/approval`, payload);
 export const generateMilestones = (payload) =>
   api.post('/ai/generate-milestones', payload);
+export const verifyMilestone = (payload) =>
+  api.post('/ai/verify-milestone', payload);
 export const submitMilestone = (milestoneId, payload) =>
   api.post(`/milestones/${milestoneId}/submit`, payload);
 export const fetchMilestonesByFreelancer = (freelancerId) =>

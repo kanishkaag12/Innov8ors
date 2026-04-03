@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Sparkles,
   Send,
   Briefcase,
+  CheckCircle2,
   Clock,
   DollarSign,
   ChevronRight,
@@ -18,32 +18,321 @@ import {
   UserCircle,
   BriefcaseBusiness,
   Lock,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
+import { verifyMilestone } from '@/services/api';
 import { getStoredAuth } from '@/services/auth';
+
+const STORAGE_KEY = 'synapescrow_employer_projects';
+
+function loadEmployerProjects() {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveEmployerProjects(projects) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+}
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(Number(amount || 0));
+}
+
+function formatPostedDate(dateString) {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return 'Recently posted';
+  }
+
+  return `Posted ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+}
+
+function getComplexityTone(complexity) {
+  const value = String(complexity || '').toLowerCase();
+  if (value.includes('high')) {
+    return 'bg-orange-50 text-orange-700';
+  }
+  if (value.includes('low')) {
+    return 'bg-sky-50 text-sky-700';
+  }
+  return 'bg-slate-50 text-slate-700';
+}
+
+function getVerificationTone(status) {
+  const value = String(status || '').toLowerCase();
+  if (value.includes('fully')) {
+    return {
+      badge: 'bg-emerald-100 text-emerald-700',
+      panel: 'border-emerald-200 bg-emerald-50',
+      heading: 'Fully completed and ready for payout.',
+      helper: 'The submitted repository satisfies this milestone and can trigger an immediate release.'
+    };
+  }
+  if (value.includes('partially')) {
+    return {
+      badge: 'bg-amber-100 text-amber-700',
+      panel: 'border-amber-200 bg-amber-50',
+      heading: 'Partially completed and needs review.',
+      helper: 'The agent found meaningful progress, but this milestone still needs feedback or a pro-rated release.'
+    };
+  }
+  return {
+    badge: 'bg-rose-100 text-rose-700',
+    panel: 'border-rose-200 bg-rose-50',
+    heading: 'Milestone requirements were not met.',
+    helper: 'The agent could not verify enough implementation to satisfy this milestone and recommends employer refund handling.'
+  };
+}
+
+function normalizeVerificationResult(result) {
+  if (!result) {
+    return null;
+  }
+
+  const completionValue = Number(
+    result?.completion_percentage ?? result?.completion ?? result?.completionPercentage ?? 0
+  );
+  const completion = Number.isFinite(completionValue) ? Math.min(100, Math.max(0, Math.round(completionValue))) : 0;
+  const rawStatus = String(result?.status ?? result?.result ?? '').toLowerCase().trim();
+
+  let status = 'Unmet';
+  if (rawStatus.includes('fully')) {
+    status = 'Fully Completed';
+  } else if (rawStatus.includes('partial')) {
+    status = 'Partially Completed';
+  } else if (rawStatus.includes('unmet') || rawStatus.includes('not completed') || rawStatus.includes('incomplete')) {
+    status = 'Unmet';
+  } else if (completion >= 85) {
+    status = 'Fully Completed';
+  } else if (completion >= 25) {
+    status = 'Partially Completed';
+  }
+
+  let recommendedAction = String(
+    result?.recommended_action ?? result?.recommendedAction ?? ''
+  ).trim();
+
+  if (!recommendedAction) {
+    recommendedAction =
+      status === 'Fully Completed'
+        ? 'Trigger immediate payment'
+        : status === 'Partially Completed'
+          ? 'Trigger feedback or pro-rated release'
+          : 'Initiate employer refund protocol';
+  }
+
+  const assessment = String(
+    result?.assessment ?? result?.ai_assessment ?? result?.short_explanation ?? ''
+  ).trim();
+
+  return {
+    ...result,
+    status,
+    completion_percentage: completion,
+    recommended_action: recommendedAction,
+    assessment
+  };
+}
 
 export default function FreelancerDashboardPage() {
   const [user, setUser] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [requestingProjectId, setRequestingProjectId] = useState(null);
+  const [repoLink, setRepoLink] = useState('');
+  const [selectedMilestoneTitle, setSelectedMilestoneTitle] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
 
   useEffect(() => {
     const auth = getStoredAuth();
     if (auth) {
       setUser(auth.user);
     }
+
+    setProjects(loadEmployerProjects());
+
+    const syncProjects = () => {
+      const latestProjects = loadEmployerProjects();
+      setProjects(latestProjects);
+      setSelectedProject((current) =>
+        current ? latestProjects.find((project) => project.id === current.id) || null : null
+      );
+    };
+
+    window.addEventListener('storage', syncProjects);
+    window.addEventListener('focus', syncProjects);
+
+    return () => {
+      window.removeEventListener('storage', syncProjects);
+      window.removeEventListener('focus', syncProjects);
+    };
   }, []);
 
-  const stats = [
-    { label: 'Active Contracts', value: '4', icon: BriefcaseBusiness, trend: '+1', color: 'bg-blue-500' },
-    { label: 'Pending Reviews', value: '2', icon: Clock, trend: '-1', color: 'bg-amber-500' },
-    { label: 'Total Earnings', value: '$12,450', icon: TrendingUp, trend: '+12%', color: 'bg-emerald-500' },
-    { label: 'Escrow Locked', value: '$3,200', icon: ShieldCheck, trend: 'Stable', color: 'bg-indigo-500' },
-  ];
+  const stats = useMemo(() => {
+    const totalBudget = projects.reduce((sum, project) => sum + Number(project?.budget || 0), 0);
 
-  const projects = [
-    { name: 'E-commerce Redesign Next.js', client: 'Acme Corp', status: 'Frontend Architecture', budget: '$4,500', timeLeft: '2 days left' },
-    { name: 'AI Writing Assistant API', client: 'TechNova', status: 'Beta Testing', budget: '$2,800', timeLeft: '5 days left' }
-  ];
+    return [
+      { label: 'Active Contracts', value: String(projects.length), icon: BriefcaseBusiness, trend: projects.length ? `+${projects.length}` : '0', color: 'bg-blue-500' },
+      { label: 'Pending Reviews', value: '0', icon: Clock, trend: '0', color: 'bg-amber-500' },
+      { label: 'Total Earnings', value: '₹0', icon: TrendingUp, trend: '0%', color: 'bg-emerald-500' },
+      { label: 'Escrow Locked', value: formatCurrency(totalBudget), icon: ShieldCheck, trend: 'Stable', color: 'bg-indigo-500' }
+    ];
+  }, [projects]);
+
+  const selectedProjectRequest = useMemo(() => {
+    if (!selectedProject || !user) {
+      return null;
+    }
+
+    return (selectedProject.applicants || []).find(
+      (applicant) => applicant.email === user.email
+    ) || null;
+  }, [selectedProject, user]);
+
+  const normalizedVerificationResult = useMemo(
+    () => normalizeVerificationResult(selectedProjectRequest?.verificationResult),
+    [selectedProjectRequest]
+  );
+
+  useEffect(() => {
+    if (!selectedProject) {
+      setRepoLink('');
+      setSelectedMilestoneTitle('');
+      setVerificationError('');
+      setIsVerifying(false);
+      return;
+    }
+
+    const request = (selectedProject.applicants || []).find(
+      (applicant) => applicant.email === user?.email
+    );
+
+    setRepoLink(request?.repoLink || '');
+    setSelectedMilestoneTitle(request?.selectedMilestoneTitle || selectedProject.milestones?.[0]?.title || '');
+    setVerificationError('');
+  }, [selectedProject, user]);
+
+  const handleRequestToJoin = () => {
+    if (!selectedProject || !user) {
+      return;
+    }
+
+    setRequestingProjectId(selectedProject.id);
+
+    window.setTimeout(() => {
+      const nextProjects = projects.map((project) => {
+        if (project.id !== selectedProject.id) {
+          return project;
+        }
+
+        const applicants = Array.isArray(project.applicants) ? [...project.applicants] : [];
+        const existingIndex = applicants.findIndex((applicant) => applicant.email === user.email);
+        const requestPayload = {
+          name: user.name || 'Freelancer',
+          email: user.email || '',
+          status: 'pending',
+          requestedAt: new Date().toISOString(),
+          pfiScore: 0
+        };
+
+        if (existingIndex >= 0) {
+          applicants[existingIndex] = {
+            ...applicants[existingIndex],
+            ...requestPayload
+          };
+        } else {
+          applicants.push(requestPayload);
+        }
+
+        return {
+          ...project,
+          applicants,
+          interestedCount: applicants.length
+        };
+      });
+
+      setProjects(nextProjects);
+      saveEmployerProjects(nextProjects);
+      const updatedSelectedProject = nextProjects.find((project) => project.id === selectedProject.id) || null;
+      setSelectedProject(updatedSelectedProject);
+      setRequestingProjectId(null);
+    }, 900);
+  };
+
+  const updateProjectApplicant = (projectId, applicantEmail, updater) => {
+    const nextProjects = projects.map((project) => {
+      if (project.id !== projectId) {
+        return project;
+      }
+
+      const applicants = (project.applicants || []).map((applicant) =>
+        applicant.email === applicantEmail ? updater(applicant, project) : applicant
+      );
+
+      return {
+        ...project,
+        applicants,
+        interestedCount: applicants.length
+      };
+    });
+
+    setProjects(nextProjects);
+    saveEmployerProjects(nextProjects);
+    setSelectedProject(nextProjects.find((project) => project.id === projectId) || null);
+  };
+
+  const handleRunVerification = async () => {
+    if (!selectedProject || !user || !repoLink.trim() || !selectedMilestoneTitle) {
+      setVerificationError('Add a GitHub repo link and select a milestone first.');
+      return;
+    }
+
+    const milestone = (selectedProject.milestones || []).find((item) => item.title === selectedMilestoneTitle);
+    if (!milestone) {
+      setVerificationError('Selected milestone could not be found.');
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      setVerificationError('');
+
+      const response = await verifyMilestone({
+        repoLink: repoLink.trim(),
+        milestone: `${milestone.title}\nDescription: ${milestone.description}\nDeliverable: ${milestone.deliverable}`
+      });
+
+      updateProjectApplicant(selectedProject.id, user.email, (applicant) => ({
+        ...applicant,
+        repoLink: repoLink.trim(),
+        selectedMilestoneTitle,
+        verificationResult: response.data?.result || null
+      }));
+    } catch (error) {
+      setVerificationError(error?.response?.data?.error || 'Quality verification failed.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-0 py-4 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -102,29 +391,39 @@ export default function FreelancerDashboardPage() {
           </div>
 
           <div className="space-y-4">
-            {projects.map((proj, idx) => (
-              <div key={idx} className="flex flex-wrap items-center justify-between rounded-2xl bg-white p-6 shadow-sm border border-slate-100 transition hover:border-emerald-200">
+            {projects.length === 0 ? (
+              <div className="rounded-2xl border border-slate-100 bg-white p-6 text-sm text-slate-500 shadow-sm">
+                No real client projects yet. New employer-posted jobs will appear here automatically.
+              </div>
+            ) : projects.map((proj) => (
+              <div key={proj.id} className="flex flex-wrap items-center justify-between rounded-2xl bg-white p-6 shadow-sm border border-slate-100 transition hover:border-emerald-200">
                 <div className="flex items-start gap-4">
                   <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
                     <Briefcase size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-lg hover:text-emerald-600 cursor-pointer">{proj.name}</h3>
+                    <h3 className="font-bold text-slate-900 text-lg hover:text-emerald-600 cursor-pointer">{proj.title}</h3>
                     <div className="flex items-center gap-3 mt-1">
                       <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
-                        <Users size={14} /> {proj.client}
+                        <Users size={14} /> {proj.employerName || 'Client'}
                       </p>
-                      <span className="text-xs px-2 py-0.5 bg-slate-100 rounded text-slate-600 font-bold">{proj.status}</span>
+                      <span className="text-xs px-2 py-0.5 bg-slate-100 rounded text-slate-600 font-bold">{proj.status || 'Active'}</span>
+                      <span className="text-xs text-slate-400 font-medium">{formatPostedDate(proj.createdAt)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-end gap-2 mt-4 sm:mt-0">
-                  <p className="text-lg font-bold text-slate-900">{proj.budget}</p>
+                  <p className="text-lg font-bold text-slate-900">{formatCurrency(proj.budget)}</p>
                   <p className="text-xs font-bold text-orange-500 flex items-center gap-1">
-                    <Clock size={12} /> {proj.timeLeft}
+                    <Clock size={12} /> Latest employer posting
                   </p>
-                  <button className="text-xs font-bold text-slate-400 hover:text-emerald-600 transition">View Details</button>
+                  <button
+                    onClick={() => setSelectedProject(proj)}
+                    className="text-xs font-bold text-slate-400 hover:text-emerald-600 transition"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
@@ -185,6 +484,235 @@ export default function FreelancerDashboardPage() {
           </div>
         </div>
       </div>
+      {selectedProject ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
+          <div className="max-h-[78vh] w-full max-w-[840px] overflow-hidden rounded-[1.65rem] bg-white shadow-2xl">
+            <div className="flex items-start justify-between bg-slate-950 px-5 py-4 text-white">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400">
+                  <Briefcase size={20} />
+                </div>
+                <div>
+                  <h2 className="text-[1.55rem] font-extrabold leading-tight">{selectedProject.title}</h2>
+                  <p className="mt-1 text-sm text-slate-300">
+                    {formatPostedDate(selectedProject.createdAt)} · Budget {formatCurrency(selectedProject.budget)}
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedProject(null)} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-slate-200 transition hover:bg-white/20">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="max-h-[calc(78vh-72px)] overflow-y-auto px-5 py-4">
+              <div className="mb-4 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-5 py-4">
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">Project Description</p>
+                <p className="mt-2 text-base text-slate-800">{selectedProject.description || 'No description available.'}</p>
+              </div>
+
+              <div className="rounded-[1.2rem] border border-emerald-100 bg-emerald-50/40 p-5">
+                <div className="mb-4 flex items-center justify-between gap-3 text-emerald-700">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 size={20} />
+                    <h3 className="text-lg font-extrabold">AI-Confirmed Milestones</h3>
+                  </div>
+                  <p className="text-sm font-extrabold text-emerald-700">
+                    Escrow Locked · {formatCurrency(selectedProject.budget)}
+                  </p>
+                </div>
+
+                {selectedProject.milestones?.length ? (
+                  <div className="space-y-4">
+                    {selectedProject.milestones.map((milestone, index) => (
+                      <article key={`${selectedProject.id}-${index}`} className="rounded-[1.2rem] border border-emerald-100 bg-white p-4 shadow-sm">
+                        <h4 className="text-[1.05rem] font-extrabold text-slate-900">{milestone.title}</h4>
+                        <p className="mt-2 text-sm leading-7 text-slate-600">{milestone.description}</p>
+
+                        <div className="mt-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-extrabold text-emerald-700">
+                          {milestone.payout_percentage}% payout
+                        </div>
+
+                        <div className="mt-4 grid gap-3 md:grid-cols-4">
+                          <div className="rounded-xl bg-slate-50 p-3.5">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Payable Amount</p>
+                            <p className="mt-2 text-base font-extrabold text-emerald-700">{formatCurrency(milestone.payment_amount)}</p>
+                          </div>
+                          <div className="rounded-xl bg-slate-50 p-3.5">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Expected Deliverable</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600">{milestone.deliverable}</p>
+                          </div>
+                          <div className="rounded-xl bg-slate-50 p-3.5">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Estimated Time</p>
+                            <p className="mt-2 text-sm font-bold text-slate-700">{milestone.estimated_time}</p>
+                          </div>
+                          <div className="rounded-xl bg-slate-50 p-3.5">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Complexity</p>
+                            <p className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-bold ${getComplexityTone(milestone.complexity)}`}>
+                              {milestone.complexity}
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl bg-white p-5 text-base text-slate-500 shadow-sm">
+                    No milestone plan is available yet for this project.
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-5 space-y-4">
+                {selectedProjectRequest?.status === 'pending' ? (
+                  <div className="rounded-[1.2rem] border border-amber-200 bg-amber-50 p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="mt-1 text-amber-500">
+                        <Clock size={20} />
+                      </div>
+                      <div>
+                        <h4 className="text-[1.05rem] font-extrabold text-amber-700">Request Pending</h4>
+                        <p className="mt-2 text-base text-amber-700/80">
+                          Waiting for employer to review your request. GitHub submission unlocks once accepted.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : selectedProjectRequest?.status === 'accepted' ? (
+                  <>
+                    <div className="rounded-[1.2rem] border border-emerald-200 bg-emerald-50 p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="mt-1 text-emerald-500">
+                          <CheckCircle2 size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-[1.05rem] font-extrabold text-emerald-700">Your request was accepted!</h4>
+                          <p className="mt-2 text-base text-emerald-700/80">
+                            You can now submit your work using the GitHub verification below.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-[1.2rem] border border-slate-200 bg-white p-5">
+                      <div>
+                        <label className="mb-2 block text-[1.05rem] font-bold text-slate-900">GitHub Repository Link</label>
+                        <input
+                          value={repoLink}
+                          onChange={(event) => setRepoLink(event.target.value)}
+                          placeholder="https://github.com/owner/repo"
+                          className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition focus:border-emerald-400"
+                        />
+                      </div>
+
+                      <div className="mt-5">
+                        <label className="mb-2 block text-[1.05rem] font-bold text-slate-900">Milestone Requirement For Verification</label>
+                        <select
+                          value={selectedMilestoneTitle}
+                          onChange={(event) => setSelectedMilestoneTitle(event.target.value)}
+                          className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition focus:border-emerald-400"
+                        >
+                          {(selectedProject.milestones || []).map((milestone) => (
+                            <option key={milestone.title} value={milestone.title}>
+                              {milestone.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <button
+                        onClick={handleRunVerification}
+                        disabled={isVerifying}
+                        className="mt-5 rounded-2xl bg-emerald-500 px-6 py-3 text-base font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {isVerifying ? 'Running Verification...' : 'Run Quality Verification'}
+                      </button>
+                    </div>
+
+                    {verificationError ? (
+                      <div className="rounded-[1.2rem] border border-rose-200 bg-rose-50 p-5 text-sm font-semibold text-rose-600">
+                        {verificationError}
+                      </div>
+                    ) : null}
+
+                    {normalizedVerificationResult ? (
+                      <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-5">
+                        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">Verification Result</p>
+                        <div className={`mt-4 rounded-2xl border p-4 ${getVerificationTone(normalizedVerificationResult.status).panel}`}>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className={`rounded-full px-3 py-1 text-sm font-bold ${getVerificationTone(normalizedVerificationResult.status).badge}`}>
+                              {normalizedVerificationResult.status}
+                            </span>
+                            <p className="text-sm font-bold text-slate-900">
+                              {getVerificationTone(normalizedVerificationResult.status).heading}
+                            </p>
+                          </div>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">
+                            {getVerificationTone(normalizedVerificationResult.status).helper}
+                          </p>
+                        </div>
+                        <div className="mt-4 grid gap-4 md:grid-cols-3">
+                          <div className="rounded-2xl bg-white p-4">
+                            <p className="text-sm font-extrabold text-slate-400">Status</p>
+                            <p className="mt-2 text-[1.05rem] font-extrabold text-slate-900">{normalizedVerificationResult.status}</p>
+                          </div>
+                          <div className="rounded-2xl bg-white p-4">
+                            <p className="text-sm font-extrabold text-slate-400">Completion</p>
+                            <p className="mt-2 text-[1.05rem] font-extrabold text-slate-900">{normalizedVerificationResult.completion_percentage}%</p>
+                          </div>
+                          <div className="rounded-2xl bg-white p-4">
+                            <p className="text-sm font-extrabold text-slate-400">Recommended Action</p>
+                            <p className="mt-2 text-[1.05rem] font-extrabold text-slate-900">{normalizedVerificationResult.recommended_action}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 rounded-2xl bg-white p-4">
+                          <p className="text-sm font-extrabold text-slate-400">AI Assessment</p>
+                          <p className="mt-2 text-base leading-7 text-slate-700">{normalizedVerificationResult.assessment || normalizedVerificationResult.short_explanation}</p>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-4 rounded-[1.2rem] border border-slate-200 bg-white p-5 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <h4 className="text-[1.05rem] font-extrabold text-slate-900">Interested in this project?</h4>
+                      <p className="mt-2 text-base text-slate-500">Send a request so employer can review your interest.</p>
+                    </div>
+                    <button
+                      onClick={handleRequestToJoin}
+                      disabled={requestingProjectId === selectedProject.id || selectedProjectRequest?.status === 'accepted'}
+                      className="rounded-2xl bg-emerald-500 px-6 py-3 text-base font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {requestingProjectId === selectedProject.id
+                        ? 'Sending...'
+                        : selectedProjectRequest?.status === 'accepted'
+                          ? 'Request Accepted'
+                          : 'Request to Join Project'}
+                    </button>
+                  </div>
+                )}
+
+                <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 text-slate-400">
+                      <Lock size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-[1.05rem] font-extrabold text-slate-900">
+                        {selectedProjectRequest?.status === 'accepted' ? 'GitHub Submission Unlocked' : 'GitHub Submission Locked'}
+                      </h4>
+                      <p className="mt-2 text-base text-slate-500">
+                        {selectedProjectRequest?.status === 'accepted'
+                          ? 'Employer accepted your request. You can now coordinate and prepare your submission workflow.'
+                          : 'Employer must accept your request before you can submit work and run AI verification.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

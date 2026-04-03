@@ -1,7 +1,7 @@
 {
   "/onboarding/categories-skills/page": "app/onboarding/categories-skills/page.js",
   "/login/page": "app/login/page.js",
-  "/signup/page": "app/signup/page.js",
+  "/dashboard/employer/page": "app/dashboard/employer/page.js",
   "/dashboard/freelancer/page": "app/dashboard/freelancer/page.js",
-  "/dashboard/employer/page": "app/dashboard/employer/page.js"
+  "/dashboard/messages/page": "app/dashboard/messages/page.js"
 }

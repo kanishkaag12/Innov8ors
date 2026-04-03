@@ -4,8 +4,28 @@ require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function generateMilestones(description) {
+function normalizeMilestones(rawMilestones = []) {
+  return rawMilestones
+    .map((milestone) => ({
+      title: String(milestone?.title || milestone?.name || '').trim(),
+      description: String(milestone?.description || '').trim(),
+      deliverable: String(milestone?.deliverable || milestone?.expected_deliverable || '').trim(),
+      estimated_time: String(milestone?.estimated_time || milestone?.timeline || '').trim(),
+      complexity: String(milestone?.complexity || 'Medium').trim(),
+      payout_percentage: Number(milestone?.payout_percentage || milestone?.payout || 0)
+    }))
+    .filter((milestone) => milestone.title && milestone.description);
+}
 
+function extractJsonPayload(text) {
+  const trimmed = String(text || '').trim();
+  const fencedMatch = trimmed.match(/```json\s*([\s\S]*?)\s*```/i);
+  const jsonCandidate = fencedMatch ? fencedMatch[1] : trimmed;
+
+  return JSON.parse(jsonCandidate);
+}
+
+async function generateMilestones(description) {
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash"
   });
@@ -15,41 +35,40 @@ You are a senior technical project manager responsible for planning software dev
 
 Break the following project into structured and realistic development milestones.
 
-For each milestone include:
-- milestone name
-- description
-- expected deliverable
-- estimated time range in days (for example: 1–2 days, 2–4 days, etc.)
-- workload complexity (Low / Medium / High)
-- payout percentage of total project budget
+Return ONLY valid JSON in this exact structure:
+{
+  "project_title": "string",
+  "milestones": [
+    {
+      "title": "string",
+      "description": "string",
+      "deliverable": "string",
+      "estimated_time": "string",
+      "complexity": "Low | Medium | High",
+      "payout_percentage": number
+    }
+  ]
+}
 
-Time estimation guidelines:
-- Estimate the time realistically based on the amount of work involved.
-- The time range should reflect real development effort.
-- Use broader ranges when the workload uncertainty is higher.
-
-Payout rules:
-- Payout percentage must reflect the workload complexity and effort required.
-- Higher complexity milestones should receive higher payout percentages.
-- Smaller setup or configuration tasks should receive lower percentages.
-- All payout percentages across all milestones must add up to exactly 100%.
-
-Milestone planning guidelines:
-- Break the project into logical development stages.
-- Avoid extremely small or trivial milestones.
-- Avoid overly large milestones.
-- Aim for balanced development phases such as setup, core development, integration, testing, and deployment.
-
-Return the result in a clean structured format.
+Rules:
+- All payout percentages across all milestones must add up to exactly 100.
+- Use realistic delivery ranges such as "1-2 weeks" or "3-5 days".
+- Higher complexity milestones should generally receive higher payout percentages.
+- Avoid trivial or oversized milestones.
+- Do not include markdown fences or explanatory text.
 
 Project:
 ${description}`;
 
-   const result = await model.generateContent(prompt);
-
+  const result = await model.generateContent(prompt);
   const response = await result.response;
+  const parsed = extractJsonPayload(response.text());
+  const milestones = normalizeMilestones(parsed?.milestones);
 
-  return response.text();
+  return {
+    project_title: String(parsed?.project_title || 'AI Generated Project Plan').trim(),
+    milestones
+  };
 }
 
 module.exports = { generateMilestones };

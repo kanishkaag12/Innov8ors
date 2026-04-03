@@ -1,4 +1,4 @@
-// File: C:\aiagent-iit\Innov8ors\frontend\src\app\dashboard\freelancer\page.js
+// File: C:\Users\msi\Desktop\SynapEscrow_Project\Innov8ors\frontend\src\app\dashboard\freelancer\page.js
 import * as entry from '../../../../../src/app/dashboard/freelancer/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
