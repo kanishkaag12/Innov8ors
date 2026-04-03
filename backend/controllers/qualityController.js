@@ -5,7 +5,7 @@ async function verifyMilestone(req, res) {
 
   try {
 
-    const { repoLink, milestone } = req.body;
+    const { repoLink, milestone, projectTitle } = req.body;
 
     if (!repoLink || !milestone) {
       return res.status(400).json({
@@ -13,21 +13,46 @@ async function verifyMilestone(req, res) {
       });
     }
 
-    const repoCode = await getRepoCode(repoLink);
+    const repoData = await getRepoCode(repoLink, milestone);
 
-    const result = await analyzeCode(milestone, repoCode);
+    const result = await analyzeCode(milestone, repoData.code, projectTitle);
 
-    res.json({
+    return res.json({
       success: true,
-      result
+      result: {
+        ...result,
+        metadata: {
+          filesScanned: repoData.filesScanned,
+          filesAnalyzed: repoData.filesAnalyzed
+        }
+      }
     });
 
   } catch (error) {
 
     console.error("QUALITY CHECK ERROR:", error);
+    const message = (error && error.message) ? error.message : "Quality check failed";
 
-    res.status(500).json({
-      error: "Quality check failed"
+    if (
+      message.includes("Invalid GitHub repository URL") ||
+      message.includes("GitHub repository not found") ||
+      message.includes("no supported code files")
+    ) {
+      return res.status(400).json({
+        error: message,
+        result: {
+          status: "Unmet",
+          completion_percentage: 0,
+          short_explanation: message,
+          assessment:
+            "The repository link is invalid or does not contain verifiable code for this milestone.",
+          recommended_action: "Initiate employer refund protocol"
+        }
+      });
+    }
+
+    return res.status(500).json({
+      error: message
     });
 
   }

@@ -120,10 +120,12 @@ function normalizeVerificationResult(result) {
     status = 'Partially Completed';
   } else if (rawStatus.includes('unmet') || rawStatus.includes('not completed') || rawStatus.includes('incomplete')) {
     status = 'Unmet';
-  } else if (completion >= 85) {
-    status = 'Fully Completed';
-  } else if (completion >= 25) {
-    status = 'Partially Completed';
+  } else if (!rawStatus) {
+    if (completion >= 85) {
+      status = 'Fully Completed';
+    } else if (completion >= 25) {
+      status = 'Partially Completed';
+    }
   }
 
   let recommendedAction = String(
@@ -306,6 +308,12 @@ export default function FreelancerDashboardPage() {
       return;
     }
 
+    const gitHubRepoRegex = /^https:\/\/github\.com\/[^\/]+\/[^\/]+(?:\/.*)?$/i;
+    if (!gitHubRepoRegex.test(repoLink.trim())) {
+      setVerificationError('Invalid GitHub repository URL format. Use https://github.com/owner/repo.');
+      return;
+    }
+
     const milestone = (selectedProject.milestones || []).find((item) => item.title === selectedMilestoneTitle);
     if (!milestone) {
       setVerificationError('Selected milestone could not be found.');
@@ -315,9 +323,16 @@ export default function FreelancerDashboardPage() {
     try {
       setIsVerifying(true);
       setVerificationError('');
+      updateProjectApplicant(selectedProject.id, user.email, (applicant) => ({
+        ...applicant,
+        repoLink: repoLink.trim(),
+        selectedMilestoneTitle,
+        verificationResult: null
+      }));
 
       const response = await verifyMilestone({
         repoLink: repoLink.trim(),
+        projectTitle: selectedProject.title,
         milestone: `${milestone.title}\nDescription: ${milestone.description}\nDeliverable: ${milestone.deliverable}`
       });
 
@@ -328,6 +343,12 @@ export default function FreelancerDashboardPage() {
         verificationResult: response.data?.result || null
       }));
     } catch (error) {
+      updateProjectApplicant(selectedProject.id, user.email, (applicant) => ({
+        ...applicant,
+        repoLink: repoLink.trim(),
+        selectedMilestoneTitle,
+        verificationResult: null
+      }));
       setVerificationError(error?.response?.data?.error || 'Quality verification failed.');
     } finally {
       setIsVerifying(false);
@@ -598,7 +619,10 @@ export default function FreelancerDashboardPage() {
                         <label className="mb-2 block text-[1.05rem] font-bold text-slate-900">GitHub Repository Link</label>
                         <input
                           value={repoLink}
-                          onChange={(event) => setRepoLink(event.target.value)}
+                          onChange={(event) => {
+                            setRepoLink(event.target.value);
+                            setVerificationError('');
+                          }}
                           placeholder="https://github.com/owner/repo"
                           className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition focus:border-emerald-400"
                         />
@@ -608,7 +632,10 @@ export default function FreelancerDashboardPage() {
                         <label className="mb-2 block text-[1.05rem] font-bold text-slate-900">Milestone Requirement For Verification</label>
                         <select
                           value={selectedMilestoneTitle}
-                          onChange={(event) => setSelectedMilestoneTitle(event.target.value)}
+                          onChange={(event) => {
+                            setSelectedMilestoneTitle(event.target.value);
+                            setVerificationError('');
+                          }}
                           className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition focus:border-emerald-400"
                         >
                           {(selectedProject.milestones || []).map((milestone) => (
@@ -667,6 +694,24 @@ export default function FreelancerDashboardPage() {
                         <div className="mt-4 rounded-2xl bg-white p-4">
                           <p className="text-sm font-extrabold text-slate-400">AI Assessment</p>
                           <p className="mt-2 text-base leading-7 text-slate-700">{normalizedVerificationResult.assessment || normalizedVerificationResult.short_explanation}</p>
+                        </div>
+                        <div className="mt-6 flex flex-wrap gap-4">
+                          {normalizedVerificationResult.status === 'Fully Completed' && (
+                            <button className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-emerald-600 hover:scale-105 active:scale-95">
+                              <CheckCircle2 size={18} />
+                              Release Milestone Payment
+                            </button>
+                          )}
+                          {normalizedVerificationResult.status === 'Partially Completed' && (
+                            <button className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-amber-600 hover:scale-105 active:scale-95">
+                              <DollarSign size={18} />
+                              Request Partial Payout
+                            </button>
+                          )}
+                          <button className="flex items-center gap-2 rounded-2xl bg-slate-100 px-6 py-3 font-bold text-slate-700 transition hover:bg-slate-200">
+                            <MessageSquare size={18} />
+                            Submit Feedback
+                          </button>
                         </div>
                       </div>
                     ) : null}
