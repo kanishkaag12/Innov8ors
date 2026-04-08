@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@/services/*": ["services/*"]
+      "@/services/*": ["services/*"],
+      "@/components/*": ["components/*"]
     }
   },
   "exclude": ["node_modules", ".next"]

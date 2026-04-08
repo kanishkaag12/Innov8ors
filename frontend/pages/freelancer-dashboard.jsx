@@ -2,6 +2,8 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import SubmissionForm from '../components/SubmissionForm';
+import PFIDashboard from '../components/PFIDashboard';
+import DashboardSidebar from '../components/DashboardSidebar';
 import {
   fetchMilestonesByProject,
   listProjects,
@@ -87,8 +89,14 @@ export default function FreelancerDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Freelancer Dashboard</h1>
+    <div className="flex h-screen bg-slate-100">
+      <DashboardSidebar />
+      <main className="flex-1 overflow-auto p-6">
+        <div className="space-y-6">
+          <h1 className="text-2xl font-bold">Freelancer Dashboard</h1>
+
+          {/* PFI Score Section */}
+          <PFIDashboard />
 
       <section className="card space-y-3">
         <h2 className="text-lg font-semibold">Browse Projects</h2>
@@ -154,6 +162,8 @@ export default function FreelancerDashboard() {
       </section>
 
       {message ? <p className="text-sm text-emerald-600">{message}</p> : null}
+        </div>
+      </main>
     </div>
   );
 }

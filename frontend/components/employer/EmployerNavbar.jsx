@@ -27,11 +27,32 @@ import {
 } from 'lucide-react';
 import { clearAuth } from '@/services/auth';
 import { useRouter } from 'next/navigation';
+import { fetchUnreadCount } from '@/services/api';
+import { getStoredAuth } from '@/services/auth';
 
 export default function EmployerNavbar({ user }) {
   const router = useRouter();
   const [openDropdown, setOpenDropdown] = useState(null);
   const dropdownRef = useRef(null);
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    const auth = getStoredAuth();
+    if (!auth?.token) return;
+
+    const checkUnread = async () => {
+      try {
+        const response = await fetchUnreadCount(auth.token);
+        setHasUnread(response.data.hasUnread || false);
+      } catch (err) {
+        console.debug('Could not fetch unread count');
+      }
+    };
+
+    checkUnread();
+    const interval = setInterval(checkUnread, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
@@ -145,8 +166,11 @@ export default function EmployerNavbar({ user }) {
                 </div>
               </NavItem>
 
-              <Link href="/dashboard/messages" className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-green-600">
+              <Link href="/dashboard/messages" className="relative px-3 py-2 text-sm font-medium text-slate-700 hover:text-green-600">
                 Messages
+                {hasUnread && (
+                  <span className="absolute top-1 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white" />
+                )}
               </Link>
             </div>
           </div>
@@ -189,7 +213,9 @@ export default function EmployerNavbar({ user }) {
 
             <button className="relative p-2 text-slate-400 hover:bg-slate-50 hover:text-green-600 rounded-full transition">
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 border-2 border-white" />
+              {hasUnread && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 border-2 border-white" />
+              )}
             </button>
 
             {/* Profile Avatar & Dropdown */}
@@ -211,6 +237,9 @@ export default function EmployerNavbar({ user }) {
                   </Link>
                   <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
                     <Award size={16} /> Membership plan
+                  </Link>
+                  <Link href="/dashboard/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
+                    <User size={16} /> Edit Profile
                   </Link>
                   <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
                     <UserPlus size={16} /> Invite coworker

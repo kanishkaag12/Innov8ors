@@ -24,33 +24,13 @@ const CODE_EXTENSIONS = [
 ];
 
 const MAX_SELECTED_FILES = 5;
-const MAX_FILE_CHARS = 6000;
-const MAX_TOTAL_CHARS = 8000;
+const MAX_FILE_CHARS = 8000;
+const MAX_TOTAL_CHARS = 12000;
 
 const STOP_WORDS = new Set([
-  "the",
-  "and",
-  "for",
-  "with",
-  "this",
-  "that",
-  "from",
-  "into",
-  "your",
-  "have",
-  "will",
-  "would",
-  "should",
-  "could",
-  "project",
-  "description",
-  "deliverable",
-  "milestone",
-  "requirement",
-  "build",
-  "create",
-  "using",
-  "flow"
+  "the", "and", "for", "with", "this", "that", "from", "into", "your", "have", "will", "would",
+  "should", "could", "project", "description", "deliverable", "milestone", "requirement",
+  "build", "create", "using", "flow", "application", "development", "full", "stack", "simple"
 ]);
 
 function isCodeFile(filename = "") {
@@ -70,29 +50,6 @@ function parseRepoUrl(repoUrl) {
     owner: match[1],
     repo: match[2]
   };
-}
-
-async function fetchRepoContents(apiUrl, headers, repoCodeParts, visitedUrls = new Set()) {
-  if (visitedUrls.has(apiUrl)) {
-    return;
-  }
-
-  visitedUrls.add(apiUrl);
-
-  const response = await axios.get(apiUrl, { headers });
-  const files = Array.isArray(response.data) ? response.data : [];
-
-  for (const file of files) {
-    if (file.type === "dir" && file.url) {
-      await fetchRepoContents(file.url, headers, repoCodeParts, visitedUrls);
-      continue;
-    }
-
-    if (file.type === "file" && file.download_url && isCodeFile(file.name)) {
-      const fileData = await axios.get(file.download_url, { headers });
-      repoCodeParts.push(`\n\nFile: ${file.path}\n${fileData.data}`);
-    }
-  }
 }
 
 async function collectRepoFiles(apiUrl, headers, repoFiles, visitedUrls = new Set(), summary = { count: 0 }) {
@@ -134,44 +91,52 @@ async function collectRepoFiles(apiUrl, headers, repoFiles, visitedUrls = new Se
   return summary.count;
 }
 
-function extractMilestoneKeywords(milestoneText = "") {
-  return String(milestoneText)
+function extractKeywords(text = "") {
+  return String(text)
     .toLowerCase()
     .split(/[^a-z0-9]+/)
     .filter((word) => word && word.length > 2 && !STOP_WORDS.has(word));
 }
 
-function scoreFile(file, keywords = []) {
+function scoreFile(file, milestoneKeywords = [], projectKeywords = []) {
   const haystack = `${file.path} ${file.name}`.toLowerCase();
   let score = 0;
 
-  for (const keyword of keywords) {
+  // 1. Primary Priority: Project Title Alignment (e.g. 'tic-tac-toe')
+  for (const keyword of projectKeywords) {
+    if (haystack.includes(keyword)) {
+      score += 10;
+    }
+  }
+
+  // 2. Secondary Priority: Milestone Requirements
+  for (const keyword of milestoneKeywords) {
     if (haystack.includes(keyword)) {
       score += 8;
     }
   }
 
-  if (haystack.includes("readme")) score += 6;
-  if (haystack.includes("package.json")) score += 6;
-  if (haystack.includes("server")) score += 5;
-  if (haystack.includes("route")) score += 5;
-  if (haystack.includes("controller")) score += 5;
-  if (haystack.includes("service")) score += 5;
-  if (haystack.includes("model")) score += 4;
+  // 3. Technical Entities
+  if (haystack.includes("razorpay")) score += 12; // High priority for reported recognition issue
+  if (haystack.includes("stripe") || haystack.includes("paypal")) score += 10;
+  if (haystack.includes("checkout")) score += 9;
   if (haystack.includes("payment")) score += 8;
   if (haystack.includes("escrow")) score += 8;
   if (haystack.includes("payout")) score += 8;
-  if (haystack.includes("milestone")) score += 6;
-  if (haystack.includes("quality")) score += 7;
-  if (haystack.includes("github")) score += 7;
-  if (haystack.includes("auth")) score += 6;
+  if (haystack.includes("auth")) score += 7;
   if (haystack.includes("verify")) score += 7;
+  if (haystack.includes("quality")) score += 7;
+  if (haystack.includes("milestone")) score += 6;
+  
+  // 4. Structural Weights
+  if (haystack.includes("readme")) score += 6;
+  if (haystack.includes("package.json")) score += 6;
+  if (haystack.includes("server") || haystack.includes("app.js")) score += 5;
+  if (haystack.includes("route") || haystack.includes("controller")) score += 5;
+  if (haystack.includes("service") || haystack.includes("model")) score += 5;
   if (haystack.includes("frontend/src/app/dashboard")) score += 4;
   if (haystack.includes("api/")) score += 3;
-  if (haystack.includes("src/")) score += 2;
-  if (haystack.endsWith(".md")) score += 1;
   if (haystack.includes(".env.example")) score += 4;
-  if (haystack.includes("dockerfile")) score += 4;
 
   return score;
 }
@@ -185,7 +150,7 @@ function trimFileContent(content = "") {
   return `${text.slice(0, MAX_FILE_CHARS)}\n/* truncated for verification */`;
 }
 
-async function getRepoCode(repoUrl, milestoneText = "") {
+async function getRepoCode(repoUrl, milestoneText = "", projectTitle = "") {
   const { owner, repo } = parseRepoUrl(repoUrl);
   const headers = {
     Accept: "application/vnd.github+json"
@@ -196,7 +161,9 @@ async function getRepoCode(repoUrl, milestoneText = "") {
   }
 
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
-  const keywords = extractMilestoneKeywords(milestoneText);
+  const milestoneKeywords = extractKeywords(milestoneText);
+  const projectKeywords = extractKeywords(projectTitle);
+  
   const repoFiles = [];
   const scanSummary = { count: 0 };
   await collectRepoFiles(apiUrl, headers, repoFiles, new Set(), scanSummary);
@@ -204,13 +171,13 @@ async function getRepoCode(repoUrl, milestoneText = "") {
   console.log(`[GITHUB] Scanned ${scanSummary.count} files in repository ${owner}/${repo}`);
 
   if (!repoFiles.length) {
-    throw new Error("Repository contains no supported code files (js/ts/json/md/css/html/python, etc.) for milestone verification.");
+    throw new Error("Repository contains no supported code files for milestone verification.");
   }
 
   const rankedFiles = repoFiles
     .map((file) => ({
       ...file,
-      score: scoreFile(file, keywords)
+      score: scoreFile(file, milestoneKeywords, projectKeywords)
     }))
     .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path))
     .slice(0, MAX_SELECTED_FILES);
@@ -219,7 +186,7 @@ async function getRepoCode(repoUrl, milestoneText = "") {
   let totalChars = 0;
   const fileListSummary = rankedFiles.map((file) => `- ${file.path} (score ${file.score})`).join("\n");
 
-  repoCodeParts.push(`Repository: ${owner}/${repo}\nSelected relevant files:\n${fileListSummary}`);
+  repoCodeParts.push(`Project Title: ${projectTitle}\nRepository: ${owner}/${repo}\nSelected relevant files:\n${fileListSummary}`);
 
   for (const file of rankedFiles) {
     if (totalChars >= MAX_TOTAL_CHARS) {

@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String   @id @default(cuid())
+  name                  String
+  email                 String   @unique
+  password              String
+  role                  String   // 'employer' | 'freelancer' | 'admin'
+  pfiScore              Float?   @default(0)
+  onboardingCompleted   Boolean  @default(false)
+  companySize           String?
+  companyName           String?
+  website               String?
+  // Freelancer profile fields
+  headline              String?
+  bio                   String?
+  skills                Json
+  primaryCategory       String?
+  experienceLevel       String?  // 'junior' | 'mid' | 'senior'
+  preferredBudgetMin    Float?
+  preferredBudgetMax    Float?
+  preferredProjectType  String?  // 'fixed' | 'hourly'
+  profileEmbedding      Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  savedJobs             SavedJob[]
+  jobInteractions       JobInteraction[]
+}
+
+model Job {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  requiredSkills  Json
+  category        String
+  experienceLevel String?
+  budgetMin       Float?
+  budgetMax       Float?
+  projectType     String   // 'fixed' | 'hourly'
+  location        String?
+  employerName    String?
+  isRemote        Boolean  @default(true)
+  status          String   @default("open")
+  createdAt       DateTime @default(now())
+  jobEmbedding    Json?
+  matchingText    String?
+  savedBy         SavedJob[]
+  interactions    JobInteraction[]
+}
+
+model JobInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  action    String   // 'view' | 'save' | 'apply'
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([userId, action, createdAt])
+  @@index([jobId, action, createdAt])
+}
+
+model SavedJob {
+  id           String   @id @default(cuid())
+  freelancerId String
+  jobId        String
+  savedAt      DateTime @default(now())
+
+  freelancer User @relation(fields: [freelancerId], references: [id], onDelete: Cascade)
+  job        Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([freelancerId, jobId])
+  @@index([freelancerId, savedAt])
+}

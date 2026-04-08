@@ -31,11 +31,32 @@ import {
 } from 'lucide-react';
 import { clearAuth } from '@/services/auth';
 import { useRouter } from 'next/navigation';
+import { fetchUnreadCount } from '@/services/api';
+import { getStoredAuth } from '@/services/auth';
 
 export default function FreelancerNavbar({ user }) {
   const router = useRouter();
   const [openDropdown, setOpenDropdown] = useState(null);
   const dropdownRef = useRef(null);
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    const auth = getStoredAuth();
+    if (!auth?.token) return;
+
+    const checkUnread = async () => {
+      try {
+        const response = await fetchUnreadCount(auth.token);
+        setHasUnread(response.data.hasUnread || false);
+      } catch (err) {
+        console.debug('Could not fetch unread count');
+      }
+    };
+
+    checkUnread();
+    const interval = setInterval(checkUnread, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
@@ -87,10 +108,10 @@ export default function FreelancerNavbar({ user }) {
             <div className="hidden lg:flex items-center gap-2">
               <NavItem label="Find Work" name="findWork">
                 <div className="p-2">
-                  <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
+                  <Link href="/dashboard/find-work" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
                     <SearchIcon size={16} /> Search for jobs
                   </Link>
-                  <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
+                  <Link href="/dashboard/find-work" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
                     <Heart size={16} /> Saved jobs
                   </Link>
                   <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
@@ -131,8 +152,11 @@ export default function FreelancerNavbar({ user }) {
                 </div>
               </NavItem>
 
-              <Link href="/dashboard/messages" className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-green-600">
+              <Link href="/dashboard/messages" className="relative px-3 py-2 text-sm font-medium text-slate-700 hover:text-green-600">
                 Messages
+                {hasUnread && (
+                  <span className="absolute top-1 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white" />
+                )}
               </Link>
             </div>
           </div>
@@ -157,7 +181,7 @@ export default function FreelancerNavbar({ user }) {
               </div>
               {openDropdown === 'searchOptions' && (
                 <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black ring-opacity-5 z-50">
-                  <Link href="#" className="flex flex-col rounded-lg px-3 py-2 hover:bg-slate-50 group/item">
+                  <Link href="/dashboard/find-work" className="flex flex-col rounded-lg px-3 py-2 hover:bg-slate-50 group/item">
                     <span className="text-sm font-bold text-slate-700 group-hover/item:text-green-600">Jobs</span>
                     <span className="text-[11px] text-slate-400">Find work for your skills</span>
                   </Link>
@@ -171,7 +195,9 @@ export default function FreelancerNavbar({ user }) {
 
             <button className="relative p-2 text-slate-400 hover:bg-slate-50 hover:text-green-600 rounded-full transition">
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 border-2 border-white" />
+              {hasUnread && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 border-2 border-white" />
+              )}
             </button>
 
             {/* Profile Avatar & Dropdown */}
@@ -193,6 +219,9 @@ export default function FreelancerNavbar({ user }) {
                   </Link>
                   <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
                     <Award size={16} /> Membership plan
+                  </Link>
+                  <Link href="/dashboard/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">
+                    <User size={16} /> Edit Profile
                   </Link>
                   <div className="my-1 border-t border-slate-100" />
                   <Link href="/dashboard/settings" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-green-600">

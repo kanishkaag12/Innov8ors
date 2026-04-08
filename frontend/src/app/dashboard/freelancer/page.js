@@ -22,8 +22,9 @@ import {
   X
 } from 'lucide-react';
 import Link from 'next/link';
-import { verifyMilestone } from '@/services/api';
+import { verifyMilestone, createProposal } from '@/services/api';
 import { getStoredAuth } from '@/services/auth';
+import PFIDashboard from '@/components/PFIDashboard';
 
 const STORAGE_KEY = 'synapescrow_employer_projects';
 
@@ -233,12 +234,37 @@ export default function FreelancerDashboardPage() {
     setVerificationError('');
   }, [selectedProject, user]);
 
-  const handleRequestToJoin = () => {
+  const handleRequestToJoin = async () => {
     if (!selectedProject || !user) {
       return;
     }
 
     setRequestingProjectId(selectedProject.id);
+
+    let proposalId = null;
+    const auth = getStoredAuth();
+    const token = auth?.token;
+    console.log('📝 Submitting proposal for project:', selectedProject.id, 'with freelancer:', user.email);
+
+    if (token) {
+      try {
+        const response = await createProposal(
+          {
+            projectId: selectedProject.id,
+            projectTitle: selectedProject.title,
+            employerEmail: selectedProject.ownerEmail,
+            employerName: selectedProject.ownerName
+          },
+          token
+        );
+        proposalId = response?.data?.proposal?._id || null;
+        console.log('✅ Proposal created with ID:', proposalId, 'full response:', response.data);
+      } catch (error) {
+        console.warn('❌ Unable to create backend proposal:', error?.response?.data || error?.message || error);
+      }
+    } else {
+      console.warn('❌ No auth token available');
+    }
 
     window.setTimeout(() => {
       const nextProjects = projects.map((project) => {
@@ -253,8 +279,10 @@ export default function FreelancerDashboardPage() {
           email: user.email || '',
           status: 'pending',
           requestedAt: new Date().toISOString(),
-          pfiScore: 0
+          pfiScore: 0,
+          proposalId
         };
+        console.log('📝 Storing applicant payload:', requestPayload);
 
         if (existingIndex >= 0) {
           applicants[existingIndex] = {
@@ -381,6 +409,10 @@ export default function FreelancerDashboardPage() {
             </button>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+        <PFIDashboard />
       </section>
 
       {/* Stats Cards */}
@@ -608,9 +640,15 @@ export default function FreelancerDashboardPage() {
                         <div>
                           <h4 className="text-[1.05rem] font-extrabold text-emerald-700">Your request was accepted!</h4>
                           <p className="mt-2 text-base text-emerald-700/80">
-                            You can now submit your work using the GitHub verification below.
+                            You can now submit your work using the GitHub verification below and continue the conversation with the client.
                           </p>
                         </div>
+                      </div>
+                      <div className="mt-5">
+                        <Link href="/dashboard/messages" className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-base font-bold text-white transition hover:bg-emerald-700">
+                          <MessageSquare size={18} />
+                          Open Project Chat
+                        </Link>
                       </div>
                     </div>
 

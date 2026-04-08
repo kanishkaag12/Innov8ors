@@ -5,10 +5,8 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Briefcase,
-  Check,
   CheckCircle2,
   ChevronRight,
-  Clock,
   DollarSign,
   FileText,
   MessageSquare,
@@ -20,7 +18,16 @@ import {
   X
 } from 'lucide-react';
 import Link from 'next/link';
-import { generateMilestones } from '@/services/api';
+import {
+  generateMilestones,
+  acceptProposal,
+  rejectProposal,
+  fetchRankedFreelancersForProject,
+  fetchFreelancerMlInsight,
+  recomputeProjectRanking,
+  listProjects,
+  createProject
+} from '@/services/api';
 import { getStoredAuth } from '@/services/auth';
 
 const STORAGE_KEY = 'synapescrow_employer_projects';
@@ -222,6 +229,160 @@ function getComplexityTone(complexity) {
   return 'bg-slate-50 text-slate-700';
 }
 
+function resolveProjectId(project) {
+  return (
+    project?.job_id ||
+    project?.project_id ||
+    project?._id ||
+    project?.id ||
+    null
+  );
+}
+
+function resolveFreelancerId(entry) {
+  return (
+    entry?.freelancer_id ||
+    entry?.freelancerId ||
+    entry?.id ||
+    null
+  );
+}
+
+function normalizeRankedFreelancersResponse(payload) {
+  const raw =
+    payload?.rankedFreelancers ||
+    payload?.freelancers ||
+    payload?.results ||
+    [];
+
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw.map((entry, index) => {
+    const profile = entry?.freelancerProfile || entry?.freelancer || {};
+    const metrics = entry?.metrics || {};
+    const successProbability = Number(
+      entry?.estimated_success_probability ?? entry?.success_probability ?? 0
+    );
+    const mlScore = Number(entry?.ml_ranking_score ?? entry?.ml_score ?? entry?.score ?? 0);
+    const matchScore = successProbability > 0
+      ? Math.round(successProbability * 100)
+      : Math.round(Math.max(0, Math.min(1, (mlScore + 1) / 2)) * 100);
+
+    const rawStrengths = Array.isArray(entry?.top_strengths) ? entry.top_strengths : [];
+    const highlightMap = {
+      'High semantic match with job description': 'Strong match with your project requirements',
+      'Strong title/domain alignment': 'Relevant domain experience',
+      'Strong required skill coverage': 'Required skills are well covered',
+      'Competitive pricing fit': 'Good fit for your budget',
+      'Reliable milestone completion history': 'Strong delivery track record'
+    };
+
+    const highlights = rawStrengths.map((item) => highlightMap[item] || item).slice(0, 3);
+
+    return {
+      freelancerId: resolveFreelancerId(entry),
+      proposalId: entry?.proposal_id || null,
+      proposalStatus: String(entry?.proposal_status || 'pending').toLowerCase(),
+      conversationId: entry?.conversation_id || null,
+      freelancerEmail: entry?.freelancer_email || '',
+      name: profile?.full_name || profile?.name || entry?.freelancer_name || 'Freelancer',
+      title: profile?.title || entry?.freelancer_title || 'Professional Freelancer',
+      avatar: profile?.avatar_url || profile?.avatar || null,
+      rank: Number(entry?.rank_position || entry?.rank || index + 1),
+      matchScore,
+      semanticScore: Number(entry?.semantic_score_contribution ?? entry?.semantic_score ?? 0),
+      priceFit: Number(entry?.price_fit_contribution ?? entry?.price_fit ?? 0),
+      reliability: Number(entry?.metrics_contribution ?? metrics?.reliability ?? 0),
+      successProbability,
+      strengths: Array.isArray(entry?.top_strengths) ? entry.top_strengths : [],
+      highlights,
+      risks: Array.isArray(entry?.top_risks) ? entry.top_risks : [],
+      percentile: Number(entry?.percentile_rank ?? 0)
+    };
+  });
+}
+
+function normalizeInsightResponse(payload) {
+  const insight = payload || {};
+
+  const successProbability = Number(
+    insight?.predicted_success_probability ?? insight?.estimated_success_probability ?? insight?.success_probability ?? 0
+  );
+  const risks = Array.isArray(insight?.risks)
+    ? insight.risks
+    : Array.isArray(insight?.top_risks)
+      ? insight.top_risks
+      : [];
+
+  let recommendation = 'Consider with caution';
+  if (successProbability >= 0.65 && risks.length <= 1) {
+    recommendation = 'Recommended';
+  } else if (successProbability < 0.45 || risks.length >= 3) {
+    recommendation = 'Not recommended';
+  }
+
+  const relevanceLabel = successProbability >= 0.75
+    ? 'Strong match with your project requirements'
+    : successProbability >= 0.55
+      ? 'Reasonable match for this project'
+      : 'Limited alignment with this project scope';
+
+  const budgetFitLabel = Number(insight?.price_fit_score ?? insight?.price_fit_contribution ?? insight?.price_fit ?? 0) >= 0.75
+    ? 'Budget is well aligned'
+    : Number(insight?.price_fit_score ?? insight?.price_fit_contribution ?? insight?.price_fit ?? 0) >= 0.5
+      ? 'Budget is acceptable'
+      : 'Budget appears less aligned';
+
+  const trackRecordLabel = Number(insight?.reliability_score ?? insight?.metrics_contribution ?? insight?.reliability ?? 0) >= 0.75
+    ? 'Strong delivery track record'
+    : Number(insight?.reliability_score ?? insight?.metrics_contribution ?? insight?.reliability ?? 0) >= 0.5
+      ? 'Moderate track record'
+      : 'Track record needs closer review';
+
+  return {
+    modelVersion: insight?.model_version || insight?.modelVersion || 'latest',
+    mlScore: Number(insight?.overall_score ?? insight?.ml_ranking_score ?? insight?.ml_score ?? 0),
+    rank: Number(insight?.rank_position ?? insight?.rank ?? 0),
+    semanticScore: Number(insight?.semantic_similarity_score ?? insight?.semantic_score_contribution ?? insight?.semantic_score ?? 0),
+    proposalQuality: Number(insight?.proposal_quality_score ?? 0),
+    priceFit: Number(insight?.price_fit_score ?? insight?.price_fit_contribution ?? insight?.price_fit ?? 0),
+    reliability: Number(insight?.reliability_score ?? insight?.metrics_contribution ?? insight?.reliability ?? 0),
+    successProbability,
+    strengths: Array.isArray(insight?.strengths)
+      ? insight.strengths
+      : Array.isArray(insight?.top_strengths)
+        ? insight.top_strengths
+        : [],
+    risks,
+    recommendation,
+    relevanceLabel,
+    budgetFitLabel,
+    trackRecordLabel
+  };
+}
+
+function normalizeBackendProject(project) {
+  const applicants = Array.isArray(project?.applicants) ? project.applicants : [];
+  const milestones = Array.isArray(project?.milestones) ? project.milestones : [];
+
+  return {
+    id: String(project?._id || project?.id || ''),
+    _id: project?._id,
+    title: String(project?.title || 'Untitled Project'),
+    description: String(project?.description || ''),
+    budget: Number(project?.budget || 0),
+    createdAt: project?.createdAt || new Date().toISOString(),
+    status: 'Active',
+    applicants,
+    interestedCount: Number(project?.interestedCount || applicants.length || 0),
+    escrowLabel: 'Escrow Locked',
+    milestones,
+    source: 'backend'
+  };
+}
+
 export default function EmployerDashboardPage() {
   const [user, setUser] = useState(null);
   const [postedProjects, setPostedProjects] = useState([]);
@@ -234,6 +395,26 @@ export default function EmployerDashboardPage() {
   const [isPaying, setIsPaying] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(null);
   const [plannerError, setPlannerError] = useState('');
+  const [rankedFreelancers, setRankedFreelancers] = useState([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
+  const [rankingError, setRankingError] = useState('');
+  const [recomputingRanking, setRecomputingRanking] = useState(false);
+  const [insightLoadingId, setInsightLoadingId] = useState('');
+  const [insightFreelancer, setInsightFreelancer] = useState(null);
+  const [mlInsight, setMlInsight] = useState(null);
+  const [mlInsightError, setMlInsightError] = useState('');
+  const [backendProjects, setBackendProjects] = useState([]);
+
+  const refreshBackendProjects = async (token) => {
+    if (!token) {
+      setBackendProjects([]);
+      return;
+    }
+
+    const response = await listProjects({}, token);
+    const rawProjects = Array.isArray(response?.data?.projects) ? response.data.projects : [];
+    setBackendProjects(rawProjects.map(normalizeBackendProject));
+  };
 
   useEffect(() => {
     const auth = getStoredAuth();
@@ -244,9 +425,74 @@ export default function EmployerDashboardPage() {
     const storedProjects = loadStoredProjects();
     setPostedProjects(storedProjects);
     saveStoredProjects(storedProjects);
+
+    const loadBackendProjects = async () => {
+      try {
+        await refreshBackendProjects(auth?.token);
+      } catch {
+        setBackendProjects([]);
+      }
+    };
+
+    loadBackendProjects();
   }, []);
 
-  const projects = useMemo(() => [...postedProjects, ...sampleProjects], [postedProjects]);
+  useEffect(() => {
+    const loadProjectRanking = async () => {
+      const projectId = resolveProjectId(selectedProject);
+      if (!selectedProject || !projectId || selectedProject?.source === 'sample') {
+        setRankedFreelancers([]);
+        setRankingError('');
+        return;
+      }
+
+      try {
+        setRankingLoading(true);
+        setRankingError('');
+        const auth = getStoredAuth();
+        const response = await fetchRankedFreelancersForProject(projectId, auth?.token);
+        setRankedFreelancers(normalizeRankedFreelancersResponse(response.data));
+      } catch (error) {
+        setRankedFreelancers([]);
+        setRankingError(
+          error?.response?.data?.message ||
+            'Candidate matching is unavailable for this project right now.'
+        );
+      } finally {
+        setRankingLoading(false);
+      }
+    };
+
+    setMlInsight(null);
+    setInsightFreelancer(null);
+    setMlInsightError('');
+    setInsightLoadingId('');
+    loadProjectRanking();
+  }, [selectedProject]);
+
+  const projects = useMemo(() => {
+    const merged = [...backendProjects, ...postedProjects, ...sampleProjects];
+    const seen = new Set();
+    const backendTitles = new Set(
+      backendProjects
+        .map((project) => String(project?.title || '').trim().toLowerCase())
+        .filter(Boolean)
+    );
+
+    return merged.filter((project) => {
+      const titleKey = String(project?.title || '').trim().toLowerCase();
+      if (project?.source !== 'backend' && titleKey && backendTitles.has(titleKey)) {
+        return false;
+      }
+
+      const key = resolveProjectId(project) || project?.id;
+      if (!key || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }, [backendProjects, postedProjects]);
 
   const persistPostedProjects = (updater) => {
     const nextProjects = updater(postedProjects);
@@ -365,12 +611,48 @@ export default function EmployerDashboardPage() {
       name: 'SynapEscrow',
       description: generatedPlan.projectTitle,
       image: undefined,
-      handler: (response) => {
-        const nextProjects = [projectRecord, ...postedProjects];
+      handler: async (response) => {
+        const auth = getStoredAuth();
+        let finalizedProject = projectRecord;
+
+        try {
+          if (auth?.token) {
+            const created = await createProject(
+              {
+                title: projectRecord.title,
+                description: projectRecord.description,
+                budget: projectRecord.budget,
+                deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+                milestones: generatedPlan?.milestones || []
+              },
+              auth.token
+            );
+
+            const createdProject = created?.data?.project;
+            if (createdProject?._id) {
+              finalizedProject = {
+                ...projectRecord,
+                id: String(createdProject._id),
+                _id: createdProject._id,
+                source: 'backend'
+              };
+            }
+
+            try {
+              await refreshBackendProjects(auth.token);
+            } catch {
+              // Keep local state if refresh fails.
+            }
+          }
+        } catch {
+          // Fallback to local-only project record when backend create fails.
+        }
+
+        const nextProjects = [finalizedProject, ...postedProjects];
         setPostedProjects(nextProjects);
         saveStoredProjects(nextProjects);
         setPaymentSuccess({
-          ...projectRecord,
+          ...finalizedProject,
           paymentId: response?.razorpay_payment_id || 'test_payment'
         });
         setIsPaying(false);
@@ -393,7 +675,31 @@ export default function EmployerDashboardPage() {
     razorpay.open();
   };
 
-  const handleApplicantStatus = (projectId, email, status) => {
+  const handleApplicantStatus = async (projectId, email, status) => {
+    const auth = getStoredAuth();
+    const token = auth?.token;
+    const project = postedProjects.find((project) => project.id === projectId);
+    const applicant = project?.applicants?.find((entry) => entry.email === email);
+    
+    console.log('📝 handleApplicantStatus called:', { projectId, email, status, applicantProposalId: applicant?.proposalId });
+
+    if (token && applicant?.proposalId) {
+      try {
+        if (status === 'accepted') {
+          console.log('✅ Accepting proposal:', applicant.proposalId, 'with budget:', project?.budget);
+          const response = await acceptProposal(applicant.proposalId, { budget: project?.budget || 0 }, token);
+          console.log('✅ Accept response:', response.data);
+        } else if (status === 'rejected') {
+          console.log('❌ Rejecting proposal:', applicant.proposalId);
+          await rejectProposal(applicant.proposalId, token);
+        }
+      } catch (error) {
+        console.warn('❌ Proposal status update failed:', error?.response?.data || error?.message || error);
+      }
+    } else {
+      console.warn('⚠️  Missing token or proposalId:', { hasToken: !!token, proposalId: applicant?.proposalId });
+    }
+
     persistPostedProjects((currentProjects) =>
       currentProjects.map((project) => {
         if (project.id !== projectId) {
@@ -414,14 +720,117 @@ export default function EmployerDashboardPage() {
   };
 
   const handleApplicantMessage = (applicant, project) => {
-    if (typeof window === 'undefined' || !applicant?.email) {
+    if (typeof window === 'undefined' || !applicant?.email || applicant.status !== 'accepted') {
       return;
     }
 
-    const subject = encodeURIComponent(`Regarding your request for ${project.title}`);
-    const body = encodeURIComponent(`Hi ${applicant.name || 'there'},\n\nI reviewed your interest in "${project.title}". Let's discuss the next steps.\n\nThanks.`);
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(applicant.email)}&su=${subject}&body=${body}`;
-    window.open(gmailUrl, '_blank');
+    window.location.href = '/dashboard/messages';
+  };
+
+  const handleRecomputeRanking = async () => {
+    const projectId = resolveProjectId(selectedProject);
+    if (!projectId) {
+      return;
+    }
+
+    try {
+      setRecomputingRanking(true);
+      setRankingError('');
+      const auth = getStoredAuth();
+      await recomputeProjectRanking(projectId, auth?.token);
+
+      const refreshed = await fetchRankedFreelancersForProject(projectId, auth?.token);
+      setRankedFreelancers(normalizeRankedFreelancersResponse(refreshed.data));
+    } catch (error) {
+      setRankingError(
+        error?.response?.data?.message ||
+          'Could not refresh candidate matches for this project.'
+      );
+    } finally {
+      setRecomputingRanking(false);
+    }
+  };
+
+  const handleRankedDecision = async (freelancer, decision) => {
+    if (!freelancer?.proposalId) {
+      return;
+    }
+
+    try {
+      const auth = getStoredAuth();
+      const token = auth?.token;
+
+      if (!token) {
+        return;
+      }
+
+      if (decision === 'accepted') {
+        await acceptProposal(freelancer.proposalId, { budget: selectedProject?.budget || 0 }, token);
+      } else {
+        await rejectProposal(freelancer.proposalId, token);
+      }
+
+      const projectId = resolveProjectId(selectedProject);
+      if (projectId) {
+        const refreshed = await fetchRankedFreelancersForProject(projectId, token);
+        setRankedFreelancers(normalizeRankedFreelancersResponse(refreshed.data));
+      }
+
+      await refreshBackendProjects(token);
+    } catch (error) {
+      setRankingError(error?.response?.data?.message || 'Could not update proposal status.');
+    }
+  };
+
+  const handleContactByEmail = (freelancer) => {
+    if (typeof window === 'undefined' || !freelancer?.freelancerEmail) {
+      return;
+    }
+
+    const subject = encodeURIComponent(`SynapEscrow: ${selectedProject?.title || 'Project'} collaboration`);
+    const body = encodeURIComponent(
+      `Hi ${freelancer.name},\n\nYour application for "${selectedProject?.title || 'this project'}" has been accepted. Let's align on next steps.\n\nThanks,\n${user?.name || 'Employer'}`
+    );
+
+    window.location.href = `mailto:${freelancer.freelancerEmail}?subject=${subject}&body=${body}`;
+  };
+
+  const handleMessageInPlatform = (freelancer) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const query = freelancer?.conversationId ? `?conversationId=${freelancer.conversationId}` : '';
+    window.location.href = `/dashboard/messages${query}`;
+  };
+
+  const handleOpenInsight = async (freelancer) => {
+    const projectId = resolveProjectId(selectedProject);
+    if (!projectId || !freelancer?.freelancerId) {
+      return;
+    }
+
+    try {
+      setInsightLoadingId(String(freelancer.freelancerId));
+      setMlInsightError('');
+      const auth = getStoredAuth();
+      const response = await fetchFreelancerMlInsight(
+        projectId,
+        freelancer.freelancerId,
+        auth?.token
+      );
+      setInsightFreelancer(freelancer);
+      setMlInsight(normalizeInsightResponse(response.data));
+    } catch (error) {
+      setMlInsight(null);
+      setInsightFreelancer(null);
+      setMlInsightError(
+        error?.response?.data?.message ||
+          'Unable to load candidate details right now.'
+      );
+    } finally {
+      setInsightLoadingId('');
+    }
   };
 
   const plannerModalWidth = paymentSuccess ? 'max-w-2xl' : plannerStep === 1 ? 'max-w-2xl' : 'max-w-4xl';
@@ -493,7 +902,7 @@ export default function EmployerDashboardPage() {
             <div className="space-y-4">
               {projects.map((proj) => (
                 <button
-                  key={proj.id}
+                  key={resolveProjectId(proj) || proj.id}
                   onClick={() => setSelectedProject(proj)}
                   className="flex w-full flex-wrap items-center justify-between rounded-[1.6rem] border border-slate-100 bg-white p-5 text-left shadow-sm transition hover:border-emerald-200 hover:shadow-md"
                 >
@@ -790,7 +1199,7 @@ export default function EmployerDashboardPage() {
                 <div className="mb-4 flex items-center justify-between gap-3 text-emerald-700">
                   <div className="flex items-center gap-3">
                     <CheckCircle2 size={20} />
-                    <h3 className="text-lg font-extrabold">AI-Confirmed Milestones</h3>
+                    <h3 className="text-lg font-extrabold">Project Milestones</h3>
                   </div>
                   <p className="text-sm font-extrabold text-emerald-700">
                     Escrow Locked · {formatCurrency(selectedProject.budget)}
@@ -799,7 +1208,7 @@ export default function EmployerDashboardPage() {
 
                 <div className="hidden items-center gap-3 text-emerald-700">
                   <CheckCircle2 size={20} />
-                  <h3 className="text-xl font-extrabold">AI-Generated Milestones</h3>
+                    <h3 className="text-xl font-extrabold">Milestones</h3>
                 </div>
 
                 {selectedProject.milestones?.length ? (
@@ -855,14 +1264,167 @@ export default function EmployerDashboardPage() {
                 </div>
 
                 <div className="rounded-[1.2rem] border border-slate-200 bg-white p-5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[1.05rem] font-extrabold text-slate-900">Interested Freelancers</h4>
-                    <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-emerald-100 px-2 text-sm font-bold text-emerald-600">
-                      {selectedProject.applicants?.length || 0}
-                    </span>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[1.05rem] font-extrabold text-slate-900">Top Candidates</h4>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-emerald-100 px-2 text-sm font-bold text-emerald-600">
+                        {rankedFreelancers.length || selectedProject.applicants?.length || 0}
+                      </span>
+                      <button
+                        onClick={handleRecomputeRanking}
+                        disabled={recomputingRanking || !resolveProjectId(selectedProject)}
+                        className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {recomputingRanking ? 'Refreshing...' : 'Refresh Matches'}
+                      </button>
+                    </div>
                   </div>
+
+                  {rankingError ? (
+                    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      {rankingError}
+                    </div>
+                  ) : null}
+
+                  {rankingLoading ? (
+                    <p className="mt-4 text-sm text-slate-500">Loading ranked freelancers...</p>
+                  ) : rankedFreelancers.length > 0 ? (
+                    <div className="mt-4 space-y-3">
+                      {rankedFreelancers.map((freelancer) => (
+                        <div
+                          key={`ranked-${freelancer.freelancerId || freelancer.name}`}
+                          className="rounded-[1.1rem] border border-slate-200 bg-slate-50 p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex rounded-full bg-slate-900 px-2 py-0.5 text-xs font-bold text-white">
+                                  #{freelancer.rank}
+                                </span>
+                                <h5 className="text-base font-extrabold text-slate-900">{freelancer.name}</h5>
+                              </div>
+                              <p className="mt-1 text-sm text-slate-600">{freelancer.title}</p>
+                            </div>
+                            <p className="text-sm font-bold text-violet-700">
+                              Match Score {freelancer.matchScore}%
+                            </p>
+                          </div>
+
+                          <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+                            {(freelancer.highlights || []).length > 0 ? (
+                              freelancer.highlights.map((highlight, idx) => (
+                                <p key={`${freelancer.freelancerId}-${idx}`} className="rounded-lg bg-white px-2 py-1">{highlight}</p>
+                              ))
+                            ) : (
+                              <p className="rounded-lg bg-white px-2 py-1">Promising fit for this project</p>
+                            )}
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => handleOpenInsight(freelancer)}
+                              disabled={
+                                insightLoadingId === String(freelancer.freelancerId) ||
+                                !freelancer.freelancerId
+                              }
+                              className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {insightLoadingId === String(freelancer.freelancerId)
+                                ? 'Loading...'
+                                : 'Why this candidate'}
+                            </button>
+
+                            {freelancer.proposalStatus !== 'accepted' ? (
+                              <button
+                                onClick={() => handleRankedDecision(freelancer, 'accepted')}
+                                disabled={!freelancer.proposalId}
+                                className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Accept
+                              </button>
+                            ) : null}
+
+                            {freelancer.proposalStatus !== 'rejected' && freelancer.proposalStatus !== 'accepted' ? (
+                              <button
+                                onClick={() => handleRankedDecision(freelancer, 'rejected')}
+                                disabled={!freelancer.proposalId}
+                                className="rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Reject
+                              </button>
+                            ) : null}
+
+                            {freelancer.proposalStatus === 'accepted' ? (
+                              <>
+                                <button
+                                  onClick={() => handleContactByEmail(freelancer)}
+                                  className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-white"
+                                >
+                                  Contact via Email
+                                </button>
+                                <button
+                                  onClick={() => handleMessageInPlatform(freelancer)}
+                                  className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-white"
+                                >
+                                  Message in Platform
+                                </button>
+                              </>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-base text-slate-500">
+                      No ranked freelancers available yet for this project.
+                    </p>
+                  )}
+
+                  {mlInsightError ? (
+                    <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                      {mlInsightError}
+                    </div>
+                  ) : null}
+
+                  {mlInsight && insightFreelancer ? (
+                    <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50/50 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h5 className="text-sm font-extrabold text-slate-900">
+                          Why {insightFreelancer.name} is a fit
+                        </h5>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-xs text-slate-700 sm:grid-cols-2">
+                        <p className="rounded-lg bg-white px-2 py-1">Candidate rank: #{mlInsight.rank}</p>
+                        <p className="rounded-lg bg-white px-2 py-1">Match confidence: {(mlInsight.successProbability * 100).toFixed(1)}%</p>
+                        <p className="rounded-lg bg-white px-2 py-1">Relevance: {mlInsight.relevanceLabel}</p>
+                        <p className="rounded-lg bg-white px-2 py-1">Budget fit: {mlInsight.budgetFitLabel}</p>
+                        <p className="rounded-lg bg-white px-2 py-1">Track record: {mlInsight.trackRecordLabel}</p>
+                      </div>
+
+                      <p className="mt-3 text-xs font-extrabold text-slate-800">
+                        Assignment recommendation: {mlInsight.recommendation}
+                      </p>
+
+                      {mlInsight.strengths.length > 0 ? (
+                        <p className="mt-3 text-xs text-emerald-700">
+                          Strengths: {mlInsight.strengths.join(', ')}
+                        </p>
+                      ) : null}
+                      {mlInsight.risks.length > 0 ? (
+                        <p className="mt-1 text-xs text-rose-700">Risks: {mlInsight.risks.join(', ')}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
+
                   {selectedProject.applicants?.length ? (
-                    <div className="mt-4 space-y-4">
+                    <div className="mt-5 space-y-4 border-t border-slate-200 pt-4">
+                      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">
+                        Applicant actions
+                      </p>
                       {selectedProject.applicants.map((applicant, index) => (
                         <div key={`${applicant.email}-${index}`} className="rounded-[1.1rem] border border-slate-200 bg-slate-50 p-4">
                           <div className="flex items-start justify-between gap-4">
@@ -904,17 +1466,18 @@ export default function EmployerDashboardPage() {
                             ) : null}
                             <button
                               onClick={() => handleApplicantMessage(applicant, selectedProject)}
-                              className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+                              disabled={applicant.status !== 'accepted'}
+                              className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${applicant.status === 'accepted'
+                                ? 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                                : 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'}`}
                             >
-                              Message
+                              {applicant.status === 'accepted' ? 'Open Chat' : 'Wait for acceptance'}
                             </button>
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="mt-4 text-base text-slate-500">No freelancer requests yet.</p>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>

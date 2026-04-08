@@ -25,6 +25,25 @@ const milestoneSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    estimated_time: {
+      type: String,
+      default: ''
+    },
+    complexity: {
+      type: String,
+      default: 'Medium'
+    },
+    payout_percentage: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100
+    },
+    order: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     status: {
       type: String,
       enum: ['pending', 'submitted', 'completed'],

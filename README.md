@@ -1,171 +1,250 @@
-# SynapEscrow Backend
+# Innov8ors (SynapEscrow)
 
-Node.js + Express backend for an autonomous AI intermediary between employers and freelancers.
+Full-stack project with:
 
-## Tech Stack
+- `backend/`: Node.js + Express + MongoDB APIs
+- `frontend/`: Next.js web app
+- `embedding-service/`: FastAPI sentence embedding microservice
+- `ml-ranking-system/`: Python ML ranking pipeline + optional FastAPI serving API
 
-- Node.js
-- Express
-- MongoDB (Mongoose)
-- OpenAI API
+This guide is written so a new developer can set up everything on a laptop from scratch.
 
-## Folder Structure
+## 1) Prerequisites
 
-```
-Innov8ors/
-├── package.json
-├── .env.example
-├── .gitignore
-├── README.md
-└── src/
-    ├── app.js
-    ├── server.js
-    ├── config/
-    │   └── db.js
-    ├── controllers/
-    │   ├── aiController.js
-    │   ├── freelancerController.js
-    │   ├── milestoneController.js
-    │   ├── paymentController.js
-    │   └── projectController.js
-    ├── models/
-    │   ├── Freelancer.js
-    │   ├── Milestone.js
-    │   ├── Payment.js
-    │   ├── Project.js
-    │   └── Submission.js
-    ├── routes/
-    │   ├── aiRoutes.js
-    │   ├── freelancerRoutes.js
-    │   ├── milestoneRoutes.js
-    │   ├── paymentRoutes.js
-    │   └── projectRoutes.js
-    ├── services/
-    │   └── openaiService.js
-    └── utils/
-        └── asyncHandler.js
+Install these first:
+
+- Node.js 18+ (LTS recommended)
+- npm 9+
+- Python 3.10 or 3.11
+- MongoDB (local or Atlas URI)
+- PostgreSQL 14+ (needed for ML ranking system)
+- Git
+
+Verify:
+
+```bash
+node -v
+npm -v
+python --version
+psql --version
 ```
 
-## Setup
+## 2) Clone And Move Into Project
 
-1. Install dependencies:
+```bash
+git clone <your-repo-url>
+cd Innov8ors
+```
+
+## 3) Install Node Dependencies
+
+Install root, backend, and frontend dependencies:
 
 ```bash
 npm install
+cd backend && npm install
+cd ../frontend && npm install
+cd ..
 ```
 
-2. Configure environment:
+## 4) Backend Setup (Mongo + APIs)
+
+Create `backend/.env` with this template:
+
+```env
+# Server
+PORT=5000
+
+# MongoDB (required)
+MONGO_URI=mongodb://127.0.0.1:27017/synapescrow
+# or use MONGODB_URI instead of MONGO_URI
+
+# Auth
+JWT_SECRET=replace_with_a_strong_secret
+
+# AI keys
+GEMINI_API_KEY=replace_with_your_key
+GROQ_API_KEY=replace_with_your_key
+
+# Optional integrations
+GITHUB_TOKEN=
+
+# Embedding microservice
+EMBEDDING_SERVICE_URL=http://127.0.0.1:8001
+
+# Optional ML runtime overrides
+ML_PYTHON_PATH=python
+ML_MODEL_PATH=
+ML_SCALER_PATH=
+
+# Optional (used by some scripts)
+API_BASE_URL=http://localhost:5000
+
+# Optional (Prisma/Postgres utilities)
+DATABASE_URL=
+```
+
+Start backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+Health check: `http://localhost:5000/health`
+
+## 5) Frontend Setup (Next.js)
+
+Create `frontend/.env.local`:
+
+```env
+# Optional (code has a default test key fallback)
+NEXT_PUBLIC_RAZORPAY_KEY_ID=
+```
+
+Start frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Open: `http://localhost:3000`
+
+## 6) Embedding Service Setup (Python + FastAPI)
+
+In a new terminal:
+
+```bash
+cd embedding-service
+python -m venv .venv
+```
+
+Activate venv:
+
+- Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+- macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install and run:
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+```
+
+Health check: `http://127.0.0.1:8001/health`
+
+## 7) ML Ranking System Setup (Python + PostgreSQL)
+
+### 7.1 Create PostgreSQL Database
+
+```bash
+createdb synapescrow_ml
+```
+
+If `createdb` is unavailable, create it using pgAdmin or SQL:
+
+```sql
+CREATE DATABASE synapescrow_ml;
+```
+
+### 7.2 Python Environment
+
+In another terminal:
+
+```bash
+cd ml-ranking-system
+python -m venv .venv
+```
+
+Activate venv (same commands as above), then:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 7.3 Environment File
+
+Copy env template:
+
+- Windows:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+- macOS/Linux:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Start server:
+Edit `.env` and set Postgres credentials (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` or `DATABASE_URL`).
+
+### 7.4 Initialize ML DB And Train Model
 
 ```bash
-npm run dev
+psql -d synapescrow_ml -f 01_schema.sql
+python 02_synthetic_data_generator.py
+python 03_feature_engineering.py
+python 04_xgboost_training.py
 ```
 
-## APIs
+This should generate model artifacts (for example `ranking_model.pkl` and `scaler.pkl`) used by ranking logic.
 
-### 1) Project Creation
+### 7.5 Optional: Run ML API Server
 
-`POST /api/projects`
-
-Request body:
-
-```json
-{
-  "employer_id": "emp_001",
-  "freelancer_id": "fr_001",
-  "title": "Build AI SaaS Landing Page",
-  "description": "Create responsive landing page with auth and analytics integration.",
-  "budget": 1500,
-  "deadline": "2026-04-10T00:00:00.000Z"
-}
+```bash
+python 06_api_server.py
 ```
 
-### 2) AI Milestone Generator
+Docs: `http://localhost:8000/api/docs`
 
-`POST /api/ai/generate-milestones`
+## 8) Recommended Run Order (Full Project)
 
-Option A (from existing project):
+Use 4 terminals:
 
-```json
-{
-  "project_id": "PROJECT_OBJECT_ID"
-}
-```
+1. `backend/` -> `npm run dev`
+2. `frontend/` -> `npm run dev`
+3. `embedding-service/` -> `uvicorn main:app --host 127.0.0.1 --port 8001 --reload`
+4. `ml-ranking-system/` -> run training scripts once; optionally run `python 06_api_server.py`
 
-Option B (direct input):
+## 9) Quick Smoke Test
 
-```json
-{
-  "title": "Build AI SaaS Landing Page",
-  "description": "Create responsive landing page with auth and analytics integration.",
-  "budget": 1500,
-  "deadline": "2026-04-10T00:00:00.000Z"
-}
-```
+1. Backend health: `GET http://localhost:5000/health`
+2. Embedding health: `GET http://127.0.0.1:8001/health`
+3. Frontend opens at `http://localhost:3000`
+4. ML API health (if running): `GET http://localhost:8000/api/health`
 
-### 3) Milestone Submission
+## 10) Common Issues
 
-`POST /api/milestones/:id/submit`
+- `MongoDB connection error`: verify `MONGO_URI` or `MONGODB_URI` and ensure MongoDB is reachable.
+- `Port 5000 already in use`: stop existing process or set `PORT` in `backend/.env`.
+- `Embedding service unavailable`: ensure FastAPI service is running on port `8001` and `EMBEDDING_SERVICE_URL` matches.
+- `ML predictor exited with code ...`: confirm ML venv has dependencies and model files were created by `04_xgboost_training.py`.
+- `psql command not found`: add PostgreSQL bin directory to PATH or use pgAdmin.
 
-Request body:
+## 11) Useful Scripts
 
-```json
-{
-  "freelancer_id": "fr_001",
-  "text": "Implemented auth, dashboard, and tests",
-  "github_link": "https://github.com/example/repo/pull/10",
-  "file_url": "https://files.example.com/submissions/m1.zip"
-}
-```
+From repo root:
 
-### 4) AI Quality Verification
+- `npm run dev` -> starts backend dev server (`backend/server.js`)
+- `npm run frontend-dev` -> starts frontend dev server
 
-`POST /api/ai/verify-milestone`
+From `backend/`:
 
-Request body:
+- `npm run dev` -> backend with nodemon
+- `npm run seed:ml:test` -> seed ML ranking test data
 
-```json
-{
-  "milestone_id": "MILESTONE_OBJECT_ID",
-  "submission_id": "SUBMISSION_OBJECT_ID"
-}
-```
+---
 
-Response includes:
-
-- status: `completed | partial | not_completed`
-- feedback
-- quality_score
-
-### 5) Escrow Payment Logic
-
-`POST /api/payments/release`
-
-Request body:
-
-```json
-{
-  "milestone_id": "MILESTONE_OBJECT_ID"
-}
-```
-
-Behavior:
-
-- `completed` → full payment release
-- `partial` → 50% payment release
-- `not_completed` → employer refund
-
-### 6) Professional Fidelity Index (PFI)
-
-`GET /api/freelancers/:id/pfi`
-
-PFI formula:
-
-- milestone success rate (40%)
-- deadline adherence (30%)
-- AI quality score (30%)
+If you want, I can also add ready-to-use `backend/.env.example` and `frontend/.env.example` files so setup becomes copy/paste only.

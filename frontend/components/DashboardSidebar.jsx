@@ -5,25 +5,46 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Briefcase, LayoutDashboard, LogOut, MessageSquare, Settings, ShieldCheck, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { clearAuth, getStoredAuth } from '../services/auth';
+import { fetchUnreadCount } from '@/services/api';
 
 const sidebarLinks = [
-  { href: '/dashboard/employer', label: 'Employer Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/freelancer', label: 'Freelancer Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/contracts', label: 'My Contracts', icon: Briefcase },
-  { href: '/dashboard/escrow', label: 'Escrow Dashboard', icon: ShieldCheck },
-  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/dashboard/profile', label: 'Profile', icon: User },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard/employer', label: 'Employer Dashboard', icon: LayoutDashboard, roles: ['employer'] },
+  { href: '/dashboard/freelancer', label: 'Freelancer Dashboard', icon: LayoutDashboard, roles: ['freelancer'] },
+  { href: '/dashboard/find-work', label: 'Find Work', icon: Briefcase, roles: ['freelancer'] },
+  { href: '/dashboard/contracts', label: 'My Contracts', icon: Briefcase, roles: ['freelancer'] },
+  { href: '/dashboard/escrow', label: 'Escrow Dashboard', icon: ShieldCheck, roles: ['freelancer', 'employer'] },
+  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare, showBadge: true, roles: ['freelancer', 'employer'] },
+  { href: '/dashboard/profile', label: 'Profile', icon: User, roles: ['freelancer', 'employer'] },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings, roles: ['freelancer', 'employer'] }
 ];
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [role, setRole] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const auth = getStoredAuth();
     setRole(auth?.user?.role || null);
+  }, []);
+
+  useEffect(() => {
+    const auth = getStoredAuth();
+    if (!auth?.token) return;
+
+    const loadUnreadCount = async () => {
+      try {
+        const response = await fetchUnreadCount(auth.token);
+        setUnreadCount(response.data.unreadCount || 0);
+      } catch (err) {
+        console.debug('Could not fetch unread count:', err);
+      }
+    };
+
+    loadUnreadCount();
+    const interval = setInterval(loadUnreadCount, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -32,11 +53,9 @@ export default function DashboardSidebar() {
     router.replace('/login');
   };
 
-  const filteredLinks = sidebarLinks.filter(link => {
-    if (role === 'freelancer' && link.href === '/dashboard/employer') return false;
-    if (role === 'employer' && link.href === '/dashboard/freelancer') return false;
-    if (role === 'employer' && link.href === '/dashboard/contracts') return false;
-    return true;
+  const filteredLinks = sidebarLinks.filter((link) => {
+    if (!role) return true;
+    return !link.roles || link.roles.includes(role);
   });
 
   return (
@@ -55,6 +74,7 @@ export default function DashboardSidebar() {
         {filteredLinks.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const showBadge = item.showBadge && unreadCount > 0;
 
           return (
             <Link
@@ -66,15 +86,28 @@ export default function DashboardSidebar() {
                   : 'border-transparent text-slate-600 hover:bg-gray-100 hover:text-slate-900'
               }`}
             >
-              <Icon 
-                size={18} 
-                className={`transition-colors ${isActive ? 'text-emerald-700' : 'text-gray-500 group-hover:text-emerald-600'}`} 
+              <Icon
+                size={18}
+                className={`transition-colors ${isActive ? 'text-emerald-700' : 'text-gray-500 group-hover:text-emerald-600'}`}
               />
               {item.label}
+              {showBadge && (
+                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
+
+      <button
+        onClick={handleLogout}
+        className="mt-6 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-gray-100 hover:text-slate-900"
+      >
+        <LogOut size={18} className="text-gray-500" />
+        Logout
+      </button>
     </aside>
   );
 }

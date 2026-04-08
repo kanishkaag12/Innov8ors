@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { Activity, CheckCircle2, FolderKanban, LockKeyhole } from 'lucide-react';
 import ProjectForm from '../components/ProjectForm';
+import DashboardSidebar from '../components/DashboardSidebar';
 import {
   approveProjectMilestones,
   createProject,
@@ -218,10 +219,13 @@ export default function EmployerDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+    <div className="flex h-screen bg-slate-100">
+      <DashboardSidebar />
+      <main className="flex-1 overflow-auto p-6">
+        <div className="space-y-6">
+          <h1 className="text-2xl font-bold">Employer Dashboard</h1>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -392,6 +396,8 @@ export default function EmployerDashboard() {
       </section>
 
       {message ? <p className="text-sm text-emerald-600">{message}</p> : null}
+        </div>
+      </main>
     </div>
   );
 }

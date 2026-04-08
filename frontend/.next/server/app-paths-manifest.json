@@ -1,3 +1,9 @@
 {
+  "/login/page": "app/login/page.js",
+  "/dashboard/profile/page": "app/dashboard/profile/page.js",
+  "/dashboard/employer/page": "app/dashboard/employer/page.js",
+  "/dashboard/messages/page": "app/dashboard/messages/page.js",
+  "/dashboard/settings/page": "app/dashboard/settings/page.js",
+  "/dashboard/find-work/page": "app/dashboard/find-work/page.js",
   "/dashboard/freelancer/page": "app/dashboard/freelancer/page.js"
 }

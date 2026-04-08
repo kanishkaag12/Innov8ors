@@ -44,9 +44,39 @@ const userSchema = new mongoose.Schema(
       type: String
     },
     freelancerProfile: {
-      category: { type: String },
-      subCategories: [{ type: String }],
-      skills: [{ type: String }]
+      fullName: { type: String, trim: true },
+      email: { type: String, lowercase: true, trim: true },
+      headline: { type: String, trim: true },
+      bio: { type: String, trim: true },
+      location: { type: String, trim: true },
+      availability: { type: String, trim: true },
+      skills: [{ type: String, trim: true }],
+      interests: [{ type: String, trim: true }],
+      preferredCategories: [{ type: String, trim: true }],
+      primaryCategory: { type: String, trim: true },
+      experienceLevel: { type: String, enum: ['junior', 'mid', 'senior'] },
+      preferredBudgetMin: { type: Number },
+      preferredBudgetMax: { type: Number },
+      preferredProjectType: { type: String, enum: ['fixed', 'hourly'] },
+      portfolioLinks: [{ type: String, trim: true }],
+      languages: [{ type: String, trim: true }],
+      profileEmbedding: [{ type: Number }],
+      embeddingText: { type: String },
+      lastEmbeddingAt: { type: Date }
+    },
+    employerProfile: {
+      fullName: { type: String, trim: true },
+      email: { type: String, lowercase: true, trim: true },
+      companyName: { type: String, trim: true },
+      about: { type: String, trim: true },
+      location: { type: String, trim: true },
+      website: { type: String, trim: true },
+      industry: { type: String, trim: true },
+      hiringInterests: [{ type: String, trim: true }],
+      preferredFreelancerCategories: [{ type: String, trim: true }],
+      companySize: { type: String, trim: true },
+      hiringGoals: { type: String, trim: true },
+      verificationInfo: { type: String, trim: true }
     }
   },
   {

@@ -1,150 +1,300 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Search, Send, FileText, CheckCheck } from 'lucide-react';
-
-const conversations = [
-  { id: 1, name: 'Acme Corp', project: 'E-commerce Redesign Next.js', lastMessage: 'Looks great! Can you pushing the...', time: '10:42 AM', unread: 2, active: true },
-  { id: 2, name: 'TechNova', project: 'AI Writing Assistant API', lastMessage: 'When can we start beta testing?', time: 'Yesterday', unread: 0, active: false },
-  { id: 3, name: 'Elevate Realty', project: 'Real Estate Dashboard UI', lastMessage: 'Thank you for the quick turnover.', time: 'Oct 08', unread: 0, active: false },
-];
+import Link from 'next/link';
+import { fetchConversations, fetchConversation, sendConversationMessage, markConversationAsRead, fetchUnreadCount } from '@/services/api';
+import { getStoredAuth } from '@/services/auth';
 
 export default function MessagesPage() {
+  const [auth, setAuth] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [conversationLoading, setConversationLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [totalUnread, setTotalUnread] = useState(0);
+
+  useEffect(() => {
+    const storedAuth = getStoredAuth();
+    setAuth(storedAuth || null);
+  }, []);
+
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      if (!auth?.token) return;
+      try {
+        const response = await fetchUnreadCount(auth.token);
+        setTotalUnread(response.data.unreadCount || 0);
+      } catch (err) {
+        console.debug('Could not fetch unread count');
+      }
+    };
+    loadUnreadCount();
+  }, [auth]);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!auth?.token) {
+        console.log('⚠️  No auth token available');
+        return;
+      }
+
+      setLoading(true);
+      setError('');
+      try {
+        console.log('📝 Fetching conversations for user:', auth.user?._id);
+        const response = await fetchConversations(auth.token);
+        console.log('✅ Conversations received:', response.data.conversations?.length || 0, 'conversations:', response.data.conversations);
+        setConversations(response.data.conversations || []);
+      } catch (err) {
+        console.error('❌ Error fetching conversations:', err);
+        setError('Unable to load conversations.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [auth]);
+
+  useEffect(() => {
+    if (!auth?.token) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const conversationsResponse = await fetchConversations(auth.token);
+        setConversations(conversationsResponse.data.conversations || []);
+
+        const unreadResponse = await fetchUnreadCount(auth.token);
+        setTotalUnread(unreadResponse.data.unreadCount || 0);
+
+        if (selectedConversation?.id) {
+          const messagesResponse = await fetchConversation(selectedConversation.id, auth.token);
+          setMessages(messagesResponse.data.messages || []);
+        }
+      } catch (err) {
+        console.debug('Poll update failed:', err.message);
+      }
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, [auth, selectedConversation]);
+
+  const handleSelectConversation = async (conversation) => {
+    if (!auth?.token || !conversation?.id) return;
+    setSelectedConversation(conversation);
+    setConversationLoading(true);
+    setError('');
+
+    try {
+      const response = await fetchConversation(conversation.id, auth.token);
+      setMessages(response.data.messages || []);
+
+      if (conversation.unreadCount > 0) {
+        await markConversationAsRead(conversation.id, auth.token);
+        
+        setConversations(prev => prev.map(conv => 
+          conv.id === conversation.id 
+            ? { ...conv, unreadCount: 0, hasUnread: false }
+            : conv
+        ));
+        
+        setTotalUnread(prev => Math.max(0, prev - conversation.unreadCount));
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Unable to load the conversation.');
+    } finally {
+      setConversationLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!auth?.token || !selectedConversation || !messageInput.trim()) {
+      return;
+    }
+
+    try {
+      const response = await sendConversationMessage(selectedConversation.id, { text: messageInput.trim() }, auth.token);
+      setMessages((prev) => [...prev, response.data.message]);
+      setMessageInput('');
+
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === selectedConversation.id
+            ? { ...conversation, lastMessage: response.data.message.text, lastMessageAt: response.data.message.createdAt }
+            : conversation
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      setError('Unable to send the message.');
+    }
+  };
+
+  const userId = auth?.user?._id || auth?.user?.id;
+
   return (
-    <div className="h-[calc(100vh-10rem)] flex flex-col sm:flex-row gap-6 animate-in fade-in duration-500">
-      {/* Sidebar: Conversation List */}
+    <div className="h-[calc(100vh-8rem)] flex flex-col sm:flex-row gap-6 animate-in fade-in duration-500">
       <div className="w-full sm:w-80 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden shrink-0">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Messages</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+              Messages
+              {totalUnread > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                  {totalUnread > 99 ? '99+' : totalUnread}
+                </span>
+              )}
+            </h2>
+            <Link href="/dashboard/freelancer" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+              Back
+            </Link>
+          </div>
           <div className="relative mt-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search conversations..." 
+            <input
+              type="text"
+              placeholder="Search conversations..."
               className="w-full pl-9 pr-4 py-2 bg-white text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-shadow"
+              disabled
             />
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-          {conversations.map((conv) => (
-            <div key={conv.id} className={`p-4 flex gap-3 cursor-pointer transition-colors ${conv.active ? 'bg-emerald-50/50' : 'hover:bg-slate-50'}`}>
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-sm opacity-90">
-                {conv.name.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start mb-0.5">
-                   <p className={`text-sm truncate pr-2 ${conv.active ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>{conv.name}</p>
-                   <p className={`text-[11px] whitespace-nowrap mt-0.5 ${conv.unread > 0 ? 'text-emerald-600 font-bold' : 'text-slate-400'}`}>{conv.time}</p>
+          {loading ? (
+            <div className="p-4 text-sm text-slate-500">Loading conversations...</div>
+          ) : conversations.length ? (
+            conversations.map((conv) => (
+              <button
+                key={conv.id}
+                type="button"
+                onClick={() => handleSelectConversation(conv)}
+                className={`w-full p-4 text-left transition ${selectedConversation?.id === conv.id ? 'bg-emerald-50' : 'hover:bg-slate-50'}`}
+              >
+                <div className="flex gap-3">
+                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-sm">
+                    {conv.projectTitle?.charAt(0) || 'C'}
+                    {conv.hasUnread && (
+                      <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-red-500" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`truncate text-sm ${conv.hasUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                        {conv.projectTitle}
+                      </p>
+                      <p className="text-[11px] text-slate-400">{new Date(conv.lastMessageAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <p className={`truncate text-xs ${conv.hasUnread ? 'text-slate-600 font-medium' : 'text-slate-500'}`}>
+                        {conv.lastMessage}
+                      </p>
+                      {conv.unreadCount > 0 && (
+                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1.5 text-xs font-bold text-white shrink-0">
+                          {conv.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 truncate mb-1">{conv.project}</p>
-                <div className="flex justify-between items-center">
-                  <p className={`text-sm truncate ${conv.unread > 0 ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>{conv.lastMessage}</p>
-                  {conv.unread > 0 && (
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow-sm shrink-0">
-                      {conv.unread}
-                    </span>
-                  )}
-                </div>
-              </div>
+              </button>
+            ))
+          ) : (
+            <div className="p-4 text-sm text-slate-500">
+              No conversations yet. Your chat will appear here once your proposal is accepted.
             </div>
-          ))}
+          )}
         </div>
       </div>
 
-      {/* Main Content: Chat Window */}
       <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        {/* Chat Header */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-sm">
-                A
-              </div>
-             <div>
-               <h3 className="font-bold text-slate-900 leading-tight">Acme Corp</h3>
-               <p className="text-xs text-slate-500">E-commerce Redesign Next.js • Online</p>
-             </div>
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-slate-900 leading-tight">
+              {selectedConversation ? selectedConversation.projectTitle : 'Select a conversation'}
+            </h3>
+            <p className="text-xs text-slate-500">
+              {selectedConversation
+                ? `Project chat for ${selectedConversation.projectTitle}`
+                : 'Chat opens after an accepted proposal creates a conversation.'}
+            </p>
           </div>
-          <button className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition">
-            View Contract
-          </button>
+          {selectedConversation && (
+            <button className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition">
+              View Contract
+            </button>
+          )}
         </div>
 
-        {/* Chat Messages */}
         <div className="flex-1 p-6 overflow-y-auto bg-slate-50 space-y-6">
-          <div className="flex justify-center">
-             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest bg-white border border-slate-100 px-3 py-1 rounded-full shadow-sm">Today</span>
-          </div>
-          
-          <div className="flex gap-3 max-w-[85%]">
-             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-sm mt-auto">
-                A
-              </div>
-             <div>
-               <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-bl-sm shadow-sm text-sm text-slate-700">
-                 Hi! Are you ready to submit the frontend architecture document? We're excited to review it.
-               </div>
-               <p className="text-[11px] text-slate-400 mt-1 ml-1">10:30 AM</p>
-             </div>
-          </div>
+          {error ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
+          ) : null}
 
-          <div className="flex gap-3 max-w-[85%] self-end ml-auto flex-row-reverse">
-             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-white font-bold text-xs shadow-sm mt-auto">
-                Y
+          {conversationLoading ? (
+            <div className="text-sm text-slate-500">Loading conversation...</div>
+          ) : selectedConversation ? (
+            messages.length ? (
+              messages.map((message) => {
+                const isSender = String(message.sender?.id) === String(userId);
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${isSender ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {!isSender && (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-xs font-bold">
+                        {message.sender?.name?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                    <div className={`max-w-[85%] rounded-3xl p-4 text-sm shadow-sm ${isSender ? 'bg-emerald-600 text-white rounded-br-sm' : 'bg-white text-slate-800 rounded-bl-sm'}`}>
+                      <p>{message.text}</p>
+                      <div className={`mt-2 flex items-center gap-1 text-[11px] ${isSender ? 'text-emerald-100' : 'text-slate-400'}`}>
+                        <span>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        {isSender && message.isRead && (
+                          <CheckCheck size={12} className="ml-1 text-emerald-200" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+                No messages yet. Send the first message to start this conversation.
               </div>
-             <div className="flex flex-col items-end">
-               <div className="bg-emerald-600 text-white p-3 rounded-2xl rounded-br-sm shadow-sm text-sm border border-emerald-700/20">
-                 Yes, I just finished the final revisions. I'm attaching the PDF right now.
-               </div>
-               <div className="flex items-center gap-1 mt-1 mr-1">
-                 <p className="text-[11px] text-slate-400">10:41 AM</p>
-                 <CheckCheck size={14} className="text-emerald-500" />
-               </div>
-             </div>
-          </div>
-          
-          <div className="flex gap-3 max-w-[85%] self-end ml-auto flex-row-reverse">
-             <div className="w-8 shrink-0" /> {/* Spacer */}
-             <div className="flex flex-col items-end w-full max-w-sm">
-               <div className="flex items-center gap-3 bg-white border border-slate-200 p-3 rounded-2xl rounded-br-sm shadow-sm text-sm w-full cursor-pointer hover:border-emerald-200 transition">
-                 <div className="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                   <FileText size={20} />
-                 </div>
-                 <div className="flex-1 min-w-0">
-                   <p className="font-semibold text-slate-900 truncate">frontend_architecture_v1.pdf</p>
-                   <p className="text-xs text-slate-500">2.4 MB PDF Document</p>
-                 </div>
-               </div>
-               <div className="flex items-center gap-1 mt-1 mr-1">
-                 <p className="text-[11px] text-slate-400">10:41 AM</p>
-                 <CheckCheck size={14} className="text-emerald-500" />
-               </div>
-             </div>
-          </div>
-          
-          <div className="flex gap-3 max-w-[85%]">
-             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-sm mt-auto">
-                A
+            )
+          ) : (
+            <div className="flex h-full items-center justify-center text-center text-slate-500">
+              <div>
+                <p className="text-lg font-semibold">No conversation selected</p>
+                <p className="mt-2 text-sm">Choose a conversation on the left or accept a proposal to begin chatting.</p>
               </div>
-             <div>
-               <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-bl-sm shadow-sm text-sm text-slate-700 flex items-center gap-1">
-                 <div className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce" />
-                 <div className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                 <div className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-               </div>
-             </div>
-          </div>
-
+            </div>
+          )}
         </div>
 
-        {/* Chat Input */}
         <div className="p-4 bg-white border-t border-slate-100 shrink-0">
           <div className="relative flex items-center">
-            <input 
-              type="text" 
-              placeholder="Type your message..." 
-              className="w-full pl-4 pr-12 py-3 bg-slate-50 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-shadow"
+            <input
+              value={messageInput}
+              onChange={(event) => setMessageInput(event.target.value)}
+              type="text"
+              placeholder={selectedConversation ? 'Type your message...' : 'Select a conversation first.'}
+              disabled={!selectedConversation}
+              className="w-full pl-4 pr-12 py-3 bg-slate-50 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-shadow disabled:cursor-not-allowed disabled:opacity-70"
             />
-            <button className="absolute right-2 h-8 w-8 flex items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm">
+            <button
+              type="button"
+              onClick={handleSendMessage}
+              disabled={!selectedConversation || !messageInput.trim()}
+              className="absolute right-2 h-8 w-8 flex items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm disabled:bg-slate-300 disabled:text-slate-500"
+            >
               <Send size={14} className="-ml-0.5 mt-0.5" />
             </button>
           </div>

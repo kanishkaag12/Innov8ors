@@ -71,4 +71,65 @@ ${description}`;
   };
 }
 
-module.exports = { generateMilestones };
+async function generateProposal(job, freelancerProfile) {
+  const fallbackProposal = [
+    `Hello, I would love to help with "${job.title}".`,
+    freelancerProfile?.headline ? `My background: ${freelancerProfile.headline}.` : null,
+    freelancerProfile?.skills?.length ? `Relevant skills: ${freelancerProfile.skills.join(', ')}.` : null,
+    freelancerProfile?.bio ? `Briefly about me: ${freelancerProfile.bio}.` : null,
+    `Based on your requirements in ${job.category}, I can deliver a clear implementation plan, communicate progress consistently, and move quickly on the highest-priority work first.`,
+    job.projectType === 'hourly'
+      ? `I am comfortable working within your hourly budget range of $${job.budgetMin || ''}-$${job.budgetMax || ''}.`
+      : `I can propose a scoped delivery within your budget range of $${job.budgetMin || ''}-$${job.budgetMax || ''}.`,
+    'If helpful, I can start with a short kickoff outline and first milestone immediately.'
+  ].filter(Boolean).join(' ');
+
+  if (!process.env.GEMINI_API_KEY) {
+    return fallbackProposal;
+  }
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash"
+  });
+
+  const prompt = `
+You are a professional freelancer writing a compelling proposal for a job.
+
+Job Details:
+Title: ${job.title}
+Description: ${job.description}
+Required Skills: ${job.requiredSkills.join(', ')}
+Category: ${job.category}
+Budget: $${job.budgetMin} - $${job.budgetMax}
+Project Type: ${job.projectType}
+
+Freelancer Profile:
+Name: ${freelancerProfile?.name || 'Freelancer'}
+Headline: ${freelancerProfile?.headline || ''}
+Bio: ${freelancerProfile?.bio || ''}
+Skills: ${freelancerProfile?.skills?.join(', ') || ''}
+Experience Level: ${freelancerProfile?.experienceLevel || ''}
+Preferred Budget: $${freelancerProfile?.preferredBudgetMin} - $${freelancerProfile?.preferredBudgetMax}
+
+Write a professional proposal that:
+- Introduces the freelancer
+- Highlights relevant experience and skills
+- Explains why they are a good fit
+- Proposes a timeline and approach
+- Includes a competitive bid within the budget range
+- Is concise but compelling
+
+Return ONLY the proposal text, no markdown or extra formatting.
+`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error) {
+    console.error('Gemini proposal generation failed, using fallback proposal:', error.message);
+    return fallbackProposal;
+  }
+}
+
+module.exports = { generateMilestones, generateProposal };

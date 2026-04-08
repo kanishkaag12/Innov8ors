@@ -35,5 +35,31 @@ temp/
 .vscode/
 .idea/
 
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+*/.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ML model and data files
+*.pkl
+*.pickle
+ranking_model.pkl
+*.h5
+*.model
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
 # optional
 package-lock.json

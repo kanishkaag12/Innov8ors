@@ -13,7 +13,7 @@ async function verifyMilestone(req, res) {
       });
     }
 
-    const repoData = await getRepoCode(repoLink, milestone);
+    const repoData = await getRepoCode(repoLink, milestone, projectTitle);
 
     const result = await analyzeCode(milestone, repoData.code, projectTitle);
 
