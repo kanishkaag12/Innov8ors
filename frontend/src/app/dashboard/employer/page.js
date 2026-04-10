@@ -26,11 +26,12 @@ import {
   fetchFreelancerMlInsight,
   recomputeProjectRanking,
   listProjects,
-  createProject
+  createProject,
+  deleteProject as deleteProjectRequest
 } from '@/services/api';
 import { getStoredAuth } from '@/services/auth';
 
-const STORAGE_KEY = 'synapescrow_employer_projects';
+const STORAGE_KEY_PREFIX = 'synapescrow_employer_projects';
 const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_SQqAVOFu5bhmIk';
 
 const sampleProjects = [
@@ -134,13 +135,18 @@ function formatRelativeDate(dateString) {
   return `${days} day${days === 1 ? '' : 's'} ago`;
 }
 
-function loadStoredProjects() {
+function getProjectStorageKey(user) {
+  const identity = String(user?._id || user?.id || user?.email || 'anonymous').trim().toLowerCase();
+  return `${STORAGE_KEY_PREFIX}:${identity}`;
+}
+
+function loadStoredProjects(storageKey) {
   if (typeof window === 'undefined') {
     return [];
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed)
       ? parsed.map((project) => {
@@ -157,12 +163,12 @@ function loadStoredProjects() {
   }
 }
 
-function saveStoredProjects(projects) {
+function saveStoredProjects(storageKey, projects) {
   if (typeof window === 'undefined') {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  window.localStorage.setItem(storageKey, JSON.stringify(projects));
 }
 
 function parseMilestones(responseData, budgetValue) {
@@ -304,6 +310,93 @@ function normalizeRankedFreelancersResponse(payload) {
   });
 }
 
+function normalizeApplicantToCandidate(applicant, index) {
+  return {
+    freelancerId: applicant?.freelancerId || null,
+    proposalId: applicant?.proposalId || null,
+    proposalStatus: String(applicant?.status || applicant?.proposalStatus || 'pending').toLowerCase(),
+    conversationId: applicant?.conversationId || null,
+    freelancerEmail: applicant?.email || '',
+    name: applicant?.name || 'Freelancer',
+    title: applicant?.title || 'Project applicant',
+    avatar: null,
+    rank: index + 1,
+    matchScore: null,
+    semanticScore: 0,
+    priceFit: 0,
+    reliability: 0,
+    successProbability: 0,
+    strengths: [],
+    highlights: [],
+    risks: [],
+    percentile: 0,
+    requestedAt: applicant?.requestedAt || null,
+    pfiScore: Number(applicant?.pfiScore || 0),
+    isLegacyApplicant: true
+  };
+}
+
+function mergeCandidateLists(rankedFreelancers, applicants) {
+  const candidatesByKey = new Map();
+
+  const buildKey = (candidate) =>
+    String(
+      candidate?.proposalId ||
+      candidate?.freelancerId ||
+      candidate?.freelancerEmail ||
+      candidate?.email ||
+      candidate?.name ||
+      ''
+    ).trim().toLowerCase();
+
+  const mergeCandidate = (candidate, isRanked) => {
+    const key = buildKey(candidate);
+    if (!key) {
+      return;
+    }
+
+    const existing = candidatesByKey.get(key);
+    if (!existing) {
+      candidatesByKey.set(key, candidate);
+      return;
+    }
+
+    const primary = isRanked ? candidate : existing;
+    const secondary = isRanked ? existing : candidate;
+
+    candidatesByKey.set(key, {
+      ...secondary,
+      ...primary,
+      proposalStatus: String(
+        primary?.proposalStatus ||
+        primary?.status ||
+        secondary?.proposalStatus ||
+        secondary?.status ||
+        'pending'
+      ).toLowerCase(),
+      conversationId: primary?.conversationId || secondary?.conversationId || null,
+      requestedAt: primary?.requestedAt || secondary?.requestedAt || null,
+      pfiScore: Number(primary?.pfiScore ?? secondary?.pfiScore ?? 0),
+      highlights:
+        Array.isArray(primary?.highlights) && primary.highlights.length
+          ? primary.highlights
+          : secondary?.highlights || []
+    });
+  };
+
+  (Array.isArray(applicants) ? applicants : []).forEach((applicant, index) =>
+    mergeCandidate(normalizeApplicantToCandidate(applicant, index), false)
+  );
+  (Array.isArray(rankedFreelancers) ? rankedFreelancers : []).forEach((candidate) =>
+    mergeCandidate(candidate, true)
+  );
+
+  return Array.from(candidatesByKey.values()).map((candidate, index) => ({
+    ...candidate,
+    rank: Number(candidate?.rank || index + 1)
+  }));
+}
+
 function normalizeInsightResponse(payload) {
   const insight = payload || {};
 
@@ -404,6 +497,7 @@ export default function EmployerDashboardPage() {
   const [mlInsight, setMlInsight] = useState(null);
   const [mlInsightError, setMlInsightError] = useState('');
   const [backendProjects, setBackendProjects] = useState([]);
+  const [projectStorageKey, setProjectStorageKey] = useState(() => getProjectStorageKey(null));
 
   const refreshBackendProjects = async (token) => {
     if (!token) {
@@ -418,13 +512,16 @@ export default function EmployerDashboardPage() {
 
   useEffect(() => {
     const auth = getStoredAuth();
+    const storageKey = getProjectStorageKey(auth?.user);
+    setProjectStorageKey(storageKey);
+
     if (auth) {
       setUser(auth.user);
     }
 
-    const storedProjects = loadStoredProjects();
+    const storedProjects = loadStoredProjects(storageKey);
     setPostedProjects(storedProjects);
-    saveStoredProjects(storedProjects);
+    saveStoredProjects(storageKey, storedProjects);
 
     const loadBackendProjects = async () => {
       try {
@@ -471,7 +568,7 @@ export default function EmployerDashboardPage() {
   }, [selectedProject]);
 
   const projects = useMemo(() => {
-    const merged = [...backendProjects, ...postedProjects, ...sampleProjects];
+    const merged = [...backendProjects, ...postedProjects];
     const seen = new Set();
     const backendTitles = new Set(
       backendProjects
@@ -497,7 +594,7 @@ export default function EmployerDashboardPage() {
   const persistPostedProjects = (updater) => {
     const nextProjects = updater(postedProjects);
     setPostedProjects(nextProjects);
-    saveStoredProjects(nextProjects);
+    saveStoredProjects(projectStorageKey, nextProjects);
 
     if (selectedProject && selectedProject.source !== 'sample') {
       const refreshed = nextProjects.find((project) => project.id === selectedProject.id) || null;
@@ -518,6 +615,11 @@ export default function EmployerDashboardPage() {
       { label: 'Weekly Spend', value: formatCompactCurrency(Math.max(236550, totalEscrow / 2)), icon: TrendingUp, trend: '+12%', color: 'bg-orange-500' }
     ];
   }, [postedProjects, projects]);
+
+  const combinedCandidates = useMemo(
+    () => mergeCandidateLists(rankedFreelancers, selectedProject?.applicants || []),
+    [rankedFreelancers, selectedProject]
+  );
 
   const openPlanner = () => {
     setPlannerError('');
@@ -650,7 +752,7 @@ export default function EmployerDashboardPage() {
 
         const nextProjects = [finalizedProject, ...postedProjects];
         setPostedProjects(nextProjects);
-        saveStoredProjects(nextProjects);
+        saveStoredProjects(projectStorageKey, nextProjects);
         setPaymentSuccess({
           ...finalizedProject,
           paymentId: response?.razorpay_payment_id || 'test_payment'
@@ -680,6 +782,7 @@ export default function EmployerDashboardPage() {
     const token = auth?.token;
     const project = postedProjects.find((project) => project.id === projectId);
     const applicant = project?.applicants?.find((entry) => entry.email === email);
+    let updatedProposal = null;
     
     console.log('📝 handleApplicantStatus called:', { projectId, email, status, applicantProposalId: applicant?.proposalId });
 
@@ -688,10 +791,12 @@ export default function EmployerDashboardPage() {
         if (status === 'accepted') {
           console.log('✅ Accepting proposal:', applicant.proposalId, 'with budget:', project?.budget);
           const response = await acceptProposal(applicant.proposalId, { budget: project?.budget || 0 }, token);
+          updatedProposal = response?.data?.proposal || null;
           console.log('✅ Accept response:', response.data);
         } else if (status === 'rejected') {
           console.log('❌ Rejecting proposal:', applicant.proposalId);
-          await rejectProposal(applicant.proposalId, token);
+          const response = await rejectProposal(applicant.proposalId, token);
+          updatedProposal = response?.data?.proposal || null;
         }
       } catch (error) {
         console.warn('❌ Proposal status update failed:', error?.response?.data || error?.message || error);
@@ -706,9 +811,22 @@ export default function EmployerDashboardPage() {
           return project;
         }
 
-        const applicants = (project.applicants || []).map((applicant) =>
-          applicant.email === email ? { ...applicant, status } : applicant
-        );
+        const applicants = (project.applicants || []).map((entry) => (
+          entry.email === email
+            ? {
+                ...entry,
+                status,
+                acceptedByName:
+                  updatedProposal?.employerName ||
+                  project?.employerName ||
+                  user?.name ||
+                  entry?.acceptedByName ||
+                  '',
+                acceptedAt: updatedProposal?.updatedAt || new Date().toISOString(),
+                conversationId: updatedProposal?.conversationId || entry?.conversationId || null
+              }
+            : entry
+        ));
 
         return {
           ...project,
@@ -833,6 +951,40 @@ export default function EmployerDashboardPage() {
     }
   };
 
+  const handleDeleteProject = async (project) => {
+    const projectId = resolveProjectId(project);
+    if (!projectId) {
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      const shouldDelete = window.confirm(`Delete project "${project.title}"? This cannot be undone.`);
+      if (!shouldDelete) {
+        return;
+      }
+    }
+
+    const auth = getStoredAuth();
+
+    try {
+      if (project?.source === 'backend' && auth?.token) {
+        await deleteProjectRequest(projectId, auth.token);
+        await refreshBackendProjects(auth.token);
+      }
+    } catch (error) {
+      window.alert(error?.response?.data?.message || 'Unable to delete this project right now.');
+      return;
+    }
+
+    persistPostedProjects((currentProjects) =>
+      currentProjects.filter((item) => resolveProjectId(item) !== String(projectId))
+    );
+
+    if (resolveProjectId(selectedProject) === String(projectId)) {
+      setSelectedProject(null);
+    }
+  };
+
   const plannerModalWidth = paymentSuccess ? 'max-w-2xl' : plannerStep === 1 ? 'max-w-2xl' : 'max-w-4xl';
 
   return (
@@ -901,36 +1053,46 @@ export default function EmployerDashboardPage() {
 
             <div className="space-y-4">
               {projects.map((proj) => (
-                <button
+                <div
                   key={resolveProjectId(proj) || proj.id}
-                  onClick={() => setSelectedProject(proj)}
-                  className="flex w-full flex-wrap items-center justify-between rounded-[1.6rem] border border-slate-100 bg-white p-5 text-left shadow-sm transition hover:border-emerald-200 hover:shadow-md"
+                  className="rounded-[1.6rem] border border-slate-100 bg-white p-5 text-left shadow-sm transition hover:border-emerald-200 hover:shadow-md"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500">
-                      <Briefcase size={26} />
-                    </div>
-                    <div>
-                      <h3 className="text-[1.1rem] font-bold text-slate-900">{proj.title}</h3>
-                      <div className="mt-3 flex flex-wrap items-center gap-3">
-                        <span className="rounded-md bg-emerald-100 px-2.5 py-1 text-sm font-bold text-emerald-700">
-                          {proj.status}
-                        </span>
-                        <span className="text-sm text-slate-400">{formatPostedDate(proj.createdAt)}</span>
-                        <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-bold text-blue-600">
-                          Interested: {proj.interestedCount || 0}
-                        </span>
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <button
+                      onClick={() => setSelectedProject(proj)}
+                      className="flex min-w-0 flex-1 items-start gap-4 text-left"
+                    >
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500">
+                        <Briefcase size={26} />
                       </div>
+                      <div>
+                        <h3 className="text-[1.1rem] font-bold text-slate-900">{proj.title}</h3>
+                        <div className="mt-3 flex flex-wrap items-center gap-3">
+                          <span className="rounded-md bg-emerald-100 px-2.5 py-1 text-sm font-bold text-emerald-700">
+                            {proj.status}
+                          </span>
+                          <span className="text-sm text-slate-400">{formatPostedDate(proj.createdAt)}</span>
+                          <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-bold text-blue-600">
+                            Interested: {proj.interestedCount || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
+                    <div className="flex flex-col items-end gap-3">
+                      <p className="text-[1.1rem] font-bold text-slate-900">{formatCurrency(proj.budget)}</p>
+                      <p className="flex items-center gap-2 text-sm font-bold text-emerald-600">
+                        <ShieldCheck size={15} /> {proj.escrowLabel || 'Escrow Locked'}
+                      </p>
+                      <button
+                        onClick={() => handleDeleteProject(proj)}
+                        className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50"
+                      >
+                        Delete Project
+                      </button>
                     </div>
                   </div>
-
-                  <div className="mt-4 flex flex-col items-end gap-3 sm:mt-0">
-                    <p className="text-[1.1rem] font-bold text-slate-900">{formatCurrency(proj.budget)}</p>
-                    <p className="flex items-center gap-2 text-sm font-bold text-emerald-600">
-                      <ShieldCheck size={15} /> {proj.escrowLabel || 'Escrow Locked'}
-                    </p>
-                  </div>
-                </button>
+                </div>
               ))}
 
               <button
@@ -1271,7 +1433,7 @@ export default function EmployerDashboardPage() {
 
                     <div className="flex items-center gap-3">
                       <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-emerald-100 px-2 text-sm font-bold text-emerald-600">
-                        {rankedFreelancers.length || selectedProject.applicants?.length || 0}
+                        {combinedCandidates.length}
                       </span>
                       <button
                         onClick={handleRecomputeRanking}
@@ -1291,11 +1453,11 @@ export default function EmployerDashboardPage() {
 
                   {rankingLoading ? (
                     <p className="mt-4 text-sm text-slate-500">Loading ranked freelancers...</p>
-                  ) : rankedFreelancers.length > 0 ? (
+                  ) : combinedCandidates.length > 0 ? (
                     <div className="mt-4 space-y-3">
-                      {rankedFreelancers.map((freelancer) => (
+                      {combinedCandidates.map((freelancer) => (
                         <div
-                          key={`ranked-${freelancer.freelancerId || freelancer.name}`}
+                          key={`candidate-${freelancer.proposalId || freelancer.freelancerId || freelancer.freelancerEmail || freelancer.name}`}
                           className="rounded-[1.1rem] border border-slate-200 bg-slate-50 p-4"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1306,11 +1468,30 @@ export default function EmployerDashboardPage() {
                                 </span>
                                 <h5 className="text-base font-extrabold text-slate-900">{freelancer.name}</h5>
                               </div>
-                              <p className="mt-1 text-sm text-slate-600">{freelancer.title}</p>
+                              <p className="mt-1 text-sm text-slate-600">
+                                {freelancer.title || freelancer.freelancerEmail || 'Professional Freelancer'}
+                              </p>
                             </div>
-                            <p className="text-sm font-bold text-violet-700">
-                              Match Score {freelancer.matchScore}%
-                            </p>
+                            <div className="flex items-center gap-3">
+                              {typeof freelancer.matchScore === 'number' && Number.isFinite(freelancer.matchScore) ? (
+                                <p className="text-sm font-bold text-violet-700">
+                                  Match Score {freelancer.matchScore}%
+                                </p>
+                              ) : (
+                                <p className="text-sm font-bold text-slate-500">
+                                  Awaiting ML match display
+                                </p>
+                              )}
+                              <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                                freelancer.proposalStatus === 'accepted'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : freelancer.proposalStatus === 'rejected'
+                                    ? 'bg-rose-100 text-rose-700'
+                                    : 'bg-amber-100 text-amber-700'
+                              }`}>
+                                {String(freelancer.proposalStatus || 'pending').toUpperCase()}
+                              </span>
+                            </div>
                           </div>
 
                           <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
@@ -1318,6 +1499,15 @@ export default function EmployerDashboardPage() {
                               freelancer.highlights.map((highlight, idx) => (
                                 <p key={`${freelancer.freelancerId}-${idx}`} className="rounded-lg bg-white px-2 py-1">{highlight}</p>
                               ))
+                            ) : freelancer.requestedAt ? (
+                              <>
+                                <p className="rounded-lg bg-white px-2 py-1">
+                                  Requested {formatRelativeDate(freelancer.requestedAt)}
+                                </p>
+                                <p className="rounded-lg bg-white px-2 py-1">
+                                  PFI Score {Number(freelancer.pfiScore || 0)}
+                                </p>
+                              </>
                             ) : (
                               <p className="rounded-lg bg-white px-2 py-1">Promising fit for this project</p>
                             )}
@@ -1420,64 +1610,6 @@ export default function EmployerDashboardPage() {
                     </div>
                   ) : null}
 
-                  {selectedProject.applicants?.length ? (
-                    <div className="mt-5 space-y-4 border-t border-slate-200 pt-4">
-                      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">
-                        Applicant actions
-                      </p>
-                      {selectedProject.applicants.map((applicant, index) => (
-                        <div key={`${applicant.email}-${index}`} className="rounded-[1.1rem] border border-slate-200 bg-slate-50 p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h5 className="text-lg font-extrabold text-slate-900">{applicant.name}</h5>
-                              <p className="mt-1 text-sm font-bold text-violet-600">↗ PFI {applicant.pfiScore || 0}</p>
-                              <p className="mt-1 text-sm text-slate-600">{applicant.email}</p>
-                              <p className="mt-1 text-sm text-slate-400">
-                                Requested: {new Date(applicant.requestedAt).toLocaleDateString()} , {new Date(applicant.requestedAt).toLocaleTimeString()}
-                              </p>
-                            </div>
-                            <span className={`rounded-full px-3 py-1 text-sm font-bold ${
-                              applicant.status === 'accepted'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : applicant.status === 'rejected'
-                                  ? 'bg-rose-100 text-rose-700'
-                                  : 'bg-amber-100 text-amber-700'
-                            }`}>
-                              {String(applicant.status || 'pending').toUpperCase()}
-                            </span>
-                          </div>
-
-                          <div className="mt-4 flex flex-wrap gap-3">
-                            {applicant.status !== 'accepted' ? (
-                              <button
-                                onClick={() => handleApplicantStatus(selectedProject.id, applicant.email, 'accepted')}
-                                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700"
-                              >
-                                Accept
-                              </button>
-                            ) : null}
-                            {applicant.status !== 'rejected' && applicant.status !== 'accepted' ? (
-                              <button
-                                onClick={() => handleApplicantStatus(selectedProject.id, applicant.email, 'rejected')}
-                                className="rounded-xl bg-rose-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-rose-600"
-                              >
-                                Reject
-                              </button>
-                            ) : null}
-                            <button
-                              onClick={() => handleApplicantMessage(applicant, selectedProject)}
-                              disabled={applicant.status !== 'accepted'}
-                              className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${applicant.status === 'accepted'
-                                ? 'border-slate-300 text-slate-700 hover:bg-slate-100'
-                                : 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'}`}
-                            >
-                              {applicant.status === 'accepted' ? 'Open Chat' : 'Wait for acceptance'}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
                 </div>
               </div>
             </div>

@@ -39,6 +39,8 @@ export const createProject = (payload, token) =>
   api.post('/projects', payload, { headers: getAuthHeaders(token) });
 export const listProjects = (params, token) =>
   api.get('/projects', { params, headers: getAuthHeaders(token) });
+export const deleteProject = (projectId, token) =>
+  api.delete(`/projects/${projectId}`, { headers: getAuthHeaders(token) });
 export const approveProjectMilestones = (projectId, payload) =>
   api.post(`/projects/${projectId}/milestones/approval`, payload);
 export const generateMilestones = (payload) =>

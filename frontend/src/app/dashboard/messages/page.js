@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Search, Send, FileText, CheckCheck } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { fetchConversations, fetchConversation, sendConversationMessage, markConversationAsRead, fetchUnreadCount } from '@/services/api';
 import { getStoredAuth } from '@/services/auth';
 
 export default function MessagesPage() {
+  const searchParams = useSearchParams();
   const [auth, setAuth] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -16,6 +18,7 @@ export default function MessagesPage() {
   const [conversationLoading, setConversationLoading] = useState(false);
   const [error, setError] = useState('');
   const [totalUnread, setTotalUnread] = useState(0);
+  const requestedConversationId = searchParams.get('conversationId');
 
   useEffect(() => {
     const storedAuth = getStoredAuth();
@@ -111,6 +114,34 @@ export default function MessagesPage() {
       setConversationLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!auth?.token || !conversations.length) {
+      return;
+    }
+
+    const selectedId = String(selectedConversation?.id || '');
+    const requestedId = String(requestedConversationId || '');
+
+    if (selectedId && conversations.some((conversation) => String(conversation.id) === selectedId)) {
+      return;
+    }
+
+    if (requestedId) {
+      const requestedConversation = conversations.find(
+        (conversation) => String(conversation.id) === requestedId
+      );
+
+      if (requestedConversation) {
+        handleSelectConversation(requestedConversation);
+        return;
+      }
+    }
+
+    if (!selectedId) {
+      handleSelectConversation(conversations[0]);
+    }
+  }, [auth?.token, conversations, requestedConversationId]);
 
   const handleSendMessage = async () => {
     if (!auth?.token || !selectedConversation || !messageInput.trim()) {

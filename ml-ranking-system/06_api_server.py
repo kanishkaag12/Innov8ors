@@ -13,13 +13,34 @@ from datetime import datetime
 import json
 import os
 import sys
+import importlib.util
 
 from db_config import get_db_config
 
 # Import ML pipeline
-from inference_pipeline import RankingInferencePipeline
-from feature_engineering import FeatureEngineeringPipeline
-from xgboost_training import RankingModel
+def _load_symbol_from_file(filename: str, symbol: str):
+    """Load a symbol from a sibling file, including files with numeric prefixes."""
+    module_path = os.path.join(os.path.dirname(__file__), filename)
+    module_name = f"ml_dynamic_{os.path.splitext(filename)[0]}"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load module spec from {filename}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    try:
+        return getattr(module, symbol)
+    except AttributeError as exc:
+        raise ImportError(f"Symbol '{symbol}' not found in {filename}") from exc
+
+
+try:
+    from inference_pipeline import RankingInferencePipeline
+    from feature_engineering import FeatureEngineeringPipeline
+    from xgboost_training import RankingModel
+except ModuleNotFoundError:
+    RankingInferencePipeline = _load_symbol_from_file("05_inference_pipeline.py", "RankingInferencePipeline")
+    FeatureEngineeringPipeline = _load_symbol_from_file("03_feature_engineering.py", "FeatureEngineeringPipeline")
+    RankingModel = _load_symbol_from_file("04_xgboost_training.py", "RankingModel")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

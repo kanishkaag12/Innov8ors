@@ -4,7 +4,8 @@ const {
   createProject,
   listProjects,
   getProjectById,
-  getProjectMilestones
+  getProjectMilestones,
+  deleteProject
 } = require('../controllers/projectController');
 const {
   getRankedFreelancers,
@@ -15,6 +16,7 @@ const router = express.Router();
 
 router.post('/', authenticateToken, createProject);
 router.get('/', authenticateToken, listProjects);
+router.delete('/:id', authenticateToken, deleteProject);
 router.get('/:id/milestones', authenticateToken, getProjectMilestones);
 router.get('/:id/interested-freelancers-ranked', authenticateToken, getRankedFreelancers);
 router.get('/:id/freelancers/:freelancerId/ml-insight', authenticateToken, getFreelancerInsightByProject);

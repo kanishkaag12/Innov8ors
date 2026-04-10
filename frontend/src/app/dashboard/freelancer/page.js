@@ -22,7 +22,7 @@ import {
   X
 } from 'lucide-react';
 import Link from 'next/link';
-import { verifyMilestone, createProposal } from '@/services/api';
+import { verifyMilestone, createProposal, fetchMyProposals, listProjects } from '@/services/api';
 import { getStoredAuth } from '@/services/auth';
 import PFIDashboard from '@/components/PFIDashboard';
 
@@ -47,6 +47,175 @@ function saveEmployerProjects(projects) {
   }
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+}
+
+function normalizeBackendProject(project) {
+  const applicants = Array.isArray(project?.applicants) ? project.applicants : [];
+  const milestones = Array.isArray(project?.milestones) ? project.milestones : [];
+
+  return {
+    id: String(project?._id || project?.id || ''),
+    _id: project?._id,
+    title: String(project?.title || 'Untitled Project'),
+    description: String(project?.description || ''),
+    budget: Number(project?.budget || 0),
+    createdAt: project?.createdAt || new Date().toISOString(),
+    status: String(project?.status || 'Active'),
+    employerName:
+      project?.employerName ||
+      project?.ownerName ||
+      project?.employer_id?.name ||
+      '',
+    ownerName:
+      project?.ownerName ||
+      project?.employerName ||
+      project?.employer_id?.name ||
+      '',
+    ownerEmail:
+      project?.ownerEmail ||
+      project?.employerEmail ||
+      project?.employer_id?.email ||
+      '',
+    employerEmail:
+      project?.employerEmail ||
+      project?.ownerEmail ||
+      project?.employer_id?.email ||
+      '',
+    applicants,
+    interestedCount: Number(project?.interestedCount || applicants.length || 0),
+    escrowLabel: project?.escrowLabel || 'Escrow Locked',
+    milestones,
+    source: 'backend'
+  };
+}
+
+function mergeApplicants(primaryApplicants, secondaryApplicants) {
+  const applicantsByEmail = new Map();
+
+  const mergeEntry = (applicant) => {
+    const email = String(applicant?.email || '').toLowerCase().trim();
+    if (!email) {
+      return;
+    }
+
+    const existing = applicantsByEmail.get(email) || {};
+    applicantsByEmail.set(email, {
+      ...existing,
+      ...applicant,
+      email: applicant?.email || existing?.email || '',
+      repoLink: applicant?.repoLink ?? existing?.repoLink ?? '',
+      selectedMilestoneTitle:
+        applicant?.selectedMilestoneTitle ?? existing?.selectedMilestoneTitle ?? '',
+      verificationResult:
+        applicant?.verificationResult ?? existing?.verificationResult ?? null
+    });
+  };
+
+  (Array.isArray(secondaryApplicants) ? secondaryApplicants : []).forEach(mergeEntry);
+  (Array.isArray(primaryApplicants) ? primaryApplicants : []).forEach(mergeEntry);
+
+  return Array.from(applicantsByEmail.values());
+}
+
+function mergeProjects(localProjects, backendProjects) {
+  const projectsById = new Map();
+
+  const mergeProject = (project, isPrimary) => {
+    const key = String(project?.id || project?._id || '').trim();
+    if (!key) {
+      return;
+    }
+
+    const existing = projectsById.get(key);
+    if (!existing) {
+      projectsById.set(key, {
+        ...project,
+        applicants: Array.isArray(project?.applicants) ? project.applicants : []
+      });
+      return;
+    }
+
+    const primary = isPrimary ? project : existing;
+    const secondary = isPrimary ? existing : project;
+
+    projectsById.set(key, {
+      ...secondary,
+      ...primary,
+      applicants: mergeApplicants(primary?.applicants, secondary?.applicants),
+      milestones:
+        Array.isArray(primary?.milestones) && primary.milestones.length
+          ? primary.milestones
+          : secondary?.milestones || [],
+      interestedCount: Math.max(
+        Number(primary?.interestedCount || 0),
+        Number(secondary?.interestedCount || 0),
+        mergeApplicants(primary?.applicants, secondary?.applicants).length
+      )
+    });
+  };
+
+  (Array.isArray(localProjects) ? localProjects : []).forEach((project) => mergeProject(project, false));
+  (Array.isArray(backendProjects) ? backendProjects : []).forEach((project) => mergeProject(project, true));
+
+  return Array.from(projectsById.values());
+}
+
+function applyProposalStatusToProjects(projects, proposals, currentUser) {
+  const userEmail = String(currentUser?.email || '').toLowerCase();
+  if (!userEmail) {
+    return projects;
+  }
+
+  const proposalByProjectId = new Map(
+    (Array.isArray(proposals) ? proposals : [])
+      .filter((proposal) => String(proposal?.freelancerEmail || '').toLowerCase() === userEmail)
+      .map((proposal) => [String(proposal?.projectId || ''), proposal])
+  );
+
+  return (Array.isArray(projects) ? projects : []).map((project) => {
+    const projectId = String(project?.id || project?._id || '');
+    const proposal = proposalByProjectId.get(projectId);
+    const applicants = Array.isArray(project?.applicants) ? [...project.applicants] : [];
+    const applicantIndex = applicants.findIndex(
+      (applicant) => String(applicant?.email || '').toLowerCase() === userEmail
+    );
+
+    if (!proposal && applicantIndex < 0) {
+      return {
+        ...project,
+        applicants,
+        interestedCount: applicants.length
+      };
+    }
+
+    const nextApplicant = {
+      ...(applicantIndex >= 0 ? applicants[applicantIndex] : {}),
+      name: applicants[applicantIndex]?.name || currentUser?.name || 'Freelancer',
+      email: currentUser?.email || applicants[applicantIndex]?.email || '',
+      proposalId: proposal?._id || applicants[applicantIndex]?.proposalId || null,
+      status: String(proposal?.status || applicants[applicantIndex]?.status || 'pending').toLowerCase(),
+      acceptedByName:
+        proposal?.employerName ||
+        applicants[applicantIndex]?.acceptedByName ||
+        project?.ownerName ||
+        project?.employerName ||
+        '',
+      acceptedAt: proposal?.updatedAt || applicants[applicantIndex]?.acceptedAt || null,
+      conversationId: proposal?.conversationId || applicants[applicantIndex]?.conversationId || null
+    };
+
+    if (applicantIndex >= 0) {
+      applicants[applicantIndex] = nextApplicant;
+    } else {
+      applicants.push(nextApplicant);
+    }
+
+    return {
+      ...project,
+      applicants,
+      interestedCount: applicants.length
+    };
+  });
 }
 
 function formatCurrency(amount) {
@@ -171,20 +340,51 @@ export default function FreelancerDashboardPage() {
       setUser(auth.user);
     }
 
-    setProjects(loadEmployerProjects());
+    const syncWithBackend = async () => {
+      const localProjects = loadEmployerProjects();
+
+      if (!auth?.token || !auth?.user) {
+        setProjects(localProjects);
+        return;
+      }
+
+      try {
+        const [proposalResponse, projectResponse] = await Promise.all([
+          fetchMyProposals(auth.token),
+          listProjects({}, auth.token)
+        ]);
+        const proposals = Array.isArray(proposalResponse?.data?.proposals) ? proposalResponse.data.proposals : [];
+        const backendProjects = Array.isArray(projectResponse?.data?.projects)
+          ? projectResponse.data.projects.map(normalizeBackendProject)
+          : [];
+        const visibleProjects = mergeProjects(localProjects, backendProjects);
+        const mergedProjects = applyProposalStatusToProjects(visibleProjects, proposals, auth.user);
+        setProjects(mergedProjects);
+        setSelectedProject((current) =>
+          current ? mergedProjects.find((project) => project.id === current.id) || null : null
+        );
+        saveEmployerProjects(mergedProjects);
+      } catch {
+        setProjects(localProjects);
+        setSelectedProject((current) =>
+          current ? localProjects.find((project) => project.id === current.id) || null : null
+        );
+      }
+    };
+
+    syncWithBackend();
 
     const syncProjects = () => {
-      const latestProjects = loadEmployerProjects();
-      setProjects(latestProjects);
-      setSelectedProject((current) =>
-        current ? latestProjects.find((project) => project.id === current.id) || null : null
-      );
+      syncWithBackend();
     };
+
+    const intervalId = window.setInterval(syncWithBackend, 10000);
 
     window.addEventListener('storage', syncProjects);
     window.addEventListener('focus', syncProjects);
 
     return () => {
+      window.clearInterval(intervalId);
       window.removeEventListener('storage', syncProjects);
       window.removeEventListener('focus', syncProjects);
     };
@@ -215,6 +415,17 @@ export default function FreelancerDashboardPage() {
     () => normalizeVerificationResult(selectedProjectRequest?.verificationResult),
     [selectedProjectRequest]
   );
+
+  const selectedRequestStatus = String(
+    selectedProjectRequest?.status || selectedProjectRequest?.proposalStatus || ''
+  ).toLowerCase();
+
+  const acceptedByName =
+    selectedProjectRequest?.acceptedByName ||
+    selectedProjectRequest?.employerName ||
+    selectedProject?.ownerName ||
+    selectedProject?.employerName ||
+    'the client';
 
   useEffect(() => {
     if (!selectedProject) {
@@ -616,7 +827,7 @@ export default function FreelancerDashboardPage() {
               </div>
 
               <div className="mt-5 space-y-4">
-                {selectedProjectRequest?.status === 'pending' ? (
+                {selectedRequestStatus === 'pending' ? (
                   <div className="rounded-[1.2rem] border border-amber-200 bg-amber-50 p-5">
                     <div className="flex items-start gap-4">
                       <div className="mt-1 text-amber-500">
@@ -630,7 +841,7 @@ export default function FreelancerDashboardPage() {
                       </div>
                     </div>
                   </div>
-                ) : selectedProjectRequest?.status === 'accepted' ? (
+                ) : selectedRequestStatus === 'accepted' ? (
                   <>
                     <div className="rounded-[1.2rem] border border-emerald-200 bg-emerald-50 p-5">
                       <div className="flex items-start gap-4">
@@ -640,7 +851,7 @@ export default function FreelancerDashboardPage() {
                         <div>
                           <h4 className="text-[1.05rem] font-extrabold text-emerald-700">Your request was accepted!</h4>
                           <p className="mt-2 text-base text-emerald-700/80">
-                            You can now submit your work using the GitHub verification below and continue the conversation with the client.
+                            Accepted by {acceptedByName}. You can now submit your work using the GitHub verification below and continue the conversation with the client.
                           </p>
                         </div>
                       </div>
@@ -762,12 +973,12 @@ export default function FreelancerDashboardPage() {
                     </div>
                     <button
                       onClick={handleRequestToJoin}
-                      disabled={requestingProjectId === selectedProject.id || selectedProjectRequest?.status === 'accepted'}
+                      disabled={requestingProjectId === selectedProject.id || selectedRequestStatus === 'accepted'}
                       className="rounded-2xl bg-emerald-500 px-6 py-3 text-base font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {requestingProjectId === selectedProject.id
                         ? 'Sending...'
-                        : selectedProjectRequest?.status === 'accepted'
+                        : selectedRequestStatus === 'accepted'
                           ? 'Request Accepted'
                           : 'Request to Join Project'}
                     </button>
@@ -781,10 +992,10 @@ export default function FreelancerDashboardPage() {
                     </div>
                     <div>
                       <h4 className="text-[1.05rem] font-extrabold text-slate-900">
-                        {selectedProjectRequest?.status === 'accepted' ? 'GitHub Submission Unlocked' : 'GitHub Submission Locked'}
+                        {selectedRequestStatus === 'accepted' ? 'GitHub Submission Unlocked' : 'GitHub Submission Locked'}
                       </h4>
                       <p className="mt-2 text-base text-slate-500">
-                        {selectedProjectRequest?.status === 'accepted'
+                        {selectedRequestStatus === 'accepted'
                           ? 'Employer accepted your request. You can now coordinate and prepare your submission workflow.'
                           : 'Employer must accept your request before you can submit work and run AI verification.'}
                       </p>

@@ -76,13 +76,16 @@ async function createProject(req, res) {
 
 async function listProjects(req, res) {
   try {
-    const query = {};
-
-    if (req.user?.role === 'employer') {
-      query.employer_id = req.user._id;
+    if (!req.user?._id) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    if (req.query?.employerId) {
+    const query = {};
+    const role = String(req.user?.role || '').toLowerCase();
+
+    if (role === 'employer' || role === 'client') {
+      query.employer_id = req.user._id;
+    } else if (req.query?.employerId) {
       query.employer_id = req.query.employerId;
     }
 
@@ -135,6 +138,7 @@ async function listProjects(req, res) {
 async function getProjectById(req, res) {
   try {
     const { id } = req.params;
+    const role = String(req.user?.role || '').toLowerCase();
 
     const project = await Project.findById(id)
       .populate('employer_id', 'name email')
@@ -143,6 +147,13 @@ async function getProjectById(req, res) {
 
     if (!project) {
       return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    if (
+      (role === 'employer' || role === 'client') &&
+      String(project.employer_id?._id || project.employer_id) !== String(req.user?._id)
+    ) {
+      return res.status(403).json({ message: 'You can only access your own projects.' });
     }
 
     const proposals = await Proposal.find({ projectId: String(project._id) })
@@ -187,9 +198,44 @@ async function getProjectMilestones(req, res) {
   }
 }
 
+async function deleteProject(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!req.user?._id) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    const role = String(req.user?.role || '').toLowerCase();
+    const isOwner = String(project.employer_id) === String(req.user._id);
+
+    if ((role === 'employer' || role === 'client') && !isOwner) {
+      return res.status(403).json({ message: 'You can only delete your own projects.' });
+    }
+
+    await Promise.all([
+      Milestone.deleteMany({ project_id: project._id }),
+      Proposal.deleteMany({ projectId: String(project._id) }),
+      Project.deleteOne({ _id: project._id })
+    ]);
+
+    return res.status(200).json({ message: 'Project deleted successfully.' });
+  } catch (error) {
+    console.error('Delete project error:', error);
+    return res.status(500).json({ message: error.message || 'Failed to delete project.' });
+  }
+}
+
 module.exports = {
   createProject,
   listProjects,
   getProjectById,
-  getProjectMilestones
+  getProjectMilestones,
+  deleteProject
 };
