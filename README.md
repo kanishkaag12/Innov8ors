@@ -145,6 +145,15 @@ Health check: `http://127.0.0.1:8001/health`
 
 ## 7) ML Ranking System Setup (Python + PostgreSQL)
 
+### Important: Do New Developers Need To Retrain The Model?
+
+No. For normal laptop setup, use the pre-trained artifacts already included in `ml-ranking-system/`:
+
+- `ranking_model.pkl`
+- `scaler.pkl`
+
+Retraining is only needed when you intentionally want to refresh the model (for example after data/schema/feature changes).
+
 ### 7.1 Create PostgreSQL Database
 
 ```bash
@@ -190,18 +199,36 @@ cp .env.example .env
 
 Edit `.env` and set Postgres credentials (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` or `DATABASE_URL`).
 
-### 7.4 Initialize ML DB And Train Model
+### 7.4 Initialize ML DB (Required)
 
 ```bash
 psql -d synapescrow_ml -f 01_schema.sql
+```
+
+### 7.5 Quick Path (Recommended): Use Included Trained Model
+
+The repo already contains `ranking_model.pkl` and `scaler.pkl`. No training step is required for basic setup.
+
+Optional: ensure `ml-ranking-system/.env` includes explicit paths:
+
+```env
+ML_MODEL_PATH=./ranking_model.pkl
+ML_SCALER_PATH=./scaler.pkl
+```
+
+### 7.6 Optional Path: Train From Scratch
+
+Run this only if you want to regenerate artifacts:
+
+```bash
 python 02_synthetic_data_generator.py
 python 03_feature_engineering.py
 python 04_xgboost_training.py
 ```
 
-This should generate model artifacts (for example `ranking_model.pkl` and `scaler.pkl`) used by ranking logic.
+This recreates model artifacts (`ranking_model.pkl` and `scaler.pkl`) used by ranking logic.
 
-### 7.5 Optional: Run ML API Server
+### 7.7 Optional: Run ML API Server
 
 ```bash
 python 06_api_server.py

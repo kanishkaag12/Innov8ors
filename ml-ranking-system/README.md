@@ -96,6 +96,15 @@
 
 ## ⚡ Quick Start
 
+### Do Teammates Need To Train Again?
+
+No for normal setup. This folder already includes trained artifacts:
+
+- `ranking_model.pkl`
+- `scaler.pkl`
+
+Use these files directly for local development. Retraining is optional and only needed when you want a newer model.
+
 ### 1. Environment Setup
 
 ```bash
@@ -127,28 +136,16 @@ export DB_USER=postgres
 export DB_PASSWORD=your_password
 ```
 
-### 3. Generate Training Data
+### 3. Use Included Trained Model (Recommended)
+
+Set model paths in `.env` (or rely on defaults if already configured):
 
 ```bash
-# Create synthetic dataset (1000 freelancers, 500 jobs)
-python 02_synthetic_data_generator.py
+ML_MODEL_PATH=./ranking_model.pkl
+ML_SCALER_PATH=./scaler.pkl
 ```
 
-### 4. Feature Engineering
-
-```bash
-# Compute embeddings and features
-python 03_feature_engineering.py
-```
-
-### 5. Train Model
-
-```bash
-# Train XGBoost LambdaMART model
-python 04_xgboost_training.py
-```
-
-### 6. Start API Server
+### 4. Start API Server
 
 ```bash
 # Launch FastAPI server on port 8000
@@ -157,7 +154,32 @@ python 06_api_server.py
 # API docs available at: http://localhost:8000/api/docs
 ```
 
-### 7. Use Frontend Component
+### 5. Optional: Train From Scratch
+
+Run these only if you need to regenerate model artifacts.
+
+#### 5.1 Generate Training Data
+
+```bash
+# Create synthetic dataset (1000 freelancers, 500 jobs)
+python 02_synthetic_data_generator.py
+```
+
+#### 5.2 Feature Engineering
+
+```bash
+# Compute embeddings and features
+python 03_feature_engineering.py
+```
+
+#### 5.3 Train Model
+
+```bash
+# Train XGBoost LambdaMART model
+python 04_xgboost_training.py
+```
+
+### 6. Use Frontend Component
 
 ```jsx
 // In React app
@@ -424,6 +446,8 @@ PostgreSQL ──► Feature Engineering ──► ml_feature_snapshots
 ```
 
 ### Retraining Strategy
+
+Default team workflow: ship/version `ranking_model.pkl` and `scaler.pkl` so new developers can run inference immediately.
 
 Retrain when:
 1. New labeled data available (weekly)

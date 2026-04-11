@@ -53,6 +53,18 @@ export const fetchMilestonesByFreelancer = (freelancerId) =>
   api.get(`/milestones/freelancer/${freelancerId}`);
 export const fetchMilestonesByProject = (projectId) =>
   api.get(`/milestones/project/${projectId}`);
+  
+// Escrow & Payment API bindings
+export const createEscrow = (payload, token) => api.post('/escrow/create', payload, { headers: getAuthHeaders(token) });
+export const releasePartialEscrow = (payload, token) => api.post('/escrow/release-partial', payload, { headers: getAuthHeaders(token) });
+export const requestPartialEscrow = (payload, token) => api.post('/escrow/request-partial', payload, { headers: getAuthHeaders(token) });
+export const approvePartialEscrow = (payload, token) => api.post('/escrow/approve-partial', payload, { headers: getAuthHeaders(token) });
+export const rejectPartialEscrow = (payload, token) => api.post('/escrow/reject-partial', payload, { headers: getAuthHeaders(token) });
+export const releaseFullEscrow = (payload, token) => api.post('/escrow/release-full', payload, { headers: getAuthHeaders(token) });
+export const refundEscrow = (payload, token) => api.post('/escrow/refund', payload, { headers: getAuthHeaders(token) });
+export const fetchWallet = (userId, token) => api.get(`/escrow/wallet/${userId}`, { headers: getAuthHeaders(token) });
+export const fetchTransactions = (userId, token) => api.get(`/escrow/transactions/${userId}`, { headers: getAuthHeaders(token) });
+
 export const releaseEscrowPayment = (payload) => api.post('/payments/release', payload);
 export const fetchFreelancerPFI = (freelancerId) =>
   api.get(`/freelancers/${freelancerId}/pfi`);
@@ -103,9 +115,9 @@ export const markConversationAsRead = (conversationId, token) =>
 
 export const loginUser = (payload) => api.post('/auth/login', payload);
 export const signupUser = (payload) => api.post('/auth/signup', payload);
-export const onboardUser = (payload) => api.post('/auth/onboarding', payload);
-export const saveCategoriesAndSkills = (payload) => api.post('/profile/categories-skills', payload);
-export const completeProfile = (payload) => api.post('/profile/complete', payload);
+export const onboardUser = (payload) => api.post('/auth/onboarding', payload, { headers: getAuthHeaders() });
+export const saveCategoriesAndSkills = (payload) => api.post('/profile/categories-skills', payload, { headers: getAuthHeaders() });
+export const completeProfile = (payload) => api.post('/profile/complete', payload, { headers: getAuthHeaders() });
 export const getProfile = (token) =>
   api.get('/profile/me', { headers: getAuthHeaders(token) });
 export const updateProfile = (payload, token) =>

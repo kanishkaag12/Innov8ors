@@ -41,18 +41,24 @@ async function createProject(req, res) {
 
     if (Array.isArray(milestones) && milestones.length > 0) {
       const docs = milestones
-        .map((milestone) => ({
-          project_id: project._id,
-          title: String(milestone?.title || '').trim(),
-          description: String(milestone?.description || '').trim(),
-          deliverable: String(milestone?.deliverable || '').trim(),
-          payment_amount: toNumber(milestone?.payment_amount, 0),
-          estimated_time: String(milestone?.estimated_time || '').trim(),
-          complexity: String(milestone?.complexity || 'Medium').trim(),
-          payout_percentage: toNumber(milestone?.payout_percentage, 0),
-          order: toNumber(milestone?.order, 0),
-          status: 'pending'
-        }))
+        .map((milestone) => {
+          const payment_amount = toNumber(milestone?.payment_amount, 0);
+          return {
+            project_id: project._id,
+            title: String(milestone?.title || '').trim(),
+            description: String(milestone?.description || '').trim(),
+            deliverable: String(milestone?.deliverable || '').trim(),
+            payment_amount: payment_amount,
+            estimated_time: String(milestone?.estimated_time || '').trim(),
+            complexity: String(milestone?.complexity || 'Medium').trim(),
+            payout_percentage: toNumber(milestone?.payout_percentage, 0),
+            order: toNumber(milestone?.order, 0),
+            amount_remaining: payment_amount, // Initialize remaining to full amount
+            amount_paid: 0,
+            status: 'pending',
+            payment_status: 'idle'
+          };
+        })
         .filter((milestone) => milestone.title && milestone.description && milestone.deliverable);
 
       if (docs.length > 0) {

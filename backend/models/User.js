@@ -24,6 +24,16 @@ const userSchema = new mongoose.Schema(
       enum: ['employer', 'freelancer', 'admin'],
       required: true
     },
+    balance: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    escrowLocked: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     pfi_score: {
       type: Number,
       default: 0,

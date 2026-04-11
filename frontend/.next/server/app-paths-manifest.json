@@ -2,6 +2,5 @@
   "/page": "app/page.js",
   "/login/page": "app/login/page.js",
   "/dashboard/freelancer/page": "app/dashboard/freelancer/page.js",
-  "/dashboard/employer/page": "app/dashboard/employer/page.js",
-  "/dashboard/messages/page": "app/dashboard/messages/page.js"
+  "/dashboard/employer/page": "app/dashboard/employer/page.js"
 }

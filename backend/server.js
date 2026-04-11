@@ -10,6 +10,7 @@ const app = express();
 app.use(
   cors({
     origin: [
+      'http://localhost',
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002'
@@ -57,6 +58,12 @@ app.get('/debug/proposals', async (req, res) => {
   }
 });
 
+const { chatBotController } = require('./controllers/aiController');
+app.post('/api/chat', (req, res, next) => {
+  console.log(`🤖 Chatbot request received: ${req.body.message?.substring(0, 50)}...`);
+  next();
+}, chatBotController);
+
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
@@ -66,6 +73,7 @@ app.use('/api/conversations', require('./routes/conversationRoutes'));
 app.use('/api/jobs', require('./routes/jobRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/ml', require('./routes/mlRoutes'));
+app.use('/api/escrow', require('./routes/escrowRoutes'));
 
 // DEBUG ENDPOINT: List freelancers and jobs
 app.get('/debug/jobs-data', async (req, res) => {

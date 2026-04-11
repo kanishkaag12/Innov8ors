@@ -48,6 +48,27 @@ const milestoneSchema = new mongoose.Schema(
       type: String,
       enum: ['pending', 'submitted', 'completed'],
       default: 'pending'
+    },
+    payment_status: {
+      type: String,
+      enum: ['idle', 'requested', 'approved', 'rejected', 'paid', 'partially_paid'],
+      default: 'idle'
+    },
+    completion_percentage: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100
+    },
+    amount_paid: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    amount_remaining: {
+      type: Number,
+      default: 0,
+      min: 0
     }
   },
   {

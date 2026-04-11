@@ -1,4 +1,5 @@
 import AppChrome from '../../components/AppChrome';
+import ChatBot from '../components/ChatBot/ChatBot';
 import './globals.css';
 
 export const metadata = {
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="min-h-screen bg-gray-50 text-gray-900">
         <AppChrome>{children}</AppChrome>
+        <ChatBot />
       </body>
     </html>
   );

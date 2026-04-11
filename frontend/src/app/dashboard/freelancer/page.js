@@ -22,8 +22,8 @@ import {
   X
 } from 'lucide-react';
 import Link from 'next/link';
-import { verifyMilestone, createProposal, fetchMyProposals, listProjects } from '@/services/api';
-import { getStoredAuth } from '@/services/auth';
+import { verifyMilestone, createProposal, fetchMyProposals, listProjects, releasePartialEscrow, requestPartialEscrow, fetchWallet } from '@/services/api';
+import { getStoredAuth, saveAuth } from '@/services/auth';
 import PFIDashboard from '@/components/PFIDashboard';
 
 const STORAGE_KEY = 'synapescrow_employer_projects';
@@ -333,6 +333,8 @@ export default function FreelancerDashboardPage() {
   const [selectedMilestoneTitle, setSelectedMilestoneTitle] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState('');
+  const [isReleasingPayment, setIsReleasingPayment] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState('');
 
   useEffect(() => {
     const auth = getStoredAuth();
@@ -349,10 +351,23 @@ export default function FreelancerDashboardPage() {
       }
 
       try {
-        const [proposalResponse, projectResponse] = await Promise.all([
+        const userId = auth.user.id || auth.user._id;
+        const [proposalResponse, projectResponse, walletRes] = await Promise.all([
           fetchMyProposals(auth.token),
-          listProjects({}, auth.token)
+          listProjects({}, auth.token),
+          fetchWallet(userId, auth.token)
         ]);
+
+        if (walletRes.data) {
+          const updatedUser = { 
+            ...auth.user, 
+            balance: walletRes.data.balance, 
+            escrowLocked: walletRes.data.escrowLocked 
+          };
+          setUser(updatedUser);
+          saveAuth({ token: auth.token, user: updatedUser });
+        }
+
         const proposals = Array.isArray(proposalResponse?.data?.proposals) ? proposalResponse.data.proposals : [];
         const backendProjects = Array.isArray(projectResponse?.data?.projects)
           ? projectResponse.data.projects.map(normalizeBackendProject)
@@ -391,15 +406,13 @@ export default function FreelancerDashboardPage() {
   }, []);
 
   const stats = useMemo(() => {
-    const totalBudget = projects.reduce((sum, project) => sum + Number(project?.budget || 0), 0);
-
     return [
       { label: 'Active Contracts', value: String(projects.length), icon: BriefcaseBusiness, trend: projects.length ? `+${projects.length}` : '0', color: 'bg-blue-500' },
       { label: 'Pending Reviews', value: '0', icon: Clock, trend: '0', color: 'bg-amber-500' },
-      { label: 'Total Earnings', value: '₹0', icon: TrendingUp, trend: '0%', color: 'bg-emerald-500' },
-      { label: 'Escrow Locked', value: formatCurrency(totalBudget), icon: ShieldCheck, trend: 'Stable', color: 'bg-indigo-500' }
+      { label: 'Total Earnings', value: formatCurrency(user?.balance || 0), icon: TrendingUp, trend: '0%', color: 'bg-emerald-500' },
+      { label: 'Escrow Locked', value: formatCurrency(user?.escrowLocked || 0), icon: ShieldCheck, trend: 'Stable', color: 'bg-indigo-500' }
     ];
-  }, [projects]);
+  }, [projects, user]);
 
   const selectedProjectRequest = useMemo(() => {
     if (!selectedProject || !user) {
@@ -594,6 +607,57 @@ export default function FreelancerDashboardPage() {
     }
   };
 
+  const handleReleasePayment = async () => {
+    if (!selectedProject || !user || !selectedMilestoneTitle) return;
+    const milestone = (selectedProject.milestones || []).find((item) => item.title === selectedMilestoneTitle);
+    if (!milestone) return;
+
+    try {
+      setIsReleasingPayment(true);
+      setPaymentMessage('');
+      const auth = getStoredAuth();
+      const payload = {
+        projectId: selectedProject.id || selectedProject._id,
+        amountToRelease: milestone.payment_amount || 0
+      };
+      
+      const response = await releasePartialEscrow(payload, auth?.token);
+      setPaymentMessage('Payment released successfully! Funds added to your wallet.');
+    } catch (error) {
+      setPaymentMessage(error?.response?.data?.error || 'Failed to release payment.');
+    } finally {
+      setIsReleasingPayment(false);
+    }
+  };
+
+  const handleRequestPartialPayment = async () => {
+    if (!selectedProject || !user || !selectedMilestoneTitle) return;
+    const milestone = (selectedProject.milestones || []).find((item) => item.title === selectedMilestoneTitle);
+    if (!milestone) return;
+
+    try {
+      setIsReleasingPayment(true);
+      setPaymentMessage('');
+      const auth = getStoredAuth();
+      
+      const applicant = (selectedProject.applicants || []).find(a => a.email === user.email);
+      const completionPercentage = applicant?.verificationResult?.completion_percentage || 0;
+
+      const payload = {
+        projectId: selectedProject.id || selectedProject._id,
+        milestoneId: milestone._id || milestone.id,
+        completionPercentage
+      };
+      
+      await requestPartialEscrow(payload, auth?.token);
+      setPaymentMessage(`Partial payment (${completionPercentage}%) requested successfully! The client will review your request.`);
+    } catch (error) {
+      setPaymentMessage(error?.response?.data?.error || 'Failed to request payment.');
+    } finally {
+      setIsReleasingPayment(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-0 py-4 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
@@ -781,7 +845,9 @@ export default function FreelancerDashboardPage() {
                     <h3 className="text-lg font-extrabold">AI-Confirmed Milestones</h3>
                   </div>
                   <p className="text-sm font-extrabold text-emerald-700">
-                    Escrow Locked · {formatCurrency(selectedProject.budget)}
+                    Escrow Locked · {formatCurrency(
+                      selectedProject.milestones?.reduce((sum, m) => sum + (m.amount_remaining !== undefined ? m.amount_remaining : m.payment_amount), 0) || selectedProject.budget
+                    )}
                   </p>
                 </div>
 
@@ -797,9 +863,21 @@ export default function FreelancerDashboardPage() {
                         </div>
 
                         <div className="mt-4 grid gap-3 md:grid-cols-4">
-                          <div className="rounded-xl bg-slate-50 p-3.5">
-                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Payable Amount</p>
+                          <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Total Budget</p>
                             <p className="mt-2 text-base font-extrabold text-emerald-700">{formatCurrency(milestone.payment_amount)}</p>
+                            {(milestone.amount_paid > 0 || milestone.payment_status === 'partially_paid') && (
+                              <div className="mt-2 space-y-1 pt-2 border-t border-slate-200">
+                                <div className="flex justify-between text-[10px] font-bold">
+                                  <span className="text-slate-500">AMOUNT RECEIVED</span>
+                                  <span className="text-emerald-600">{formatCurrency(milestone.amount_paid)}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-bold">
+                                  <span className="text-slate-500">LEFT STATUS</span>
+                                  <span className="text-slate-700">{formatCurrency(milestone.amount_remaining)}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div className="rounded-xl bg-slate-50 p-3.5">
                             <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Expected Deliverable</p>
@@ -944,23 +1022,38 @@ export default function FreelancerDashboardPage() {
                           <p className="text-sm font-extrabold text-slate-400">AI Assessment</p>
                           <p className="mt-2 text-base leading-7 text-slate-700">{normalizedVerificationResult.assessment || normalizedVerificationResult.short_explanation}</p>
                         </div>
-                        <div className="mt-6 flex flex-wrap gap-4">
-                          {normalizedVerificationResult.status === 'Fully Completed' && (
-                            <button className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-emerald-600 hover:scale-105 active:scale-95">
-                              <CheckCircle2 size={18} />
-                              Release Milestone Payment
-                            </button>
+                        <div className="mt-6 flex flex-col gap-4">
+                          {paymentMessage && (
+                            <div className={`rounded-[1.2rem] border p-4 text-sm font-semibold ${paymentMessage.includes('success') ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-600'}`}>
+                              {paymentMessage}
+                            </div>
                           )}
-                          {normalizedVerificationResult.status === 'Partially Completed' && (
-                            <button className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-amber-600 hover:scale-105 active:scale-95">
-                              <DollarSign size={18} />
-                              Request Partial Payout
+                          <div className="flex flex-wrap gap-4">
+                            {normalizedVerificationResult.status === 'Fully Completed' && (
+                              <button 
+                                onClick={handleReleasePayment}
+                                disabled={isReleasingPayment}
+                                className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-emerald-600 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                              >
+                                <CheckCircle2 size={18} />
+                                {isReleasingPayment ? 'Releasing...' : 'Release Milestone Payment'}
+                              </button>
+                            )}
+                            {normalizedVerificationResult.status === 'Partially Completed' && (
+                              <button 
+                                onClick={handleRequestPartialPayment}
+                                disabled={isReleasingPayment}
+                                className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-amber-600 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                              >
+                                <DollarSign size={18} />
+                                {isReleasingPayment ? 'Requesting...' : 'Request Partial Payout'}
+                              </button>
+                            )}
+                            <button className="flex items-center gap-2 rounded-2xl bg-slate-100 px-6 py-3 font-bold text-slate-700 transition hover:bg-slate-200">
+                              <MessageSquare size={18} />
+                              Submit Feedback
                             </button>
-                          )}
-                          <button className="flex items-center gap-2 rounded-2xl bg-slate-100 px-6 py-3 font-bold text-slate-700 transition hover:bg-slate-200">
-                            <MessageSquare size={18} />
-                            Submit Feedback
-                          </button>
+                          </div>
                         </div>
                       </div>
                     ) : null}

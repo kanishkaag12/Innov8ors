@@ -27,9 +27,14 @@ import {
   recomputeProjectRanking,
   listProjects,
   createProject,
-  deleteProject as deleteProjectRequest
+  deleteProject as deleteProjectRequest,
+  createEscrow,
+  approvePartialEscrow,
+  rejectPartialEscrow,
+  fetchProjectById,
+  fetchWallet
 } from '@/services/api';
-import { getStoredAuth } from '@/services/auth';
+import { getStoredAuth, saveAuth } from '@/services/auth';
 
 const STORAGE_KEY_PREFIX = 'synapescrow_employer_projects';
 const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_SQqAVOFu5bhmIk';
@@ -498,16 +503,19 @@ export default function EmployerDashboardPage() {
   const [mlInsightError, setMlInsightError] = useState('');
   const [backendProjects, setBackendProjects] = useState([]);
   const [projectStorageKey, setProjectStorageKey] = useState(() => getProjectStorageKey(null));
+  const [isProcessingPayment, setIsProcessingPayment] = useState({});
 
   const refreshBackendProjects = async (token) => {
     if (!token) {
       setBackendProjects([]);
-      return;
+      return [];
     }
 
     const response = await listProjects({}, token);
     const rawProjects = Array.isArray(response?.data?.projects) ? response.data.projects : [];
-    setBackendProjects(rawProjects.map(normalizeBackendProject));
+    const normalized = rawProjects.map(normalizeBackendProject);
+    setBackendProjects(normalized);
+    return normalized;
   };
 
   useEffect(() => {
@@ -523,15 +531,38 @@ export default function EmployerDashboardPage() {
     setPostedProjects(storedProjects);
     saveStoredProjects(storageKey, storedProjects);
 
-    const loadBackendProjects = async () => {
+    const loadBackendData = async () => {
       try {
         await refreshBackendProjects(auth?.token);
       } catch {
         setBackendProjects([]);
       }
+
+      // Sync wallet state from backend
+      try {
+        if (auth?.token && (auth.user?.id || auth.user?._id)) {
+          const userId = auth.user.id || auth.user._id;
+          const walletRes = await fetchWallet(userId, auth.token);
+          if (walletRes.data) {
+            const updatedUser = {
+              ...auth.user,
+              balance: walletRes.data.balance,
+              escrowLocked: walletRes.data.escrowLocked
+            };
+            setUser(updatedUser);
+            saveAuth({ token: auth.token, user: updatedUser });
+          }
+        }
+      } catch {
+        // Wallet sync failed silently
+      }
     };
 
-    loadBackendProjects();
+    loadBackendData();
+
+    // Periodic sync every 10 seconds
+    const intervalId = window.setInterval(loadBackendData, 10000);
+    return () => window.clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -605,16 +636,17 @@ export default function EmployerDashboardPage() {
   };
 
   const stats = useMemo(() => {
-    const totalEscrow = projects.reduce((sum, project) => sum + Number(project?.budget || 0), 0);
     const totalInterested = projects.reduce((sum, project) => sum + Number(project?.interestedCount || 0), 0);
+    // Use the actual user profile escrow balance which updates after payments
+    const actualEscrow = user?.escrowLocked || projects.reduce((sum, project) => sum + Number(project?.budget || 0), 0);
 
     return [
       { label: 'Active Jobs', value: String(projects.length), icon: Briefcase, trend: `+${postedProjects.length}`, color: 'bg-blue-500' },
       { label: 'Proposals', value: String(Math.max(10, totalInterested + 9)), icon: Users, trend: `+${Math.max(4, postedProjects.length)} new`, color: 'bg-emerald-500' },
-      { label: 'Escrow Locked', value: formatCompactCurrency(totalEscrow || 500000), icon: ShieldCheck, trend: 'Stable', color: 'bg-indigo-500' },
-      { label: 'Weekly Spend', value: formatCompactCurrency(Math.max(236550, totalEscrow / 2)), icon: TrendingUp, trend: '+12%', color: 'bg-orange-500' }
+      { label: 'Escrow Locked', value: formatCompactCurrency(actualEscrow), icon: ShieldCheck, trend: 'Stable', color: 'bg-indigo-500' },
+      { label: 'Weekly Spend', value: formatCompactCurrency(Math.max(236550, actualEscrow / 2)), icon: TrendingUp, trend: '+12%', color: 'bg-orange-500' }
     ];
-  }, [postedProjects, projects]);
+  }, [postedProjects, projects, user]);
 
   const combinedCandidates = useMemo(
     () => mergeCandidateLists(rankedFreelancers, selectedProject?.applicants || []),
@@ -738,6 +770,16 @@ export default function EmployerDashboardPage() {
                 _id: createdProject._id,
                 source: 'backend'
               };
+              
+              try {
+                await createEscrow({
+                  projectId: createdProject._id,
+                  clientId: user?.id || user?._id,
+                  totalAmount: Number(projectRecord.budget)
+                }, auth.token);
+              } catch (escrowErr) {
+                console.error('Escrow creation failed:', escrowErr);
+              }
             }
 
             try {
@@ -982,6 +1024,75 @@ export default function EmployerDashboardPage() {
 
     if (resolveProjectId(selectedProject) === String(projectId)) {
       setSelectedProject(null);
+    }
+  };
+
+  const handleApprovePartialPayment = async (milestoneId) => {
+    const projId = selectedProject?.id || selectedProject?._id;
+    if (!projId) return;
+
+    try {
+      setIsProcessingPayment(prev => ({ ...prev, [milestoneId]: true }));
+      const auth = getStoredAuth();
+      const payload = {
+        projectId: projId,
+        milestoneId
+      };
+      await approvePartialEscrow(payload, auth?.token);
+      
+      // Refresh the specific project from backend to get latest milestone data
+      const updatedProjectRes = await fetchProjectById(projId, auth?.token);
+      if (updatedProjectRes.data?.project) {
+        const normalized = normalizeBackendProject(updatedProjectRes.data.project);
+        setSelectedProject(normalized);
+        
+        // Also update in the main projects list
+        setPostedProjects(prev => prev.map(p => (p.id === projId || p._id === projId) ? normalized : p));
+      }
+
+      // Refresh user balance from server
+      if (auth?.user?.id || auth?.user?._id) {
+        const userId = auth.user.id || auth.user._id;
+        const walletRes = await fetchWallet(userId, auth.token);
+        
+        if (walletRes.data) {
+          const updatedUser = { 
+            ...auth.user, 
+            balance: walletRes.data.balance, 
+            escrowLocked: walletRes.data.escrowLocked 
+          };
+          saveAuth({ token: auth.token, user: updatedUser });
+          setUser(updatedUser);
+        }
+      }
+
+      window.alert('Partial payout approved and transferred successfully!');
+    } catch (error) {
+      console.error('Approval error:', error);
+      window.alert(error?.response?.data?.error || 'Failed to approve payout.');
+    } finally {
+      setIsProcessingPayment(prev => ({ ...prev, [milestoneId]: false }));
+    }
+  };
+
+  const handleRejectPartialPayment = async (milestoneId) => {
+    const projId = selectedProject?.id || selectedProject?._id;
+    if (!projId) return;
+
+    try {
+      setIsProcessingPayment(prev => ({ ...prev, [milestoneId]: true }));
+      const auth = getStoredAuth();
+      const payload = {
+        projectId: projId,
+        milestoneId
+      };
+      await rejectPartialEscrow(payload, auth?.token);
+      await refreshBackendProjects(auth?.token);
+      window.alert('Partial payout request rejected.');
+    } catch (error) {
+      window.alert(error?.response?.data?.error || 'Failed to reject payout.');
+    } finally {
+      setIsProcessingPayment(prev => ({ ...prev, [milestoneId]: false }));
     }
   };
 
@@ -1364,7 +1475,9 @@ export default function EmployerDashboardPage() {
                     <h3 className="text-lg font-extrabold">Project Milestones</h3>
                   </div>
                   <p className="text-sm font-extrabold text-emerald-700">
-                    Escrow Locked · {formatCurrency(selectedProject.budget)}
+                    Escrow Locked · {formatCurrency(
+                      selectedProject.milestones?.reduce((sum, m) => sum + (m.amount_remaining !== undefined ? m.amount_remaining : m.payment_amount), 0) || selectedProject.budget
+                    )}
                   </p>
                 </div>
 
@@ -1385,9 +1498,21 @@ export default function EmployerDashboardPage() {
                         </div>
 
                         <div className="mt-4 grid gap-3 md:grid-cols-4">
-                          <div className="rounded-xl bg-slate-50 p-3.5">
-                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Payable Amount</p>
+                          <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Total Budget</p>
                             <p className="mt-2 text-base font-extrabold text-emerald-700">{formatCurrency(milestone.payment_amount)}</p>
+                            {(milestone.amount_paid > 0 || milestone.payment_status === 'partially_paid') && (
+                              <div className="mt-2 space-y-1 pt-2 border-t border-slate-200">
+                                <div className="flex justify-between text-[10px] font-bold">
+                                  <span className="text-slate-500">PAID</span>
+                                  <span className="text-emerald-600">{formatCurrency(milestone.amount_paid)}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-bold">
+                                  <span className="text-slate-500">LEFT STATUS</span>
+                                  <span className="text-slate-700">{formatCurrency(milestone.amount_remaining)}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div className="rounded-xl bg-slate-50 p-3.5">
                             <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Expected Deliverable</p>
@@ -1404,6 +1529,46 @@ export default function EmployerDashboardPage() {
                             </p>
                           </div>
                         </div>
+
+                        {milestone.payment_status === 'requested' && (
+                          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-amber-50 p-4 border border-amber-100">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <DollarSign size={20} className="text-amber-600" />
+                                <span className="font-bold text-amber-800">
+                                  Partial Payout Requested
+                                </span>
+                              </div>
+                              <p className="pl-7 text-sm font-medium text-amber-900">
+                                Freelancer is requesting <strong>{milestone.completion_percentage || 0}%</strong> of the milestone amount based on AI-QA assessment.
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleApprovePartialPayment(milestone._id || milestone.id)}
+                                disabled={isProcessingPayment[milestone._id || milestone.id]}
+                                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                              >
+                                {isProcessingPayment[milestone._id || milestone.id] ? 'Approving...' : 'Approve'}
+                              </button>
+                              <button
+                                onClick={() => handleRejectPartialPayment(milestone._id || milestone.id)}
+                                disabled={isProcessingPayment[milestone._id || milestone.id]}
+                                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-rose-700 disabled:opacity-50"
+                              >
+                                {isProcessingPayment[milestone._id || milestone.id] ? 'Rejecting...' : 'Reject'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {milestone.payment_status === 'paid' && (
+                          <div className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 p-4 border border-emerald-100">
+                            <CheckCircle2 size={20} className="text-emerald-600" />
+                            <span className="font-bold text-emerald-800">
+                              Payment Released
+                            </span>
+                          </div>
+                        )}
                       </article>
                     ))}
                   </div>

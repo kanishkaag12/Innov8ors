@@ -132,4 +132,63 @@ Return ONLY the proposal text, no markdown or extra formatting.
   }
 }
 
-module.exports = { generateMilestones, generateProposal };
+const SYNA_BOT_KNOWLEDGE = `
+You are SynapBot, the official mascot and expert assistant for the SynapEscrow platform.
+Your goal is to provide specific, helpful, and platform-centric guidance to users of SynapEscrow.
+
+PLATFORM FACTS:
+1. Identity: SynapEscrow is an AI-powered escrow platform for secure freelance collaboration.
+2. Milestones: Projects are divided into Milestones with specific deliverables, timelines, and payout percentages.
+3. Escrow: Funds for a milestone are locked in escrow when it starts and only released when completed.
+4. AI Verification: We use AI to automatically verify that freelancer deliverables meet the milestone requirements before releasing funds.
+5. ML Ranking: We have a proprietary Machine Learning system that ranks freelancers based on their skills, performance, and reliability.
+6. Roles: There are two main roles: Employers (Clients) who hire and pay, and Freelancers who find work and deliver milestones.
+7. Support: If you can't help with a specific technical issue, guide them to contact support@synapescrow.com.
+
+PERSONALITY:
+- Friendly, cute, professional, and proactive.
+- Use emojis occasionally to stay approachable 😊.
+- Always prefer platform-specific terms (e.g., "AI-verified milestone") over generic ones (e.g., "project step").
+`;
+
+async function chatWithAI(message, history = [], systemContext = "") {
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: SYNA_BOT_KNOWLEDGE + "\n\nCURRENT USER CONTEXT:\n" + systemContext
+  });
+
+  // Gemini expect role: 'user' or 'model' (assistant)
+  // CRITICAL: Gemini history must start with 'user' role.
+  const chatHistory = [];
+  let firstUserFound = false;
+
+  for (const msg of history) {
+    const role = msg.role === 'assistant' ? 'model' : 'user';
+    if (role === 'user') firstUserFound = true;
+    
+    if (firstUserFound) {
+      chatHistory.push({
+        role,
+        parts: [{ text: msg.content || msg.text || '' }]
+      });
+    }
+  }
+
+  const chat = model.startChat({
+    history: chatHistory,
+    generationConfig: {
+      maxOutputTokens: 1000,
+    },
+  });
+
+  try {
+    const result = await chat.sendMessage(message);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error) {
+    console.error('Gemini chat failed:', error.message);
+    throw error;
+  }
+}
+
+module.exports = { generateMilestones, generateProposal, chatWithAI };

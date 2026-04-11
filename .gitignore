@@ -1,37 +1,45 @@
-# dependencies
+# Dependencies
 node_modules/
+**/node_modules/
 
-# environment variables
+# Environment variables and secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 
-# logs
-logs
+# Logs
+logs/
+**/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# coverage folder
+# Coverage and reports
 coverage/
+**/coverage/
+htmlcov/
 
-# build folders
+# Build folders
 dist/
 build/
+out/
 .next/
+**/.next/
 
-# temporary files
+# Temporary files
 tmp/
 temp/
 
-# IDE files
+# IDE/editor files
 .vscode/
 .idea/
 
@@ -44,22 +52,27 @@ ENV/
 
 # Python cache files
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
 
-# ML model and data files
+# ML artifacts generated locally
 *.pkl
 *.pickle
-ranking_model.pkl
 *.h5
 *.model
 
-# Database files
+# Keep canonical shared model artifacts versioned
+!ml-ranking-system/ranking_model.pkl
+!ml-ranking-system/scaler.pkl
+
+# Local database files
 *.db
 *.sqlite
 *.sqlite3
-
-# optional
-package-lock.json
