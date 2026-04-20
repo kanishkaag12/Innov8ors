@@ -785,12 +785,12 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `get()` connect `Community 5` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 13`?**
-  _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Why does `execute()` connect `Community 3` to `Community 8`, `Community 1`, `Community 2`, `Community 9`?**
-  _High betweenness centrality (0.080) - this node is a cross-community bridge._
-- **Why does `includes()` connect `Community 4` to `Community 0`, `Community 1`, `Community 2`, `Community 11`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
+  _High betweenness centrality (0.151) - this node is a cross-community bridge._
+- **Why does `get()` connect `Community 5` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 13`?**
+  _High betweenness centrality (0.096) - this node is a cross-community bridge._
+- **Why does `#s()` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`?**
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
 - **Are the 36 inferred relationships involving `get()` (e.g. with `listProjects()` and `w()`) actually correct?**
   _`get()` has 36 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 31 inferred relationships involving `execute()` (e.g. with `.execute_query()` and `.generate_users_and_freelancers()`) actually correct?**
