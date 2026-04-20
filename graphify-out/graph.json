@@ -13013,144 +13013,144 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L1",
-      "id": "02_synthetic_data_generator_rationale_1",
       "community": 3,
-      "norm_label": "synthetic data generator for ml ranking system - generates realistic freelancer"
+      "norm_label": "synthetic data generator for ml ranking system - generates realistic freelancer",
+      "id": "02_synthetic_data_generator_rationale_1"
     },
     {
       "label": "Generate realistic training data for ML ranking system",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L24",
-      "id": "02_synthetic_data_generator_rationale_24",
       "community": 3,
-      "norm_label": "generate realistic training data for ml ranking system"
+      "norm_label": "generate realistic training data for ml ranking system",
+      "id": "02_synthetic_data_generator_rationale_24"
     },
     {
       "label": "Initialize database connection",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L64",
-      "id": "02_synthetic_data_generator_rationale_64",
       "community": 3,
-      "norm_label": "initialize database connection"
+      "norm_label": "initialize database connection",
+      "id": "02_synthetic_data_generator_rationale_64"
     },
     {
       "label": "Connect to PostgreSQL",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L70",
-      "id": "02_synthetic_data_generator_rationale_70",
       "community": 3,
-      "norm_label": "connect to postgresql"
+      "norm_label": "connect to postgresql",
+      "id": "02_synthetic_data_generator_rationale_70"
     },
     {
       "label": "Close database connection",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L79",
-      "id": "02_synthetic_data_generator_rationale_79",
       "community": 3,
-      "norm_label": "close database connection"
+      "norm_label": "close database connection",
+      "id": "02_synthetic_data_generator_rationale_79"
     },
     {
       "label": "Execute query and return cursor",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L84",
-      "id": "02_synthetic_data_generator_rationale_84",
       "community": 3,
-      "norm_label": "execute query and return cursor"
+      "norm_label": "execute query and return cursor",
+      "id": "02_synthetic_data_generator_rationale_84"
     },
     {
       "label": "Generate freelancers and employers",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L96",
-      "id": "02_synthetic_data_generator_rationale_96",
       "community": 3,
-      "norm_label": "generate freelancers and employers"
+      "norm_label": "generate freelancers and employers",
+      "id": "02_synthetic_data_generator_rationale_96"
     },
     {
       "label": "Generate skills master table",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L166",
-      "id": "02_synthetic_data_generator_rationale_166",
       "community": 3,
-      "norm_label": "generate skills master table"
+      "norm_label": "generate skills master table",
+      "id": "02_synthetic_data_generator_rationale_166"
     },
     {
       "label": "Assign random skills to freelancers",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L193",
-      "id": "02_synthetic_data_generator_rationale_193",
       "community": 3,
-      "norm_label": "assign random skills to freelancers"
+      "norm_label": "assign random skills to freelancers",
+      "id": "02_synthetic_data_generator_rationale_193"
     },
     {
       "label": "Generate jobs with realistic data",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L238",
-      "id": "02_synthetic_data_generator_rationale_238",
       "community": 3,
-      "norm_label": "generate jobs with realistic data"
+      "norm_label": "generate jobs with realistic data",
+      "id": "02_synthetic_data_generator_rationale_238"
     },
     {
       "label": "Assign skill requirements to jobs",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L282",
-      "id": "02_synthetic_data_generator_rationale_282",
       "community": 3,
-      "norm_label": "assign skill requirements to jobs"
+      "norm_label": "assign skill requirements to jobs",
+      "id": "02_synthetic_data_generator_rationale_282"
     },
     {
       "label": "Generate proposals (5-20 per job)",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L314",
-      "id": "02_synthetic_data_generator_rationale_314",
       "community": 3,
-      "norm_label": "generate proposals (5-20 per job)"
+      "norm_label": "generate proposals (5-20 per job)",
+      "id": "02_synthetic_data_generator_rationale_314"
     },
     {
       "label": "Initialize freelancer metrics",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L363",
-      "id": "02_synthetic_data_generator_rationale_363",
       "community": 3,
-      "norm_label": "initialize freelancer metrics"
+      "norm_label": "initialize freelancer metrics",
+      "id": "02_synthetic_data_generator_rationale_363"
     },
     {
       "label": "Create contracts with hiring outcomes (for training labels)",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L410",
-      "id": "02_synthetic_data_generator_rationale_410",
       "community": 3,
-      "norm_label": "create contracts with hiring outcomes (for training labels)"
+      "norm_label": "create contracts with hiring outcomes (for training labels)",
+      "id": "02_synthetic_data_generator_rationale_410"
     },
     {
       "label": "Create ml_feature_snapshots for training (this will be populated by feature engi",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L458",
-      "id": "02_synthetic_data_generator_rationale_458",
       "community": 3,
-      "norm_label": "create ml_feature_snapshots for training (this will be populated by feature engi"
+      "norm_label": "create ml_feature_snapshots for training (this will be populated by feature engi",
+      "id": "02_synthetic_data_generator_rationale_458"
     },
     {
       "label": "Generate complete synthetic dataset with smart skipping",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\02_synthetic_data_generator.py",
       "source_location": "L545",
-      "id": "02_synthetic_data_generator_rationale_545",
       "community": 3,
-      "norm_label": "generate complete synthetic dataset with smart skipping"
+      "norm_label": "generate complete synthetic dataset with smart skipping",
+      "id": "02_synthetic_data_generator_rationale_545"
     },
     {
       "label": "03_feature_engineering.py",
@@ -13346,171 +13346,171 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L1",
-      "id": "03_feature_engineering_rationale_1",
       "community": 8,
-      "norm_label": "feature engineering pipeline for ml ranking system - computes embeddings using"
+      "norm_label": "feature engineering pipeline for ml ranking system - computes embeddings using",
+      "id": "03_feature_engineering_rationale_1"
     },
     {
       "label": "Extract and compute features for ML model",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L24",
-      "id": "03_feature_engineering_rationale_24",
       "community": 8,
-      "norm_label": "extract and compute features for ml model"
+      "norm_label": "extract and compute features for ml model",
+      "id": "03_feature_engineering_rationale_24"
     },
     {
       "label": "Initialize feature pipeline",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L27",
-      "id": "03_feature_engineering_rationale_27",
       "community": 8,
-      "norm_label": "initialize feature pipeline"
+      "norm_label": "initialize feature pipeline",
+      "id": "03_feature_engineering_rationale_27"
     },
     {
       "label": "Connect to PostgreSQL",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L36",
-      "id": "03_feature_engineering_rationale_36",
       "community": 8,
-      "norm_label": "connect to postgresql"
+      "norm_label": "connect to postgresql",
+      "id": "03_feature_engineering_rationale_36"
     },
     {
       "label": "Reconnect if PostgreSQL connection was dropped.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L50",
-      "id": "03_feature_engineering_rationale_50",
       "community": 8,
-      "norm_label": "reconnect if postgresql connection was dropped."
+      "norm_label": "reconnect if postgresql connection was dropped.",
+      "id": "03_feature_engineering_rationale_50"
     },
     {
       "label": "Compute embeddings for list of texts",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L58",
-      "id": "03_feature_engineering_rationale_58",
       "community": 8,
-      "norm_label": "compute embeddings for list of texts"
+      "norm_label": "compute embeddings for list of texts",
+      "id": "03_feature_engineering_rationale_58"
     },
     {
       "label": "Convert numpy array to bytes for storage",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L66",
-      "id": "03_feature_engineering_rationale_66",
       "community": 8,
-      "norm_label": "convert numpy array to bytes for storage"
+      "norm_label": "convert numpy array to bytes for storage",
+      "id": "03_feature_engineering_rationale_66"
     },
     {
       "label": "Convert DB/pandas numeric values to float for feature calculations.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L70",
-      "id": "03_feature_engineering_rationale_70",
       "community": 8,
-      "norm_label": "convert db/pandas numeric values to float for feature calculations."
+      "norm_label": "convert db/pandas numeric values to float for feature calculations.",
+      "id": "03_feature_engineering_rationale_70"
     },
     {
       "label": "Fetch all proposal-job pairs with necessary data",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L84",
-      "id": "03_feature_engineering_rationale_84",
       "community": 8,
-      "norm_label": "fetch all proposal-job pairs with necessary data"
+      "norm_label": "fetch all proposal-job pairs with necessary data",
+      "id": "03_feature_engineering_rationale_84"
     },
     {
       "label": "Fetch batch of proposal-job pairs with necessary data",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L141",
-      "id": "03_feature_engineering_rationale_141",
       "community": 8,
-      "norm_label": "fetch batch of proposal-job pairs with necessary data"
+      "norm_label": "fetch batch of proposal-job pairs with necessary data",
+      "id": "03_feature_engineering_rationale_141"
     },
     {
       "label": "Get required skills for a job",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L199",
-      "id": "03_feature_engineering_rationale_199",
       "community": 8,
-      "norm_label": "get required skills for a job"
+      "norm_label": "get required skills for a job",
+      "id": "03_feature_engineering_rationale_199"
     },
     {
       "label": "Get freelancer skills",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L225",
-      "id": "03_feature_engineering_rationale_225",
       "community": 8,
-      "norm_label": "get freelancer skills"
+      "norm_label": "get freelancer skills",
+      "id": "03_feature_engineering_rationale_225"
     },
     {
       "label": "Compute semantic similarity scores",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L255",
-      "id": "03_feature_engineering_rationale_255",
       "community": 8,
-      "norm_label": "compute semantic similarity scores"
+      "norm_label": "compute semantic similarity scores",
+      "id": "03_feature_engineering_rationale_255"
     },
     {
       "label": "Compute skill overlap between freelancer and job",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L305",
-      "id": "03_feature_engineering_rationale_305",
       "community": 8,
-      "norm_label": "compute skill overlap between freelancer and job"
+      "norm_label": "compute skill overlap between freelancer and job",
+      "id": "03_feature_engineering_rationale_305"
     },
     {
       "label": "Compute price fit score",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L347",
-      "id": "03_feature_engineering_rationale_347",
       "community": 8,
-      "norm_label": "compute price fit score"
+      "norm_label": "compute price fit score",
+      "id": "03_feature_engineering_rationale_347"
     },
     {
       "label": "Compute proposal-level features",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L383",
-      "id": "03_feature_engineering_rationale_383",
       "community": 8,
-      "norm_label": "compute proposal-level features"
+      "norm_label": "compute proposal-level features",
+      "id": "03_feature_engineering_rationale_383"
     },
     {
       "label": "Normalize numeric features to 0-1 range",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L397",
-      "id": "03_feature_engineering_rationale_397",
       "community": 8,
-      "norm_label": "normalize numeric features to 0-1 range"
+      "norm_label": "normalize numeric features to 0-1 range",
+      "id": "03_feature_engineering_rationale_397"
     },
     {
       "label": "Save computed features to ml_feature_snapshots",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L421",
-      "id": "03_feature_engineering_rationale_421",
       "community": 8,
-      "norm_label": "save computed features to ml_feature_snapshots"
+      "norm_label": "save computed features to ml_feature_snapshots",
+      "id": "03_feature_engineering_rationale_421"
     },
     {
       "label": "Execute complete feature engineering pipeline with batching",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\03_feature_engineering.py",
       "source_location": "L505",
-      "id": "03_feature_engineering_rationale_505",
       "community": 8,
-      "norm_label": "execute complete feature engineering pipeline with batching"
+      "norm_label": "execute complete feature engineering pipeline with batching",
+      "id": "03_feature_engineering_rationale_505"
     },
     {
       "label": "04_xgboost_training.py",
@@ -13688,153 +13688,153 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L1",
-      "id": "04_xgboost_training_rationale_1",
       "community": 9,
-      "norm_label": "xgboost lambdamart ranking model - pure ml learning-to-rank approach - trained"
+      "norm_label": "xgboost lambdamart ranking model - pure ml learning-to-rank approach - trained",
+      "id": "04_xgboost_training_rationale_1"
     },
     {
       "label": "XGBoost LambdaMART ranking model for freelancer ranking",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L28",
-      "id": "04_xgboost_training_rationale_28",
       "community": 9,
-      "norm_label": "xgboost lambdamart ranking model for freelancer ranking"
+      "norm_label": "xgboost lambdamart ranking model for freelancer ranking",
+      "id": "04_xgboost_training_rationale_28"
     },
     {
       "label": "Initialize ranking model",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L50",
-      "id": "04_xgboost_training_rationale_50",
       "community": 9,
-      "norm_label": "initialize ranking model"
+      "norm_label": "initialize ranking model",
+      "id": "04_xgboost_training_rationale_50"
     },
     {
       "label": "Connect to PostgreSQL",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L59",
-      "id": "04_xgboost_training_rationale_59",
       "community": 9,
-      "norm_label": "connect to postgresql"
+      "norm_label": "connect to postgresql",
+      "id": "04_xgboost_training_rationale_59"
     },
     {
       "label": "Reconnect to PostgreSQL when the existing connection is stale.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L73",
-      "id": "04_xgboost_training_rationale_73",
       "community": 9,
-      "norm_label": "reconnect to postgresql when the existing connection is stale."
+      "norm_label": "reconnect to postgresql when the existing connection is stale.",
+      "id": "04_xgboost_training_rationale_73"
     },
     {
       "label": "Load training data from PostgreSQL",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L80",
-      "id": "04_xgboost_training_rationale_80",
       "community": 9,
-      "norm_label": "load training data from postgresql"
+      "norm_label": "load training data from postgresql",
+      "id": "04_xgboost_training_rationale_80"
     },
     {
       "label": "Run a local pipeline script using the current Python executable.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L136",
-      "id": "04_xgboost_training_rationale_136",
       "community": 9,
-      "norm_label": "run a local pipeline script using the current python executable."
+      "norm_label": "run a local pipeline script using the current python executable.",
+      "id": "04_xgboost_training_rationale_136"
     },
     {
       "label": "Create and populate training snapshots when source table is empty.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L145",
-      "id": "04_xgboost_training_rationale_145",
       "community": 9,
-      "norm_label": "create and populate training snapshots when source table is empty."
+      "norm_label": "create and populate training snapshots when source table is empty.",
+      "id": "04_xgboost_training_rationale_145"
     },
     {
       "label": "Prepare data for ranking model (group by job)",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L193",
-      "id": "04_xgboost_training_rationale_193",
       "community": 9,
-      "norm_label": "prepare data for ranking model (group by job)"
+      "norm_label": "prepare data for ranking model (group by job)",
+      "id": "04_xgboost_training_rationale_193"
     },
     {
       "label": "Train XGBoost LambdaMART model",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L220",
-      "id": "04_xgboost_training_rationale_220",
       "community": 9,
-      "norm_label": "train xgboost lambdamart model"
+      "norm_label": "train xgboost lambdamart model",
+      "id": "04_xgboost_training_rationale_220"
     },
     {
       "label": "Log feature importance",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L260",
-      "id": "04_xgboost_training_rationale_260",
       "community": 9,
-      "norm_label": "log feature importance"
+      "norm_label": "log feature importance",
+      "id": "04_xgboost_training_rationale_260"
     },
     {
       "label": "Predict ranking scores for freelancers",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L271",
-      "id": "04_xgboost_training_rationale_271",
       "community": 9,
-      "norm_label": "predict ranking scores for freelancers"
+      "norm_label": "predict ranking scores for freelancers",
+      "id": "04_xgboost_training_rationale_271"
     },
     {
       "label": "Evaluate model performance",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L297",
-      "id": "04_xgboost_training_rationale_297",
       "community": 9,
-      "norm_label": "evaluate model performance"
+      "norm_label": "evaluate model performance",
+      "id": "04_xgboost_training_rationale_297"
     },
     {
       "label": "Save model and scaler",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L356",
-      "id": "04_xgboost_training_rationale_356",
       "community": 9,
-      "norm_label": "save model and scaler"
+      "norm_label": "save model and scaler",
+      "id": "04_xgboost_training_rationale_356"
     },
     {
       "label": "Save model metadata to database",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L365",
-      "id": "04_xgboost_training_rationale_365",
       "community": 9,
-      "norm_label": "save model metadata to database"
+      "norm_label": "save model metadata to database",
+      "id": "04_xgboost_training_rationale_365"
     },
     {
       "label": "Save ranking predictions to database",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L398",
-      "id": "04_xgboost_training_rationale_398",
       "community": 9,
-      "norm_label": "save ranking predictions to database"
+      "norm_label": "save ranking predictions to database",
+      "id": "04_xgboost_training_rationale_398"
     },
     {
       "label": "Execute complete training pipeline",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\04_xgboost_training.py",
       "source_location": "L492",
-      "id": "04_xgboost_training_rationale_492",
       "community": 9,
-      "norm_label": "execute complete training pipeline"
+      "norm_label": "execute complete training pipeline",
+      "id": "04_xgboost_training_rationale_492"
     },
     {
       "label": "05_inference_pipeline.py",
@@ -14021,162 +14021,162 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L1",
-      "id": "05_inference_pipeline_rationale_1",
       "community": 3,
-      "norm_label": "ml inference pipeline for real-time freelancer ranking - loads trained model an"
+      "norm_label": "ml inference pipeline for real-time freelancer ranking - loads trained model an",
+      "id": "05_inference_pipeline_rationale_1"
     },
     {
       "label": "Real-time inference for freelancer ranking",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L26",
-      "id": "05_inference_pipeline_rationale_26",
       "community": 3,
-      "norm_label": "real-time inference for freelancer ranking"
+      "norm_label": "real-time inference for freelancer ranking",
+      "id": "05_inference_pipeline_rationale_26"
     },
     {
       "label": "Initialize inference pipeline",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L47",
-      "id": "05_inference_pipeline_rationale_47",
       "community": 3,
-      "norm_label": "initialize inference pipeline"
+      "norm_label": "initialize inference pipeline",
+      "id": "05_inference_pipeline_rationale_47"
     },
     {
       "label": "Connect to PostgreSQL",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L56",
-      "id": "05_inference_pipeline_rationale_56",
       "community": 3,
-      "norm_label": "connect to postgresql"
+      "norm_label": "connect to postgresql",
+      "id": "05_inference_pipeline_rationale_56"
     },
     {
       "label": "Load trained model and scaler",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L69",
-      "id": "05_inference_pipeline_rationale_69",
       "community": 3,
-      "norm_label": "load trained model and scaler"
+      "norm_label": "load trained model and scaler",
+      "id": "05_inference_pipeline_rationale_69"
     },
     {
       "label": "Compute embedding for text",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L82",
-      "id": "05_inference_pipeline_rationale_82",
       "community": 3,
-      "norm_label": "compute embedding for text"
+      "norm_label": "compute embedding for text",
+      "id": "05_inference_pipeline_rationale_82"
     },
     {
       "label": "Compute cosine similarity between two embeddings",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L88",
-      "id": "05_inference_pipeline_rationale_88",
       "community": 3,
-      "norm_label": "compute cosine similarity between two embeddings"
+      "norm_label": "compute cosine similarity between two embeddings",
+      "id": "05_inference_pipeline_rationale_88"
     },
     {
       "label": "Fetch job data from database",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L96",
-      "id": "05_inference_pipeline_rationale_96",
       "community": 3,
-      "norm_label": "fetch job data from database"
+      "norm_label": "fetch job data from database",
+      "id": "05_inference_pipeline_rationale_96"
     },
     {
       "label": "Get required skills for job",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L117",
-      "id": "05_inference_pipeline_rationale_117",
       "community": 3,
-      "norm_label": "get required skills for job"
+      "norm_label": "get required skills for job",
+      "id": "05_inference_pipeline_rationale_117"
     },
     {
       "label": "Fetch freelancer profile and metrics",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L129",
-      "id": "05_inference_pipeline_rationale_129",
       "community": 3,
-      "norm_label": "fetch freelancer profile and metrics"
+      "norm_label": "fetch freelancer profile and metrics",
+      "id": "05_inference_pipeline_rationale_129"
     },
     {
       "label": "Get freelancer skills",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L180",
-      "id": "05_inference_pipeline_rationale_180",
       "community": 3,
-      "norm_label": "get freelancer skills"
+      "norm_label": "get freelancer skills",
+      "id": "05_inference_pipeline_rationale_180"
     },
     {
       "label": "Extract features for ranking",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L214",
-      "id": "05_inference_pipeline_rationale_214",
       "community": 3,
-      "norm_label": "extract features for ranking"
+      "norm_label": "extract features for ranking",
+      "id": "05_inference_pipeline_rationale_214"
     },
     {
       "label": "Rank all freelancers who have applied to a job",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L302",
-      "id": "05_inference_pipeline_rationale_302",
       "community": 3,
-      "norm_label": "rank all freelancers who have applied to a job"
+      "norm_label": "rank all freelancers who have applied to a job",
+      "id": "05_inference_pipeline_rationale_302"
     },
     {
       "label": "Rank a single freelancer for a job",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L362",
-      "id": "05_inference_pipeline_rationale_362",
       "community": 3,
-      "norm_label": "rank a single freelancer for a job"
+      "norm_label": "rank a single freelancer for a job",
+      "id": "05_inference_pipeline_rationale_362"
     },
     {
       "label": "Generate human-readable explanations",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L396",
-      "id": "05_inference_pipeline_rationale_396",
       "community": 3,
-      "norm_label": "generate human-readable explanations"
+      "norm_label": "generate human-readable explanations",
+      "id": "05_inference_pipeline_rationale_396"
     },
     {
       "label": "Compute estimated success probability",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L431",
-      "id": "05_inference_pipeline_rationale_431",
       "community": 3,
-      "norm_label": "compute estimated success probability"
+      "norm_label": "compute estimated success probability",
+      "id": "05_inference_pipeline_rationale_431"
     },
     {
       "label": "Rank freelancers for multiple jobs",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L444",
-      "id": "05_inference_pipeline_rationale_444",
       "community": 3,
-      "norm_label": "rank freelancers for multiple jobs"
+      "norm_label": "rank freelancers for multiple jobs",
+      "id": "05_inference_pipeline_rationale_444"
     },
     {
       "label": "Test inference pipeline",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\05_inference_pipeline.py",
       "source_location": "L460",
-      "id": "05_inference_pipeline_rationale_460",
       "community": 3,
-      "norm_label": "test inference pipeline"
+      "norm_label": "test inference pipeline",
+      "id": "05_inference_pipeline_rationale_460"
     },
     {
       "label": "06_api_server.py",
@@ -14372,189 +14372,189 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L1",
-      "id": "06_api_server_rationale_1",
       "community": 3,
-      "norm_label": "fastapi backend for ml ranking system provides rest endpoints for freelancer ra"
+      "norm_label": "fastapi backend for ml ranking system provides rest endpoints for freelancer ra",
+      "id": "06_api_server_rationale_1"
     },
     {
       "label": "Load a symbol from a sibling file, including files with numeric prefixes.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L22",
-      "id": "06_api_server_rationale_22",
       "community": 3,
-      "norm_label": "load a symbol from a sibling file, including files with numeric prefixes."
+      "norm_label": "load a symbol from a sibling file, including files with numeric prefixes.",
+      "id": "06_api_server_rationale_22"
     },
     {
       "label": "Feature values for a freelancer-job pair",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L51",
-      "id": "06_api_server_rationale_51",
       "community": 3,
-      "norm_label": "feature values for a freelancer-job pair"
+      "norm_label": "feature values for a freelancer-job pair",
+      "id": "06_api_server_rationale_51"
     },
     {
       "label": "ML scoring insight for a freelancer",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L70",
-      "id": "06_api_server_rationale_70",
       "community": 3,
-      "norm_label": "ml scoring insight for a freelancer"
+      "norm_label": "ml scoring insight for a freelancer",
+      "id": "06_api_server_rationale_70"
     },
     {
       "label": "Ranked freelancer response",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L77",
-      "id": "06_api_server_rationale_77",
       "community": 3,
-      "norm_label": "ranked freelancer response"
+      "norm_label": "ranked freelancer response",
+      "id": "06_api_server_rationale_77"
     },
     {
       "label": "Response for project ranking endpoint",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L91",
-      "id": "06_api_server_rationale_91",
       "community": 3,
-      "norm_label": "response for project ranking endpoint"
+      "norm_label": "response for project ranking endpoint",
+      "id": "06_api_server_rationale_91"
     },
     {
       "label": "Individual prediction response",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L101",
-      "id": "06_api_server_rationale_101",
       "community": 3,
-      "norm_label": "individual prediction response"
+      "norm_label": "individual prediction response",
+      "id": "06_api_server_rationale_101"
     },
     {
       "label": "Request to retrain model",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L117",
-      "id": "06_api_server_rationale_117",
       "community": 3,
-      "norm_label": "request to retrain model"
+      "norm_label": "request to retrain model",
+      "id": "06_api_server_rationale_117"
     },
     {
       "label": "Initialize ML pipeline on startup",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L151",
-      "id": "06_api_server_rationale_151",
       "community": 3,
-      "norm_label": "initialize ml pipeline on startup"
+      "norm_label": "initialize ml pipeline on startup",
+      "id": "06_api_server_rationale_151"
     },
     {
       "label": "Close connections on shutdown",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L164",
-      "id": "06_api_server_rationale_164",
       "community": 3,
-      "norm_label": "close connections on shutdown"
+      "norm_label": "close connections on shutdown",
+      "id": "06_api_server_rationale_164"
     },
     {
       "label": "Fetch freelancer details from database",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L174",
-      "id": "06_api_server_rationale_174",
       "community": 3,
-      "norm_label": "fetch freelancer details from database"
+      "norm_label": "fetch freelancer details from database",
+      "id": "06_api_server_rationale_174"
     },
     {
       "label": "Fetch job details from database",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L193",
-      "id": "06_api_server_rationale_193",
       "community": 3,
-      "norm_label": "fetch job details from database"
+      "norm_label": "fetch job details from database",
+      "id": "06_api_server_rationale_193"
     },
     {
       "label": "Fetch proposal details",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L212",
-      "id": "06_api_server_rationale_212",
       "community": 3,
-      "norm_label": "fetch proposal details"
+      "norm_label": "fetch proposal details",
+      "id": "06_api_server_rationale_212"
     },
     {
       "label": "Health check endpoint",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L239",
-      "id": "06_api_server_rationale_239",
       "community": 3,
-      "norm_label": "health check endpoint"
+      "norm_label": "health check endpoint",
+      "id": "06_api_server_rationale_239"
     },
     {
       "label": "Rank freelancers for a specific project/job.          Returns ranked list with",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L254",
-      "id": "06_api_server_rationale_254",
       "community": 3,
-      "norm_label": "rank freelancers for a specific project/job.          returns ranked list with"
+      "norm_label": "rank freelancers for a specific project/job.          returns ranked list with",
+      "id": "06_api_server_rationale_254"
     },
     {
       "label": "Get ML ranking and insights for a specific freelancer-job pair.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L319",
-      "id": "06_api_server_rationale_319",
       "community": 3,
-      "norm_label": "get ml ranking and insights for a specific freelancer-job pair."
+      "norm_label": "get ml ranking and insights for a specific freelancer-job pair.",
+      "id": "06_api_server_rationale_319"
     },
     {
       "label": "Get ML-based insights for a freelancer's profile.     Includes strengths, weakn",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L391",
-      "id": "06_api_server_rationale_391",
       "community": 3,
-      "norm_label": "get ml-based insights for a freelancer's profile.     includes strengths, weakn"
+      "norm_label": "get ml-based insights for a freelancer's profile.     includes strengths, weakn",
+      "id": "06_api_server_rationale_391"
     },
     {
       "label": "Trigger recomputation of rankings for a job (e.g., after new proposals).",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L473",
-      "id": "06_api_server_rationale_473",
       "community": 3,
-      "norm_label": "trigger recomputation of rankings for a job (e.g., after new proposals)."
+      "norm_label": "trigger recomputation of rankings for a job (e.g., after new proposals).",
+      "id": "06_api_server_rationale_473"
     },
     {
       "label": "Trigger model retraining with current data.     This runs asynchronously in the",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L498",
-      "id": "06_api_server_rationale_498",
       "community": 3,
-      "norm_label": "trigger model retraining with current data.     this runs asynchronously in the"
+      "norm_label": "trigger model retraining with current data.     this runs asynchronously in the",
+      "id": "06_api_server_rationale_498"
     },
     {
       "label": "Get information about the current deployed model.",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L531",
-      "id": "06_api_server_rationale_531",
       "community": 3,
-      "norm_label": "get information about the current deployed model."
+      "norm_label": "get information about the current deployed model.",
+      "id": "06_api_server_rationale_531"
     },
     {
       "label": "Global HTTP exception handler",
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\06_api_server.py",
       "source_location": "L573",
-      "id": "06_api_server_rationale_573",
       "community": 3,
-      "norm_label": "global http exception handler"
+      "norm_label": "global http exception handler",
+      "id": "06_api_server_rationale_573"
     },
     {
       "label": "07_RankedFreelancersDashboard.jsx",
@@ -14633,9 +14633,9 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\08_model_predict.py",
       "source_location": "L1",
-      "id": "08_model_predict_rationale_1",
       "community": 5,
-      "norm_label": "batch inference bridge for synapescrow backend. reads feature rows from stdin j"
+      "norm_label": "batch inference bridge for synapescrow backend. reads feature rows from stdin j",
+      "id": "08_model_predict_rationale_1"
     },
     {
       "label": "apply_schema.py",
@@ -14705,9 +14705,9 @@
       "file_type": "rationale",
       "source_file": "ml-ranking-system\\test_db_connection.py",
       "source_location": "L16",
-      "id": "test_db_connection_rationale_16",
       "community": 3,
-      "norm_label": "test database connection using environment variables"
+      "norm_label": "test database connection using environment variables",
+      "id": "test_db_connection_rationale_16"
     }
   ],
   "links": [
@@ -40014,8 +40014,8 @@
       "source_file": "backend\\services\\synapbot\\knowledgeRetriever.js",
       "source_location": "L265",
       "weight": 1.0,
-      "_src": "knowledgeretriever_retrieverelevantcontext",
-      "_tgt": "wasm_compiler_edge_slice",
+      "_src": "wasm_compiler_edge_slice",
+      "_tgt": "knowledgeretriever_retrieverelevantcontext",
       "source": "wasm_compiler_edge_slice",
       "target": "knowledgeretriever_retrieverelevantcontext"
     },
@@ -40026,8 +40026,8 @@
       "source_file": "backend\\services\\synapbot\\synapbotService.js",
       "source_location": "L95",
       "weight": 1.0,
-      "_src": "synapbotservice_buildcontextanswer",
-      "_tgt": "wasm_compiler_edge_slice",
+      "_src": "wasm_compiler_edge_slice",
+      "_tgt": "synapbotservice_buildcontextanswer",
       "source": "wasm_compiler_edge_slice",
       "target": "synapbotservice_buildcontextanswer"
     },
@@ -40038,8 +40038,8 @@
       "source_file": "backend\\services\\synapbot\\synapbotService.js",
       "source_location": "L149",
       "weight": 1.0,
-      "_src": "synapbotservice_chatwithsynapbot",
-      "_tgt": "wasm_compiler_edge_slice",
+      "_src": "wasm_compiler_edge_slice",
+      "_tgt": "synapbotservice_chatwithsynapbot",
       "source": "wasm_compiler_edge_slice",
       "target": "synapbotservice_chatwithsynapbot"
     },
@@ -40590,8 +40590,8 @@
       "source_file": "backend\\services\\synapbot\\knowledgeRetriever.js",
       "source_location": "L202",
       "weight": 1.0,
-      "_src": "knowledgeretriever_scoreentry",
-      "_tgt": "wasm_compiler_edge_includes",
+      "_src": "wasm_compiler_edge_includes",
+      "_tgt": "knowledgeretriever_scoreentry",
       "source": "wasm_compiler_edge_includes",
       "target": "knowledgeretriever_scoreentry"
     },
@@ -52998,8 +52998,8 @@
       "source_file": "backend\\services\\synapbot\\synapbotService.js",
       "source_location": "L162",
       "weight": 1.0,
-      "_src": "synapbotservice_chatwithsynapbot",
-      "_tgt": "gemma4service_generategemma4answer",
+      "_src": "gemma4service_generategemma4answer",
+      "_tgt": "synapbotservice_chatwithsynapbot",
       "source": "gemma4service_generategemma4answer",
       "target": "synapbotservice_chatwithsynapbot"
     },
@@ -53286,8 +53286,8 @@
       "source_file": "backend\\services\\synapbot\\synapbotService.js",
       "source_location": "L111",
       "weight": 1.0,
-      "_src": "synapbotservice_chatwithsynapbot",
-      "_tgt": "knowledgeretriever_retrieverelevantcontext",
+      "_src": "knowledgeretriever_retrieverelevantcontext",
+      "_tgt": "synapbotservice_chatwithsynapbot",
       "source": "knowledgeretriever_retrieverelevantcontext",
       "target": "synapbotservice_chatwithsynapbot"
     },
@@ -53298,8 +53298,8 @@
       "source_file": "backend\\services\\synapbot\\synapbotService.js",
       "source_location": "L147",
       "weight": 1.0,
-      "_src": "synapbotservice_chatwithsynapbot",
-      "_tgt": "knowledgeretriever_formatcontext",
+      "_src": "knowledgeretriever_formatcontext",
+      "_tgt": "synapbotservice_chatwithsynapbot",
       "source": "knowledgeretriever_formatcontext",
       "target": "synapbotservice_chatwithsynapbot"
     },
