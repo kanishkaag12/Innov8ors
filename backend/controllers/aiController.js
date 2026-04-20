@@ -1,4 +1,5 @@
-const { generateMilestones, generateProposal, chatWithAI } = require("../services/aiService");
+const { generateMilestones, generateProposal } = require("../services/aiService");
+const { chatWithSynapBot } = require("../services/synapbot/synapbotService");
 
 async function analyzeRequirement(req, res) {
 
@@ -62,7 +63,7 @@ async function generateProposalController(req, res) {
 
 async function chatBotController(req, res) {
   try {
-    const { message, history, role, page, context: pageContext } = req.body;
+    const { message, history } = req.body;
 
     if (!message) {
       return res.status(400).json({
@@ -70,26 +71,32 @@ async function chatBotController(req, res) {
       });
     }
 
-    const systemContext = `
-The user is currently a ${role || 'Guest'} browsing the ${page || 'unknown'} page.
-Additional page context: ${pageContext || 'None'}.
-`;
-
-    console.log(`🧠 AI is thinking about message: "${message.substring(0, 30)}..." for role: ${role}`);
-    const reply = await chatWithAI(message, history || [], systemContext);
-    console.log(`✅ AI Response generated: ${reply.substring(0, 50)}...`);
+    console.log(`🧠 SynapBot request: "${String(message).substring(0, 60)}..."`);
+    const result = await chatWithSynapBot({
+      message,
+      history: history || []
+    });
 
     res.json({
       success: true,
-      reply
+      reply: result.reply,
+      contextUsed: result.contextUsed || [],
+      toolsAvailable: result.toolsAvailable || []
     });
 
   } catch (error) {
-    console.error("❌ CHATBOT CONTROLLER ERROR:", error.message);
+    console.error("❌ SYNAPBOT CONTROLLER ERROR:", error.message);
     if (error.status) console.error("Error Status:", error.status);
+
+    const statusCode =
+      error.code === "INVALID_MESSAGE"
+        ? 400
+        : error.code === "MISSING_GEMINI_API_KEY"
+          ? 503
+          : 500;
     
-    res.status(500).json({
-      error: "Chatbot service failed",
+    res.status(statusCode).json({
+      error: "SynapBot service failed",
       details: error.message
     });
   }

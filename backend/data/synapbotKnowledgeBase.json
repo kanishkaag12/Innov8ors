@@ -1,0 +1,122 @@
+[
+  {
+    "id": "platform-overview",
+    "title": "What SynapEscrow Is",
+    "category": "overview",
+    "keywords": ["synapescrow", "what is synapescrow", "what this website is", "platform overview", "freelance escrow platform"],
+    "questions": ["what is synapescrow", "what is this website", "what does this platform do", "what is synapescrow used for"],
+    "content": "SynapEscrow is a freelance project platform that helps employers and freelancers work together using milestone-based escrow. It combines project posting, proposals, milestone tracking, protected payments, and dispute guidance in one workflow."
+  },
+  {
+    "id": "platform-features",
+    "title": "Main Platform Features",
+    "category": "overview",
+    "keywords": ["features", "main features", "platform features", "website features", "what can i do here", "capabilities"],
+    "questions": ["what are the main features of this website", "what features does synapescrow have", "what can i do on this platform", "what does synapescrow offer"],
+    "content": "SynapEscrow lets employers post projects, receive freelancer proposals, split work into milestones, fund milestones in escrow, review deliverables, release payments after approval, track activity in dashboards, and follow dispute support guidance if something goes wrong."
+  },
+  {
+    "id": "platform-benefits",
+    "title": "Why Use SynapEscrow",
+    "category": "overview",
+    "keywords": ["why use synapescrow", "platform benefits", "why this platform", "why choose synapescrow", "trusted escrow"],
+    "questions": ["why should i use synapescrow", "why use this platform", "what are the benefits of synapescrow"],
+    "content": "SynapEscrow reduces payment uncertainty by protecting milestone funds in escrow and keeping deliverables tied to clear acceptance steps. It gives both employers and freelancers more structure around scope, progress tracking, verification, and payment release."
+  },
+  {
+    "id": "escrow-basics",
+    "title": "How Escrow Works",
+    "category": "escrow",
+    "keywords": ["escrow", "how escrow works", "funds", "secure payment", "held payment", "protected funds"],
+    "questions": ["how does escrow work", "how does synapescrow protect payments", "what happens to funds before work starts"],
+    "content": "In SynapEscrow, the employer funds a milestone before work begins and the money is held in escrow while the freelancer completes that step. The funds stay protected until the milestone is reviewed and approved through the platform workflow."
+  },
+  {
+    "id": "milestone-overview",
+    "title": "How Milestones Work",
+    "category": "milestones",
+    "keywords": ["milestone", "milestones", "milestone flow", "milestone process", "project milestones"],
+    "questions": ["how do milestones work", "what are milestones", "how does milestone payment work", "how are projects split into milestones"],
+    "content": "SynapEscrow breaks a project into milestones so each stage has a deliverable, timeline, and payout amount or percentage. This makes project scope clearer and lets payment release happen step by step instead of waiting until the entire project is finished."
+  },
+  {
+    "id": "milestone-creation",
+    "title": "Creating Milestones",
+    "category": "milestones",
+    "keywords": ["create milestone", "create milestones", "milestone setup", "milestone creation", "deliverable", "timeline", "payout"],
+    "questions": ["how can i create milestones", "how do i create a milestone", "how should milestones be set up", "what should i include in a milestone"],
+    "content": "When creating milestones in SynapEscrow, define a clear milestone title, expected deliverable, acceptance criteria, timeline, and payout amount or percentage. The milestone plan should cover the whole project cleanly so progress and payment are easy to review."
+  },
+  {
+    "id": "login-freelancer",
+    "title": "Freelancer Login",
+    "category": "accounts",
+    "keywords": ["freelancer login", "login as freelancer", "freelancer sign in", "freelancer account access", "contractor login"],
+    "questions": ["how can i login as a freelancer", "how do i log in as freelancer", "where do freelancers sign in", "how can a freelancer access the dashboard"],
+    "content": "A freelancer logs in from the SynapEscrow sign-in page using the email and password used for the account. After signing in, SynapEscrow takes the user to the freelancer dashboard to manage proposals, projects, and milestone progress."
+  },
+  {
+    "id": "login-employer",
+    "title": "Employer Login",
+    "category": "accounts",
+    "keywords": ["employer login", "login as employer", "employer sign in", "client login", "employer account access"],
+    "questions": ["how can i login as an employer", "how do employers log in", "where do clients sign in", "how can an employer access the dashboard"],
+    "content": "An employer signs in from the SynapEscrow login page with the account email and password. After login, the employer dashboard is where projects can be posted, proposals reviewed, milestones funded, and releases managed."
+  },
+  {
+    "id": "signup-flow",
+    "title": "Signup Flow",
+    "category": "accounts",
+    "keywords": ["signup", "sign up", "register", "create account", "join synapescrow"],
+    "questions": ["how do i sign up", "how can i create an account", "how do new users register", "what is the signup flow"],
+    "content": "New users create a SynapEscrow account from the signup page by entering their account details and choosing the appropriate role. After registration, they can sign in and continue to the dashboard experience for that role."
+  },
+  {
+    "id": "dashboards",
+    "title": "Dashboards",
+    "category": "accounts",
+    "keywords": ["dashboard", "freelancer dashboard", "employer dashboard", "account home", "workspace"],
+    "questions": ["what is on the dashboard", "what dashboards does synapescrow have", "what can employers and freelancers see after login"],
+    "content": "SynapEscrow has role-based dashboards. Employers use their dashboard to manage projects, review proposals, fund milestones, and release payments, while freelancers use their dashboard to track proposals, active projects, submissions, and milestone status."
+  },
+  {
+    "id": "payment-release",
+    "title": "Payment Release",
+    "category": "escrow",
+    "keywords": ["release payment", "payment release", "release funds", "escrow release", "when payment releases"],
+    "questions": ["how is payment released", "when are funds released", "how do milestone payments get released", "how do employers release payment"],
+    "content": "Payment is released after a funded milestone is completed, reviewed, and approved in the SynapEscrow workflow. The employer checks the deliverable, and the release happens only after the required platform approval or verification step is satisfied."
+  },
+  {
+    "id": "disputes",
+    "title": "Disputes",
+    "category": "support",
+    "keywords": ["dispute", "payment dispute", "milestone dispute", "conflict", "issue", "support"],
+    "questions": ["what happens if there is a dispute", "how do disputes work", "what if employer and freelancer disagree", "how do i get help with a milestone issue"],
+    "content": "If there is a dispute about milestone quality, scope, or payment release, users should follow the SynapEscrow dispute process and contact support for review. SynapBot can explain the workflow, but final dispute handling depends on the platform's review process."
+  },
+  {
+    "id": "role-differences",
+    "title": "Employer and Freelancer Roles",
+    "category": "accounts",
+    "keywords": ["employer", "freelancer", "roles", "who does what", "account roles"],
+    "questions": ["what is the difference between employer and freelancer", "what can employers do", "what can freelancers do"],
+    "content": "Employers create projects, review proposals, fund milestones, and approve releases. Freelancers submit proposals, complete milestone deliverables, and track project progress from their own dashboard."
+  },
+  {
+    "id": "verification",
+    "title": "Verification Before Release",
+    "category": "verification",
+    "keywords": ["verification", "review", "approval", "quality check", "ai verification"],
+    "questions": ["does synapescrow verify work before release", "how are deliverables reviewed", "what happens before payment is approved"],
+    "content": "SynapEscrow includes a verification step to help review submitted milestone work before payment release. That guidance supports the employer's approval decision, but payment still follows the platform workflow rather than an automatic promise from the bot."
+  },
+  {
+    "id": "ranking-overview",
+    "title": "Freelancer Ranking and Matching",
+    "category": "ranking",
+    "keywords": ["ranking", "matching", "recommendation", "freelancer ranking", "ml ranking"],
+    "questions": ["how are freelancers ranked", "does synapescrow recommend freelancers", "how does matching work"],
+    "content": "SynapEscrow includes a ranking flow that helps surface freelancers using signals such as profile quality, skills relevance, and reliability-related information. Rankings are advisory and depend on the available project and profile data."
+  }
+]

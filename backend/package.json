@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.1",
     "mongoose": "^8.5.1",
+    "openai": "^4.57.0",
     "pg": "^8.20.0",
     "prisma": "^7.6.0"
   },

@@ -60,7 +60,7 @@ app.get('/debug/proposals', async (req, res) => {
 
 const { chatBotController } = require('./controllers/aiController');
 app.post('/api/chat', (req, res, next) => {
-  console.log(`🤖 Chatbot request received: ${req.body.message?.substring(0, 50)}...`);
+  console.log(`🤖 SynapBot request received: ${req.body.message?.substring(0, 50)}...`);
   next();
 }, chatBotController);
 

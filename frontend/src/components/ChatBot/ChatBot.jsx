@@ -5,6 +5,7 @@ import ChatButton from './ChatButton';
 import ChatPanel from './ChatPanel';
 
 const POP_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,8 +66,8 @@ const ChatBot = () => {
     const currentPage = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
 
     try {
-      // 3. API Call to Backend (Strictly port 5000)
-      const res = await fetch("http://localhost:5000/api/chat", {
+      // 3. API Call to backend SynapBot route
+      const res = await fetch(`${API_BASE_URL}/api/ai/synapbot/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -85,7 +86,7 @@ const ChatBot = () => {
       }
 
       const data = await res.json();
-      const aiReply = data.reply;
+      const aiReply = data.reply || "I am not sure based on the available SynapEscrow knowledge. Please contact support or rephrase your question.";
 
       // 4. Update UI with AI Response
       const botMessage = {
@@ -104,7 +105,7 @@ const ChatBot = () => {
       
       const errorMessage = {
         role: "assistant",
-        content: `I'm sorry, I'm having trouble connecting to my brain right now (${err.message}).`
+        content: `I am not sure right now due to a connection issue (${err.message}). Please try again or contact support.`
       };
       setMessages(prev => [...prev, errorMessage]);
       speak(errorMessage.content);

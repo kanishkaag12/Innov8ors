@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { analyzeRequirement, generateProposalController } = require("../controllers/aiController");
+const { analyzeRequirement, generateProposalController, chatBotController } = require("../controllers/aiController");
 const { verifyMilestone } = require("../controllers/qualityController");
 const { authenticateToken } = require("../middleware/authMiddleware");
 
@@ -14,5 +14,8 @@ router.post("/generate-proposal", authenticateToken, generateProposalController)
 
 /* github repo code analyzer */
 router.post("/verify-milestone", verifyMilestone);
+
+/* SynapBot platform support assistant */
+router.post("/synapbot/chat", chatBotController);
 
 module.exports = router;
