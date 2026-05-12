@@ -6,38 +6,6 @@ A full-stack platform built on modern tech: Node.js, Next.js, Python ML, and mic
 
 ---
 
-## ⚠️ CRITICAL SECURITY NOTICE
-
-**If you see credentials in Git history:**
-
-Your repository has previously exposed API keys and database credentials. If you're seeing this notice, they have been **replaced with placeholders** in the current version.
-
-**ACTION REQUIRED:**
-1. **Immediately revoke all exposed credentials:**
-   - OpenAI API keys
-   - Groq API keys
-   - Gemini API keys
-   - Razorpay keys
-   - GitHub tokens
-   - MongoDB credentials
-   - Any other API keys
-
-2. **Generate new credentials:**
-   - Create new API keys at each provider's dashboard
-   - Update your `.env` files with new credentials (locally only)
-   - Never commit real credentials again
-
-3. **Cleanup git history (if needed):**
-   - Consider using `git filter-repo` or `BFG Repo Cleaner` to remove sensitive data from history
-   - Or, create a fresh clone with only necessary branches
-
-4. **Always use `.env.example` files:**
-   - Copy `.env.example` to `.env`
-   - Replace placeholders with real credentials locally
-   - `.env` files are git-ignored and won't be committed
-
----
-
 ## 📑 Table of Contents
 
 - [Project Overview](#-project-overview)
@@ -735,32 +703,20 @@ test: add test cases
 
 ### Environment Setup for Production
 
-**⚠️ IMPORTANT: NEVER commit real credentials to git!**
-
 Update environment variables for production:
 
 **Backend (.env)**
 ```env
 NODE_ENV=production
 PORT=5000
-JWT_SECRET=use_strong_secret_key_here_minimum_32_characters
-MONGO_URI=mongodb+srv://your_username:your_password@your_cluster.mongodb.net/synapescrow?retryWrites=true&w=majority
-GEMINI_API_KEY=your_production_gemini_key
-GROQ_API_KEY=your_production_groq_key
-OPENAI_API_KEY=your_production_openai_key
+JWT_SECRET=use_strong_secret_key_here
+MONGO_URI=mongodb+srv://production:creds@cluster.mongodb.net/synapescrow
 ```
 
 **Frontend (.env.production.local)**
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com
-NEXT_PUBLIC_RAZORPAY_KEY_ID=your_production_razorpay_public_key
 ```
-
-**Use environment variable management services for production:**
-- Heroku Config Vars
-- AWS Secrets Manager
-- GitHub Secrets (for CI/CD)
-- HashiCorp Vault
 
 ### Deployment Platforms
 
