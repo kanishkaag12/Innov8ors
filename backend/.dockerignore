@@ -1,0 +1,26 @@
+node_modules
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.log
+.vscode
+.git
+.gitignore
+tmp/
+temp/
+generated/
+dev.db
+Dockerfile
+# Test/debug scripts – not needed in production image
+check_*.js
+debug_*.js
+diagnose_*.js
+discover-model.js
+fix_*.js
+initialize_*.js
+list-models*.js
+test-*.js
+tmp-test.js
+seed.js
+backend-*.log

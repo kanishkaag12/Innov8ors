@@ -22,7 +22,8 @@ exports.getUserConversations = async (req, res) => {
     
     const conversations = await Conversation.find({ participants: req.user._id })
       .sort({ lastMessageAt: -1 })
-      .populate('proposalId', 'projectTitle');
+      .populate('proposalId', 'projectTitle')
+      .populate('participants', 'name role');
 
     console.log('🔍 Found conversations:', conversations.length, 'for user:', req.user._id);
 
@@ -34,10 +35,16 @@ exports.getUserConversations = async (req, res) => {
 
       const unreadCount = getUnreadCount(conversation, userIdStr);
 
+      const otherParticipant = conversation.participants.find(
+        (p) => String(p._id || p) !== userIdStr
+      );
+
       return {
         id: conversation._id,
         projectId: conversation.projectId,
         projectTitle: conversation.proposalId?.projectTitle || 'Project conversation',
+        otherParticipantName: otherParticipant ? otherParticipant.name : 'Unknown User',
+        otherParticipantRole: otherParticipant ? otherParticipant.role : 'user',
         participants: conversation.participants,
         lastMessage: lastMessage?.text || 'No messages yet',
         lastMessageAt: conversation.lastMessageAt,
@@ -79,14 +86,16 @@ exports.getUnreadCount = async (req, res) => {
 exports.getConversationById = async (req, res) => {
   try {
     const { id } = req.params;
-    const conversation = await Conversation.findById(id).populate('proposalId', 'projectTitle');
+    const conversation = await Conversation.findById(id)
+      .populate('proposalId', 'projectTitle')
+      .populate('participants', 'name role');
 
     if (!conversation) {
       return res.status(404).json({ message: 'Conversation not found.' });
     }
 
     const isParticipant = conversation.participants.some((participant) =>
-      String(participant) === String(req.user._id)
+      String(participant._id || participant) === String(req.user._id)
     );
 
     if (!isParticipant) {
@@ -100,11 +109,17 @@ exports.getConversationById = async (req, res) => {
     const userIdStr = String(req.user._id);
     const unreadCount = getUnreadCount(conversation, userIdStr);
 
+    const otherParticipant = conversation.participants.find(
+      (p) => String(p._id || p) !== userIdStr
+    );
+
     return res.status(200).json({
       conversation: {
         id: conversation._id,
         projectId: conversation.projectId,
         projectTitle: conversation.proposalId?.projectTitle || 'Project conversation',
+        otherParticipantName: otherParticipant ? otherParticipant.name : 'Unknown User',
+        otherParticipantRole: otherParticipant ? otherParticipant.role : 'user',
         participants: conversation.participants,
         lastMessageAt: conversation.lastMessageAt,
         unreadCount: unreadCount

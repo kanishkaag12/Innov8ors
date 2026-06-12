@@ -7,14 +7,24 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const app = express();
 
+// CORS: allow local dev, Docker-networked frontend, and production domain.
+// Override via CORS_ORIGINS env var (comma-separated list).
+const DEFAULT_ORIGINS = [
+  'http://localhost',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://frontend:3000',           // Docker service-to-service
+  process.env.PRODUCTION_ORIGIN,   // e.g. https://synapescrow.com
+].filter(Boolean);
+
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+  : DEFAULT_ORIGINS;
+
 app.use(
   cors({
-    origin: [
-      'http://localhost',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002'
-    ],
+    origin: allowedOrigins,
     credentials: true
   })
 );

@@ -45,4 +45,30 @@ const contractSchema = new mongoose.Schema(
   }
 );
 
+contractSchema.post('save', function (doc) {
+  if (doc.freelancerId) {
+    setImmediate(async () => {
+      try {
+        const PFIService = require('../services/pfiService');
+        await PFIService.calculatePFIScore(String(doc.freelancerId), 'profile_update', ['rehire_occurred']);
+      } catch (err) {
+        console.error('[PFI Hook] Failed to recalculate PFI after contract save:', err.message);
+      }
+    });
+  }
+});
+
+contractSchema.post('findOneAndUpdate', function (doc) {
+  if (doc && doc.freelancerId) {
+    setImmediate(async () => {
+      try {
+        const PFIService = require('../services/pfiService');
+        await PFIService.calculatePFIScore(String(doc.freelancerId), 'profile_update', ['rehire_occurred']);
+      } catch (err) {
+        console.error('[PFI Hook] Failed to recalculate PFI after contract update:', err.message);
+      }
+    });
+  }
+});
+
 module.exports = mongoose.model('Contract', contractSchema);

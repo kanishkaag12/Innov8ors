@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ChatButton from './ChatButton';
 import ChatPanel from './ChatPanel';
 
@@ -15,31 +15,70 @@ const ChatBot = () => {
   const [isTalking, setIsTalking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const soundEnabledRef = useRef(soundEnabled);
+  const messagesRef = useRef(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const playSound = useCallback(() => {
-    if (soundEnabled) {
+    if (soundEnabledRef.current) {
       const audio = new Audio(POP_SOUND_URL);
       audio.volume = 0.4;
       audio.play().catch(e => console.log('Sound play blocked:', e));
     }
-  }, [soundEnabled]);
+  }, []);
 
   const speak = useCallback((text) => {
-    if (!soundEnabled || !window.speechSynthesis) return;
+    if (!window.speechSynthesis) return;
     
-    // Stop any current speech
+    // Stop any current speech queue before starting a new one
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
     utterance.pitch = 1.1; // Slightly more 'robot' cute pitch
     
-    utterance.onstart = () => setIsTalking(true);
+    utterance.onstart = () => {
+      if (soundEnabledRef.current) {
+        setIsTalking(true);
+      }
+    };
     utterance.onend = () => setIsTalking(false);
     utterance.onerror = () => setIsTalking(false);
 
     window.speechSynthesis.speak(utterance);
-  }, [soundEnabled]);
+
+    // If muted, start it in paused state so it can be resumed later
+    if (!soundEnabledRef.current) {
+      window.speechSynthesis.pause();
+    }
+  }, []);
+
+  // Sync ref and handle real-time mute/unmute (pause/resume)
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      if (!soundEnabled) {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause();
+        }
+        setIsTalking(false);
+      } else {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+          setIsTalking(true);
+        } else if (!window.speechSynthesis.speaking) {
+          // If not currently active or paused, but we have a last message, play it from start
+          const lastMessage = messagesRef.current[messagesRef.current.length - 1];
+          if (lastMessage && lastMessage.role === 'assistant') {
+            speak(lastMessage.content);
+          }
+        }
+      }
+    }
+  }, [soundEnabled, speak]);
 
   const handleSendMessage = async (input) => {
     if (!input.trim()) return;
@@ -52,9 +91,11 @@ const ChatBot = () => {
     // 2. Start Loading State
     setIsListening(true);
 
-    // Detect context
+    // Detect context and retrieve token
     let userRole = 'Guest';
+    let token = null;
     if (typeof window !== 'undefined') {
+      token = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         try {
@@ -67,11 +108,16 @@ const ChatBot = () => {
 
     try {
       // 3. API Call to backend SynapBot route
+      const headers = {
+        "Content-Type": "application/json"
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/ai/synapbot/chat`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers,
         body: JSON.stringify({
           message: input,
           history: messages,

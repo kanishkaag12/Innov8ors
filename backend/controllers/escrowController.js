@@ -243,10 +243,16 @@ exports.approvePartial = async (req, res) => {
     // Calculate pro-rated amount based on completion percentage
     const percentage = Number(milestone.completion_percentage || 100);
     const totalAmount = Number(milestone.payment_amount || 0);
-    const amountToRelease = Number(((totalAmount * percentage) / 100).toFixed(2));
+    const amountAlreadyPaid = Number(milestone.amount_paid || 0);
+    
+    // Target total amount to be paid after this approval
+    const targetTotalAmount = Number(((totalAmount * percentage) / 100).toFixed(2));
+    
+    // Incremental amount to release now
+    let amountToRelease = Number((targetTotalAmount - amountAlreadyPaid).toFixed(2));
 
     console.log(`[APPROVE_PARTIAL] Milestone: ${milestone.title}`);
-    console.log(`[APPROVE_PARTIAL] Config: Percentage=${percentage}%, TotalBudget=${totalAmount}`);
+    console.log(`[APPROVE_PARTIAL] Config: Percentage=${percentage}%, TotalBudget=${totalAmount}, Already Paid=${amountAlreadyPaid}`);
     console.log(`[APPROVE_PARTIAL] Target Release: ${amountToRelease}`);
     console.log(`[APPROVE_PARTIAL] Current Escrow: Remaining=${escrow.remainingAmount}, Released=${escrow.releasedAmount}`);
 
@@ -254,7 +260,14 @@ exports.approvePartial = async (req, res) => {
       throw new Error('Unauthorized to release these funds. You are not the owner of this project escrow.');
     }
 
-    if (amountToRelease <= 0) throw new Error('Amount must be greater than zero');
+    if (amountToRelease <= 0) {
+      throw new Error(`Nothing to release. The freelancer has already received ₹${amountAlreadyPaid} which is equal to or greater than the requested ${percentage}% payout.`);
+    }
+
+    if (amountToRelease > milestone.amount_remaining + 0.01) {
+      amountToRelease = milestone.amount_remaining;
+    }
+
     if (amountToRelease > escrow.remainingAmount + 0.01) { // Floating point safety
       throw new Error(`Insufficient funds in escrow. Requested: ${amountToRelease}, Max Available: ${escrow.remainingAmount}`);
     }
@@ -489,6 +502,13 @@ exports.refundEscrow = async (req, res) => {
 exports.getWallet = async (req, res) => {
   try {
     const userId = req.params.userId;
+    const requesterId = String(req.user?._id || req.user?.id || '');
+    const requesterRole = String(req.user?.role || '').toLowerCase();
+
+    if (requesterRole !== 'admin' && requesterId !== String(userId)) {
+      return res.status(403).json({ error: 'Forbidden: wallet access denied.' });
+    }
+
     const user = await User.findById(userId).select('balance escrowLocked role');
     if (!user) return res.status(404).json({ error: 'User not found' });
     
@@ -510,6 +530,13 @@ exports.getWallet = async (req, res) => {
 exports.getTransactions = async (req, res) => {
   try {
     const userId = req.params.userId;
+    const requesterId = String(req.user?._id || req.user?.id || '');
+    const requesterRole = String(req.user?.role || '').toLowerCase();
+
+    if (requesterRole !== 'admin' && requesterId !== String(userId)) {
+      return res.status(403).json({ error: 'Forbidden: transaction access denied.' });
+    }
+
     const transactions = await Transaction.find({ userId }).sort({ createdAt: -1 });
     res.status(200).json({ transactions });
   } catch (error) {

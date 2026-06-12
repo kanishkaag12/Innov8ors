@@ -2,6 +2,9 @@ const Project = require('../models/Project');
 const Proposal = require('../models/Proposal');
 const Milestone = require('../models/Milestone');
 const User = require('../models/User');
+const Contract = require('../models/Contract');
+const Job = require('../models/Job');
+const mongoose = require('mongoose');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -91,6 +94,23 @@ async function listProjects(req, res) {
 
     if (role === 'employer' || role === 'client') {
       query.employer_id = req.user._id;
+    } else if (role === 'freelancer') {
+      const activeContracts = await Contract.find({
+        freelancerId: req.user._id,
+        status: 'active'
+      })
+        .select('projectId')
+        .lean();
+
+      const scopedProjectIds = activeContracts
+        .map((contract) => String(contract.projectId || '').trim())
+        .filter((id) => mongoose.Types.ObjectId.isValid(id));
+
+      if (!scopedProjectIds.length) {
+        return res.status(200).json({ projects: [] });
+      }
+
+      query._id = { $in: scopedProjectIds };
     } else if (req.query?.employerId) {
       query.employer_id = req.query.employerId;
     }
@@ -118,7 +138,13 @@ async function listProjects(req, res) {
 
     const enriched = projects.map((project) => {
       const proposalList = byProjectId.get(String(project._id)) || [];
-      const applicants = proposalList.map((proposal) => ({
+      const applicantSource = role === 'freelancer'
+        ? proposalList.filter(
+            (proposal) => String(proposal.freelancerId?._id || proposal.freelancerId) === String(req.user._id)
+          )
+        : proposalList;
+
+      const applicants = applicantSource.map((proposal) => ({
         name: proposal.freelancerName || proposal?.freelancerId?.name || 'Freelancer',
         email: proposal.freelancerEmail || proposal?.freelancerId?.email || '',
         pfiScore: toNumber(proposal?.freelancerId?.pfi_score, 0),
@@ -129,7 +155,7 @@ async function listProjects(req, res) {
       }));
 
       const plain = project.toObject();
-      plain.interestedCount = proposalList.length;
+      plain.interestedCount = applicants.length;
       plain.applicants = applicants;
       return plain;
     });
@@ -155,11 +181,21 @@ async function getProjectById(req, res) {
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    if (
-      (role === 'employer' || role === 'client') &&
-      String(project.employer_id?._id || project.employer_id) !== String(req.user?._id)
-    ) {
+    const isEmployerOwner =
+      String(project.employer_id?._id || project.employer_id) === String(req.user?._id);
+    const isAssignedFreelancer =
+      String(project.freelancer_id?._id || project.freelancer_id) === String(req.user?._id);
+
+    const hasFreelancerProposal = role === 'freelancer'
+      ? await Proposal.exists({ projectId: String(project._id), freelancerId: req.user._id })
+      : false;
+
+    if ((role === 'employer' || role === 'client') && !isEmployerOwner) {
       return res.status(403).json({ message: 'You can only access your own projects.' });
+    }
+
+    if (role === 'freelancer' && !isAssignedFreelancer && !hasFreelancerProposal) {
+      return res.status(403).json({ message: 'You can only access projects you are involved in.' });
     }
 
     const proposals = await Proposal.find({ projectId: String(project._id) })
@@ -167,7 +203,13 @@ async function getProjectById(req, res) {
       .sort({ createdAt: -1 })
       .lean();
 
-    const applicants = proposals.map((proposal) => ({
+    const applicantSource = role === 'freelancer'
+      ? proposals.filter(
+          (proposal) => String(proposal.freelancerId?._id || proposal.freelancerId) === String(req.user._id)
+        )
+      : proposals;
+
+    const applicants = applicantSource.map((proposal) => ({
       name: proposal.freelancerName || proposal?.freelancerId?.name || 'Freelancer',
       email: proposal.freelancerEmail || proposal?.freelancerId?.email || '',
       pfiScore: toNumber(proposal?.freelancerId?.pfi_score, 0),
@@ -178,7 +220,7 @@ async function getProjectById(req, res) {
     }));
 
     const plain = project.toObject();
-    plain.interestedCount = proposals.length;
+    plain.interestedCount = applicants.length;
     plain.applicants = applicants;
 
     return res.status(200).json({ project: plain });
@@ -191,10 +233,28 @@ async function getProjectById(req, res) {
 async function getProjectMilestones(req, res) {
   try {
     const { id } = req.params;
+    const role = String(req.user?.role || '').toLowerCase();
     const project = await Project.findById(id).populate('milestones');
 
     if (!project) {
       return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    const isEmployerOwner =
+      String(project.employer_id?._id || project.employer_id) === String(req.user?._id);
+    const isAssignedFreelancer =
+      String(project.freelancer_id?._id || project.freelancer_id) === String(req.user?._id);
+
+    const hasFreelancerProposal = role === 'freelancer'
+      ? await Proposal.exists({ projectId: String(project._id), freelancerId: req.user._id })
+      : false;
+
+    if ((role === 'employer' || role === 'client') && !isEmployerOwner) {
+      return res.status(403).json({ message: 'You can only access your own project milestones.' });
+    }
+
+    if (role === 'freelancer' && !isAssignedFreelancer && !hasFreelancerProposal) {
+      return res.status(403).json({ message: 'You can only access milestones for projects you are involved in.' });
     }
 
     return res.status(200).json({ milestones: project.milestones || [] });
@@ -228,7 +288,8 @@ async function deleteProject(req, res) {
     await Promise.all([
       Milestone.deleteMany({ project_id: project._id }),
       Proposal.deleteMany({ projectId: String(project._id) }),
-      Project.deleteOne({ _id: project._id })
+      Project.deleteOne({ _id: project._id }),
+      Job.deleteOne({ _id: project._id })
     ]);
 
     return res.status(200).json({ message: 'Project deleted successfully.' });

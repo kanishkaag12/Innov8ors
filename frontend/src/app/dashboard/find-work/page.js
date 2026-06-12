@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getStoredAuth } from '@/services/auth';
 import {
+  createProposal,
   generateProposal,
   getJobMatches,
   getSavedJobs,
@@ -72,6 +73,11 @@ export default function FindWorkPage() {
   const [proposalText, setProposalText] = useState('');
   const [proposalLoading, setProposalLoading] = useState(false);
   const [savingId, setSavingId] = useState('');
+  const [bidAmount, setBidAmount] = useState('');
+  const [deliveryDays, setDeliveryDays] = useState('14');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     setAuth(getStoredAuth());
@@ -194,6 +200,11 @@ export default function FindWorkPage() {
   const handleOpenQuickApply = async (job) => {
     setDrawerJob(job);
     setProposalText('');
+    const defaultBid = job.budgetMax || job.budgetMin || '';
+    setBidAmount(String(defaultBid));
+    setDeliveryDays('14');
+    setSubmitSuccess(false);
+    setSubmitError('');
 
     if (auth?.token && freelancerId) {
       try {
@@ -204,6 +215,45 @@ export default function FindWorkPage() {
       } catch (interactionError) {
         console.debug('View interaction failed:', interactionError.message);
       }
+    }
+  };
+
+  const handleSubmitProposal = async () => {
+    if (!auth?.token || !drawerJob || !proposalText) {
+      setSubmitError('Proposal text is required.');
+      return;
+    }
+
+    setSubmitLoading(true);
+    setSubmitError('');
+
+    const payload = {
+      projectId: drawerJob._id,
+      projectTitle: drawerJob.title,
+      projectDescription: drawerJob.description,
+      projectBudget: drawerJob.budgetMax || drawerJob.budgetMin,
+      requiredSkills: drawerJob.requiredSkills,
+      employerName: drawerJob.employerName,
+      proposalText,
+      bidAmount: Number(bidAmount) || undefined,
+      estimatedDeliveryDays: Number(deliveryDays) || undefined
+    };
+
+    try {
+      await createProposal(payload, auth.token);
+      setSubmitSuccess(true);
+      
+      // Track interactive apply interaction
+      await trackJobInteraction(
+        { freelancerId, jobId: drawerJob._id, action: 'apply', metadata: { source: 'quick-apply' } },
+        auth.token
+      ).catch(() => null);
+
+    } catch (err) {
+      console.error('Submit proposal failed:', err);
+      setSubmitError(err.response?.data?.message || 'Failed to submit proposal. Please try again.');
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -438,8 +488,8 @@ export default function FindWorkPage() {
                               {job.projectType}
                             </span>
                             {job.matchScore != null ? (
-                              <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getMatchStyles(job.matchScore)}`}>
-                                {job.matchScore}% match
+                              <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getMatchStyles(job.matchScore > 100 ? Math.min(99, Math.round(job.matchScore / 15)) : job.matchScore)}`}>
+                                {job.matchScore > 100 ? Math.min(99, Math.round(job.matchScore / 15)) : job.matchScore}% match
                               </span>
                             ) : null}
                           </div>
@@ -532,74 +582,156 @@ export default function FindWorkPage() {
       </div>
 
       {drawerJob ? (
-        <div className="fixed inset-0 z-50 bg-slate-950/35 backdrop-blur-[2px]">
-          <div className="ml-auto flex h-full w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+        <div 
+          onClick={() => setDrawerJob(null)}
+          className="fixed inset-0 z-[100] bg-slate-950/45 backdrop-blur-[3px] flex justify-end transition-opacity duration-300"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="flex h-full w-full max-w-2xl flex-col bg-white shadow-2xl border-l border-slate-100 animate-slide-in"
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5 bg-slate-50/50">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Quick Apply</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{drawerJob.title}</h2>
-                <p className="mt-2 text-sm text-slate-500">
-                  {drawerJob.employerName || 'SynapEscrow Client'} • {formatBudget(drawerJob)} • {drawerJob.category}
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Quick Apply with AI</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900">{drawerJob.title}</h2>
+                <p className="mt-2 text-sm text-slate-500 font-medium">
+                  {drawerJob.employerName || 'SynapEscrow Client'} • <span className="text-emerald-700 font-semibold">{formatBudget(drawerJob)}</span> • {drawerJob.category}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setDrawerJob(null)}
-                className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50"
+                className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
-              <section>
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Why this job may fit</h3>
-                <div className="mt-3 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                  {drawerJob.matchScore != null ? (
-                    <p>
-                      AI ranked this role at <span className="font-semibold text-slate-900">{drawerJob.matchScore}%</span>{' '}
-                      cosine similarity against your profile embedding.
-                    </p>
-                  ) : (
-                    <p>This role is being shown from the latest posting feed.</p>
-                  )}
-                  {drawerJob.overlappingSkills?.length ? (
-                    <p className="mt-3">
-                      Matching skills: <span className="font-semibold text-emerald-700">{drawerJob.overlappingSkills.join(', ')}</span>
-                    </p>
-                  ) : null}
-                </div>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Job Description</h3>
-                <div className="mt-3 rounded-2xl border border-slate-200 p-4 text-sm leading-6 text-slate-600">
-                  {drawerJob.description}
-                </div>
-              </section>
-
-              <section>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Proposal Draft</h3>
+            {/* Scrollable Content */}
+            <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6 pb-6">
+              {submitSuccess ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-4 animate-bounce">
+                    <Sparkles size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900">Proposal Submitted!</h3>
+                  <p className="mt-2 text-sm text-slate-500 max-w-sm">
+                    Your proposal has been successfully submitted to {drawerJob.employerName || 'the client'}. They will contact you shortly if it's a match.
+                  </p>
                   <button
                     type="button"
-                    onClick={handleGenerateProposal}
-                    disabled={proposalLoading}
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                    onClick={() => setDrawerJob(null)}
+                    className="mt-6 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
-                    <Sparkles size={14} />
-                    {proposalLoading ? 'Generating' : 'Draft with AI'}
+                    Close Drawer
                   </button>
                 </div>
+              ) : (
+                <>
+                  <section>
+                    <h3 className="text-xs font-bold uppercase tracking-wide text-slate-400">Why this job may fit</h3>
+                    <div className="mt-2.5 rounded-2xl bg-gradient-to-r from-emerald-50/50 to-teal-50/50 border border-emerald-100 p-4 text-sm leading-6 text-slate-600">
+                      {drawerJob.matchScore != null ? (
+                        <p>
+                          AI matched this role at <span className="font-bold text-emerald-800">{drawerJob.matchScore > 100 ? Math.min(99, Math.round(drawerJob.matchScore / 15)) : drawerJob.matchScore}%</span> cosine similarity against your profile.
+                        </p>
+                      ) : (
+                        <p>This role is being shown from the latest posting feed.</p>
+                      )}
+                      {drawerJob.overlappingSkills?.length ? (
+                        <p className="mt-2">
+                          Matching skills: <span className="font-semibold text-emerald-700">{drawerJob.overlappingSkills.join(', ')}</span>
+                        </p>
+                      ) : null}
+                    </div>
+                  </section>
 
-                <textarea
-                  value={proposalText}
-                  onChange={(event) => setProposalText(event.target.value)}
-                  placeholder="Generate a proposal draft or write your own here."
-                  className="mt-3 h-72 w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 outline-none transition focus:border-emerald-400 focus:bg-white"
-                />
-              </section>
+                  <section>
+                    <h3 className="text-xs font-bold uppercase tracking-wide text-slate-400">Job Description</h3>
+                    <div className="mt-2.5 rounded-2xl border border-slate-100 bg-slate-50/30 p-4 text-sm leading-7 text-slate-600 max-h-48 overflow-y-auto">
+                      {drawerJob.description}
+                    </div>
+                  </section>
+
+                  {/* Pricing and Delivery Parameters */}
+                  <section className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block">
+                        <span className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Your Bid Amount ($)</span>
+                        <input
+                          type="number"
+                          value={bidAmount}
+                          onChange={(e) => setBidAmount(e.target.value)}
+                          placeholder="e.g. 500"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-400 focus:bg-white"
+                        />
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block">
+                        <span className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Estimated Delivery (Days)</span>
+                        <input
+                          type="number"
+                          value={deliveryDays}
+                          onChange={(e) => setDeliveryDays(e.target.value)}
+                          placeholder="e.g. 14"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-400 focus:bg-white"
+                        />
+                      </label>
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-wide text-slate-400">Proposal Cover Letter</h3>
+                      <button
+                        type="button"
+                        onClick={handleGenerateProposal}
+                        disabled={proposalLoading}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
+                      >
+                        <Sparkles size={12} />
+                        {proposalLoading ? 'Drafting...' : 'Draft with AI'}
+                      </button>
+                    </div>
+
+                    <textarea
+                      value={proposalText}
+                      onChange={(event) => setProposalText(event.target.value)}
+                      placeholder="Write your cover letter here, or use the Draft with AI button above to generate one customized to the job description and your profile."
+                      className="mt-3 h-64 w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-4 text-sm leading-6 text-slate-700 outline-none transition focus:border-emerald-400 focus:bg-white resize-none"
+                    />
+                  </section>
+                </>
+              )}
             </div>
+
+            {/* Bottom Actions */}
+            {!submitSuccess && (
+              <div className="border-t border-slate-100 bg-white px-6 py-4 flex items-center justify-between gap-4 shrink-0 z-10">
+                <div className="text-xs text-red-500 font-semibold max-w-xs truncate">
+                  {submitError}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setDrawerJob(null)}
+                    className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmitProposal}
+                    disabled={submitLoading || !proposalText}
+                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-slate-800 disabled:opacity-50"
+                  >
+                    {submitLoading ? 'Submitting...' : 'Submit Proposal'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : null}

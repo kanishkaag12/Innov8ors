@@ -64,16 +64,54 @@ async function collectRepoFiles(apiUrl, headers, repoFiles, visitedUrls = new Se
     response = await axios.get(apiUrl, { headers });
   } catch (error) {
     const statusCode = error?.response?.status;
-    if (statusCode === 404) {
-      throw new Error("GitHub repository not found. Please check the repo URL and visibility settings.");
+    if (statusCode === 401 && headers.Authorization) {
+      console.warn("⚠️ GitHub API returned 401 with token. Retrying without Authorization header for public repo...");
+      delete headers.Authorization; // Mutate headers object permanently for future/recursive calls
+      try {
+        response = await axios.get(apiUrl, { headers });
+      } catch (retryError) {
+        if (retryError?.response?.status === 404) {
+          throw new Error("GitHub repository not found. Please check the repo URL and visibility settings.");
+        }
+        throw new Error(`Failed to fetch repository contents (public fallback): ${retryError.message}`);
+      }
+    } else {
+      if (statusCode === 404) {
+        throw new Error("GitHub repository not found. Please check the repo URL and visibility settings.");
+      }
+      throw new Error(`Failed to fetch repository contents: ${error.message}`);
     }
-    throw new Error(`Failed to fetch repository contents: ${error.message}`);
   }
 
   const files = Array.isArray(response.data) ? response.data : [];
 
+  const IGNORED_DIRS = new Set([
+    "node_modules",
+    "bower_components",
+    "dist",
+    "build",
+    "out",
+    ".next",
+    ".nuxt",
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "target",
+    "bin",
+    "obj",
+    ".git",
+    ".github",
+    ".idea",
+    ".vscode"
+  ]);
+
   for (const file of files) {
     if (file.type === "dir" && file.url) {
+      const dirName = file.name.toLowerCase();
+      if (IGNORED_DIRS.has(dirName)) {
+        continue;
+      }
       await collectRepoFiles(file.url, headers, repoFiles, visitedUrls, summary);
       continue;
     }
@@ -193,7 +231,18 @@ async function getRepoCode(repoUrl, milestoneText = "", projectTitle = "") {
       break;
     }
 
-    const fileData = await axios.get(file.download_url, { headers });
+    let fileData;
+    try {
+      fileData = await axios.get(file.download_url, { headers });
+    } catch (err) {
+      if (err.response?.status === 401 && headers.Authorization) {
+        const publicHeaders = { ...headers };
+        delete publicHeaders.Authorization;
+        fileData = await axios.get(file.download_url, { headers: publicHeaders });
+      } else {
+        throw err;
+      }
+    }
     const trimmed = trimFileContent(fileData.data);
     const remaining = MAX_TOTAL_CHARS - totalChars;
     const finalSnippet =

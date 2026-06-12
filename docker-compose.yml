@@ -1,0 +1,202 @@
+# =============================================================================
+# SynapEscrow – Docker Compose
+# =============================================================================
+# Quick start:
+#   cp .env.example .env   # fill in real secrets
+#   docker compose up --build
+#
+# Services:
+#   frontend          – Next.js 14   (port 3000)
+#   backend           – Express 4    (port 5000)
+#   embedding-service – FastAPI      (port 8001, internal only)
+#   ml-ranking-system – FastAPI      (port 8000, internal only)
+#
+# Databases (cloud-only):
+#   MongoDB Atlas   – configured via MONGO_URI / MONGODB_URI
+#   Neon PostgreSQL – configured via DATABASE_URL (backend) and DATABASE_URL (ml-ranking-system)
+#
+# Internal Docker network: synapnet
+# =============================================================================
+
+networks:
+  synapnet:
+    driver: bridge
+
+volumes:
+  # Shared volume: lets the backend Node.js process spawn
+  # ml-ranking-system/08_model_predict.py as a child process
+  # while also keeping .pkl model files accessible.
+  ml_model_data:
+    driver: local
+
+# ---------------------------------------------------------------------------
+services:
+
+  # ──────────────────────────────────────────────
+  # EMBEDDING SERVICE  (FastAPI · port 8001)
+  # ──────────────────────────────────────────────
+  embedding-service:
+    build:
+      context: ./embedding-service
+      dockerfile: Dockerfile
+    container_name: synapescrow-embedding
+    restart: unless-stopped
+    networks:
+      - synapnet
+    expose:
+      - "8001"
+    # No secrets needed – pure model inference
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ──────────────────────────────────────────────
+  # ML RANKING SYSTEM  (FastAPI · port 8000)
+  # ──────────────────────────────────────────────
+  ml-ranking-system:
+    build:
+      context: ./ml-ranking-system
+      dockerfile: Dockerfile
+    container_name: synapescrow-ml
+    restart: unless-stopped
+    networks:
+      - synapnet
+    expose:
+      - "8000"
+    volumes:
+      # Expose ml-ranking-system directory so the backend can call
+      # 08_model_predict.py as a child process using ML_SYSTEM_DIR.
+      - ml_model_data:/app
+    environment:
+      # Neon PostgreSQL (same DB as backend Prisma)
+      DATABASE_URL: ${ML_DATABASE_URL}
+      DB_HOST:      ${ML_DB_HOST:-}
+      DB_PORT:      ${ML_DB_PORT:-5432}
+      DB_NAME:      ${ML_DB_NAME:-synapescrow_ml}
+      DB_USER:      ${ML_DB_USER:-postgres}
+      DB_PASSWORD:  ${ML_DB_PASSWORD:-}
+      # ML model paths inside the container
+      ML_MODEL_PATH:  /app/ranking_model.pkl
+      ML_SCALER_PATH: /app/scaler.pkl
+      # API settings
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DEBUG:     ${DEBUG:-false}
+      # CORS – only backend needs it
+      ALLOWED_ORIGINS: "http://backend:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ──────────────────────────────────────────────
+  # BACKEND  (Express · port 5000)
+  # Depends on: embedding-service, ml-ranking-system
+  # ──────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: synapescrow-backend
+    restart: unless-stopped
+    depends_on:
+      embedding-service:
+        condition: service_healthy
+      ml-ranking-system:
+        condition: service_healthy
+    networks:
+      - synapnet
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    volumes:
+      # Mount ml-ranking-system source so Node can spawn Python child processes.
+      # Maps to the same path that mlModelService.js resolves:
+      #   path.join(__dirname, '..', '..', 'ml-ranking-system')
+      - ml_model_data:/ml-ranking-system
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: "5000"
+
+      # ── MongoDB (Atlas) ──────────────────────────────
+      MONGO_URI:    ${MONGO_URI}
+      MONGODB_URI:  ${MONGODB_URI}
+
+      # ── PostgreSQL / Prisma (Neon) ───────────────────
+      DATABASE_URL: ${DATABASE_URL}
+
+      # ── AI API Keys ──────────────────────────────────
+      OPENAI_API_KEY:  ${OPENAI_API_KEY}
+      GROQ_API_KEY:    ${GROQ_API_KEY}
+      GEMINI_API_KEY:  ${GEMINI_API_KEY}
+      GEMMA4_API_KEY:      ${GEMMA4_API_KEY:-}
+      GEMMA4_API_BASE_URL: ${GEMMA4_API_BASE_URL:-}
+      GEMMA4_MODEL:        ${GEMMA4_MODEL:-gemma-4}
+
+      # ── Payments ─────────────────────────────────────
+      RAZORPAY_KEY_ID:     ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+
+      # ── GitHub ───────────────────────────────────────
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+
+      # ── JWT ──────────────────────────────────────────
+      JWT_SECRET: ${JWT_SECRET}
+
+      # ── Inter-service URLs (Docker service names) ────
+      EMBEDDING_SERVICE_URL: http://embedding-service:8001
+      ML_RANKING_API_URL:    http://ml-ranking-system:8000
+
+      # ── ML child-process paths ───────────────────────
+      # Node resolves: path.join(__dirname, '..', '..', 'ml-ranking-system')
+      # In Docker the backend working dir is /app so the volume mount at
+      # /ml-ranking-system matches the resolved path.
+      ML_SYSTEM_DIR:  /ml-ranking-system
+      ML_PYTHON_PATH: python3
+      ML_MODEL_PATH:  /ml-ranking-system/ranking_model.pkl
+      ML_SCALER_PATH: /ml-ranking-system/scaler.pkl
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ──────────────────────────────────────────────
+  # FRONTEND  (Next.js · port 3000)
+  # Depends on: backend
+  # ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the Next.js build – points to backend
+        NEXT_PUBLIC_API_BASE_URL:    ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:5000}
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID}
+    container_name: synapescrow-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - synapnet
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      # Runtime env (for server-side Next.js logic only)
+      NEXT_PUBLIC_API_BASE_URL:    ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:5000}
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s

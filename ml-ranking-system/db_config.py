@@ -26,7 +26,8 @@ def _parse_database_url(database_url: str) -> dict:
 def get_db_config() -> dict:
     database_url = os.getenv('DATABASE_URL')
     if database_url:
-        return _parse_database_url(database_url)
+        # Pass the raw URL as DSN so psycopg2/libpq handles Neon SNI and options correctly
+        return {'dsn': database_url}
 
     return {
         'host': os.getenv('DB_HOST', 'localhost'),

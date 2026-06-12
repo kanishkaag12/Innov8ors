@@ -92,4 +92,30 @@ const proposalSchema = new mongoose.Schema(
   }
 );
 
+proposalSchema.post('save', function (doc) {
+  if (doc.freelancerId) {
+    setImmediate(async () => {
+      try {
+        const PFIService = require('../services/pfiService');
+        await PFIService.calculatePFIScore(String(doc.freelancerId), 'profile_update', ['proposal_accepted']);
+      } catch (err) {
+        console.error('[PFI Hook] Failed to recalculate PFI after proposal save:', err.message);
+      }
+    });
+  }
+});
+
+proposalSchema.post('findOneAndUpdate', function (doc) {
+  if (doc && doc.freelancerId) {
+    setImmediate(async () => {
+      try {
+        const PFIService = require('../services/pfiService');
+        await PFIService.calculatePFIScore(String(doc.freelancerId), 'profile_update', ['proposal_accepted']);
+      } catch (err) {
+        console.error('[PFI Hook] Failed to recalculate PFI after proposal update:', err.message);
+      }
+    });
+  }
+});
+
 module.exports = mongoose.model('Proposal', proposalSchema);

@@ -1,0 +1,1901 @@
+[
+  {
+    "title": "Full-Stack Developer for E-commerce Platform Integration (Ref: #1000)",
+    "description": "We are an established e-commerce brand looking to integrate our custom storefront with a new headless CMS and a third-party inventory API. The ideal developer will have strong experience with React, Next.js, Node.js, and integrating RESTful/GraphQL APIs. You must write clean, documented code and perform thorough testing before deployment. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Web Development",
+    "budget": "$3000 - $5000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Node.js",
+      "Next.js",
+      "Express"
+    ],
+    "clientName": "Acme Corp Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "React Native Developer for Healthcare Booking App (Ref: #1001)",
+    "description": "We are building a telemedicine startup and need a cross-platform React Native developer to complete our patient-facing app. Key features include doctor search, appointment scheduling, push notifications, and video calling integration via Twilio. UI designs are ready in Figma. Expert level required due to strict HIPAA compliance guidelines. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$5000 - $8000",
+    "duration": "3 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Android SDK",
+      "iOS SDK",
+      "React Native",
+      "Objective-C"
+    ],
+    "clientName": "Fintechly Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Complete Mobile & Web App Redesign - Fintech Platform (Ref: #1002)",
+    "description": "We are looking for an expert UI/UX designer to completely redesign our mobile wallet application and web dashboard. You will conduct user research, create wireframes, refine our visual identity, and deliver a comprehensive Figma design system with fully interactive prototypes. Experience with complex dashboard design is required. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$4000 - $7000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Adobe XD",
+      "Wireframing",
+      "Prototyping",
+      "Figma",
+      "Responsive Design"
+    ],
+    "clientName": "MedCare Solutions Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "AI Chatbot Integration with Custom Knowledge Base (RAG) (Ref: #1003)",
+    "description": "We want to build a customer support assistant for our e-commerce brand that answers queries using our detailed help docs. We require an expert ML engineer to implement a RAG (Retrieval-Augmented Generation) pipeline using OpenAI APIs, LangChain, and a vector database (Pinecone or PGVector). Must run fast and contain safety guardrails against hallucinations. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$3500 - $6000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "PyTorch",
+      "Computer Vision",
+      "OpenAI API"
+    ],
+    "clientName": "EduLearn Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "AWS Cloud Infrastructure Setup using Terraform (Ref: #1004)",
+    "description": "We need an expert DevOps engineer to design and implement a secure, scalable AWS infrastructure for our Next.js and Node.js application. Deliverables must be fully written as Terraform code (IaC), including VPC setup, ECS Fargate clusters, RDS PostgreSQL, Auto Scaling, and AWS Secrets Manager integration. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$3000 - $5500",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Linux",
+      "Cloudflare",
+      "Nginx",
+      "AWS"
+    ],
+    "clientName": "ShopifyPlus Partner Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "E-commerce Customer Segmentation & Cohort Analysis (Ref: #1005)",
+    "description": "We have large datasets of customer transactions. We want an expert data scientist to perform RFM analysis, build clustering models (K-Means), and perform cohort analysis to identify high-value customer groups and churn risks. Deliverables should include clean Jupyter notebooks and a detailed presentation slide deck. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Data Science",
+    "budget": "$2000 - $4000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Python",
+      "R",
+      "Pandas",
+      "NumPy",
+      "SQL"
+    ],
+    "clientName": "Apex Digital Agency Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "High-Quality Technical Blog Posts for DevOps Platform (Ref: #1006)",
+    "description": "We are looking for an expert technical writer to write a series of 5 deep-dive blog articles (1500-2000 words each) about Docker, Kubernetes, and Kubernetes alternatives. You must be able to write actual configuration code examples and explain complex engineering concepts clearly. SEO optimization is required. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$1000 - $2000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Content Strategy",
+      "SaaS Content",
+      "Blog Writing"
+    ],
+    "clientName": "SaaSify Inc Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Lead Generation and Google Ads Campaign Setup (Ref: #1007)",
+    "description": "We are a real estate agency looking to acquire high-intent buyer leads. We need an expert marketing manager to set up Google Ads campaigns, conduct extensive keyword research, write ad copy, configure conversion tracking, and optimize bids. You must have proven case studies of low cost-per-lead. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$1500 - $3000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Lead Generation",
+      "SEO",
+      "Social Media Marketing",
+      "Content Marketing"
+    ],
+    "clientName": "PropTech Innovations Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Promo Video Production and Motion Graphics (Ref: #1008)",
+    "description": "We are launching a mobile app and need an expert video editor to create a 60-second high-energy promotional video. We will provide screenshots and screen recordings. You will design slick 3D/2D mobile device frame mockups, add fluid text transitions, source premium background music, and deliver multiple aspect ratios (16:9, 9:16). Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$1500 - $2800",
+    "duration": "3 weeks",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Final Cut Pro",
+      "Adobe Premiere Pro",
+      "YouTube Editing",
+      "Color Grading",
+      "Video Production"
+    ],
+    "clientName": "LogiRoute Global Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Smart Contract Developer for DeFi Staking Protocol (Ref: #1009)",
+    "description": "We are building a decentralized finance protocol and need an expert Solidity developer to write custom staking, locking, and yield generation smart contracts. You must ensure protection against common exploits (reentrancy, flash loan attacks) and provide scripts for deployment. Hardhat/Foundry experience is a must. Code must be gas-optimized and thoroughly unit-tested. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Solidity",
+      "Ethereum",
+      "Solana"
+    ],
+    "clientName": "GuardCyber Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Frontend React Developer for SaaS Dashboard UI (Ref: #1010)",
+    "description": "We need an intermediate frontend developer to build several new dashboard views for our B2B SaaS platform. Design mockups are fully complete in Figma. You will be responsible for converting these designs into clean, responsive React components using Tailwind CSS. Must be comfortable with state management (Redux Toolkit or Context API) and connecting to existing backend endpoints. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Web Development",
+    "budget": "$800 - $1500",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Redux",
+      "JavaScript",
+      "REST API",
+      "CSS3"
+    ],
+    "clientName": "Nova AI Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "Flutter Developer to build E-learning Mobile App (Ref: #1011)",
+    "description": "Looking for an intermediate Flutter developer to build a mobile learning app. The app contains modular courses, video streaming, quizzes, and a user profile dashboard. We have the backend API ready. You will implement the mobile client, handle offline caching, and package the app for both iOS and Android stores. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$2500 - $4500",
+    "duration": "2 months",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Google Play Console",
+      "Flutter",
+      "Mobile UI",
+      "Kotlin",
+      "Java"
+    ],
+    "clientName": "CoinTech Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Figma Landing Page and Branding Assets Design (Ref: #1012)",
+    "description": "Need an intermediate designer to design a modern, high-converting landing page for a new AI SaaS product. Additionally, we need assistance with logo refinement, social media banners, and email newsletter templates. Deliverable must be a highly structured Figma file with components and styles. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$600 - $1200",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "User Research",
+      "Prototyping",
+      "Wireframing"
+    ],
+    "clientName": "VeloWeb Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "Fine-tune LLM for Legal Document Summarization (Ref: #1013)",
+    "description": "Looking for a senior AI specialist to fine-tune an open-source model (like Llama 3 or Mistral) on our proprietary dataset of legal contracts. Goal is to generate accurate, high-quality bullet summaries of contract terms. Experience with PyTorch, Hugging Face, and LoRA/QLoRA parameter-efficient tuning is required. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Scikit-Learn",
+      "PyTorch",
+      "TensorFlow",
+      "FastAPI"
+    ],
+    "clientName": "NexoMobile Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "CI/CD Pipeline Setup via GitHub Actions for Web App (Ref: #1014)",
+    "description": "Looking for an intermediate DevOps specialist to configure a CI/CD pipeline for our repository. Every pull request should run linting, unit tests, and security scanning. Successful merges to main should automatically deploy build artifacts to AWS Amplify or Vercel and notify Slack. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$500 - $1000",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Cloudflare",
+      "Bash Scripting",
+      "Docker",
+      "Nginx",
+      "AWS"
+    ],
+    "clientName": "PixelDesign Studio Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "SQL Query Optimization and Tableau Dashboard Creation (Ref: #1015)",
+    "description": "Looking for an intermediate data analyst to clean up our raw databases, write highly optimized SQL views, and build an interactive sales dashboard in Tableau. The dashboard must track monthly recurring revenue (MRR), customer acquisition cost (CAC), and lifetime value (LTV). Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Data Science",
+    "budget": "$1000 - $1800",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Statistical Analysis",
+      "Power BI",
+      "Data Cleansing"
+    ],
+    "clientName": "DevOpsGrid Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "SEO Copywriting for B2B SaaS Website (Ref: #1016)",
+    "description": "Looking for an intermediate SEO writer to write landing page copy, product feature descriptions, and meta tags for our CRM SaaS. We will provide keywords and page structure. You will write engaging, persuasive copy that drives conversions and ranks well on Google. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$500 - $900",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Creative Writing",
+      "Blog Writing",
+      "Whitepapers",
+      "Technical Writing"
+    ],
+    "clientName": "DataPulse Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Social Media Manager for Fashion E-commerce Brand (Ref: #1017)",
+    "description": "Looking for an intermediate social media marketer to manage our Instagram, Pinterest, and TikTok channels. Responsibilities include creating a content calendar, posting reels, engaging with followers, and configuring basic influencer outreach templates. Strong visual taste is required. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$800 - $1500",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Lead Generation",
+      "SEO",
+      "Email Marketing",
+      "Copywriting",
+      "HubSpot"
+    ],
+    "clientName": "WordCraft Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "YouTube Video Editor for Tech Review Channel (Ref: #1018)",
+    "description": "Looking for a reliable, intermediate video editor to edit 2 high-quality YouTube tech videos per week. Raw footage is about 30-40 minutes; final videos should be 10-12 minutes. You will trim dead air, insert B-roll, add subtle text highlights, handle audio levels, and perform basic color correction. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$600 - $1200",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Sound Design",
+      "YouTube Editing",
+      "Final Cut Pro"
+    ],
+    "clientName": "LeadGenius Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Web3.js/Ethers.js Integration for NFT Minting Dapp (Ref: #1019)",
+    "description": "Looking for an intermediate blockchain developer to connect our completed frontend UI (Next.js) with our deployed ERC-721 smart contract. You will implement wallet connection (Metamask, WalletConnect), read smart contract state (price, total minted), call the mint function, and handle transaction errors smoothly. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$1500 - $3000",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Ethers.js",
+      "Web3.js",
+      "Rust",
+      "Solana"
+    ],
+    "clientName": "RenderCut Studios Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "Simple Landing Page Setup with WordPress/Elementor (Ref: #1020)",
+    "description": "Looking for a beginner developer to set up a clean, 3-page landing page for a local tutoring business. We will provide all content and images. You need to configure the domain, host, set up a basic theme using Elementor Pro, and integrate a contact form connected to Mailchimp. Quick project with potential for monthly maintenance. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Web Development",
+    "budget": "$150 - $300",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "GraphQL",
+      "PostgreSQL",
+      "Django",
+      "REST API",
+      "Redux"
+    ],
+    "clientName": "SmartContract Lab Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Swift Developer for iOS Widget and Extension (Ref: #1021)",
+    "description": "We want to build a lock screen widget and a sharing extension for our existing iOS productivity app. The main codebase is written in Swift and SwiftUI. This is a targeted project requiring deep knowledge of iOS extensions, App Groups for shared data, and widget lifecycles. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$1500 - $3000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Swift",
+      "Flutter",
+      "App Store Deployment"
+    ],
+    "clientName": "Acme Corp Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "User Flow and Wireframe Design for EdTech App (Ref: #1022)",
+    "description": "Looking for a UX designer to map out the complete user journey and wireframes for a new language learning app. Focus is strictly on usability, onboarding optimization, and intuitive navigation. Visual UI design is out of scope for this phase. Output must include detailed flow diagrams and black-and-white wireframes. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$1000 - $2000",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Figma",
+      "Adobe XD",
+      "User Testing",
+      "User Research"
+    ],
+    "clientName": "Fintechly Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "FastAPI Wrapper and Prompt Pipeline for OpenAI API (Ref: #1023)",
+    "description": "We need an intermediate backend developer to build a Python FastAPI service that handles prompts, structures user inputs, calls the OpenAI GPT-4o API, and parses the JSON response. You will implement basic validation, rate limiting, and api key validation. Excellent Python skills are a must. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$800 - $1600",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Hugging Face",
+      "TensorFlow",
+      "FastAPI",
+      "Neural Networks",
+      "Scikit-Learn"
+    ],
+    "clientName": "MedCare Solutions Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Dockerize Multi-Service Node and Python App (Ref: #1024)",
+    "description": "Our current system runs raw Node.js and a Python script on a VPS. We want to containerize the entire application. We need a developer to write optimized Dockerfiles, configure a docker-compose.yml file with database persistence, and document local run commands. Perfect starter project for a junior DevOps enthusiast. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$250 - $500",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Nginx",
+      "GitHub Actions",
+      "GCP"
+    ],
+    "clientName": "EduLearn Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "CSV Data Cleaning and Analysis Script in Python (Ref: #1025)",
+    "description": "We have a messy spreadsheet containing lead information with missing cells, duplicates, and inconsistent formatting. We need a Python developer to write a Pandas script to clean the data, normalize fields, export clean files, and generate a text report of general statistics. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Data Science",
+    "budget": "$150 - $350",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Apache Spark",
+      "SQL",
+      "Python",
+      "Data Visualization"
+    ],
+    "clientName": "ShopifyPlus Partner Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Simple Proofreading and Editing of Startup Pitch Deck (Ref: #1026)",
+    "description": "Need a beginner-friendly writer to proofread a 15-slide investment pitch deck. You will check for spelling errors, grammar mistakes, and refine the tone to make it sound professional and crisp. Fast turnaround is required. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$100 - $200",
+    "duration": "3 days",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Copywriting",
+      "Ghostwriting",
+      "SEO Writing",
+      "Blog Writing",
+      "Content Strategy"
+    ],
+    "clientName": "Apex Digital Agency Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "Email Newsletter Template and List Warmup (Ref: #1027)",
+    "description": "Need a beginner marketer to help format newsletter campaigns in Mailchimp and write 4 simple email sequences to warm up a small email list of 500 subscribers. Templates and copy must be clean and modern. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$200 - $400",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Lead Generation",
+      "Facebook Ads",
+      "Content Marketing"
+    ],
+    "clientName": "SaaSify Inc Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "TikTok and Reels Video Editing (Batch of 15) (Ref: #1028)",
+    "description": "Looking for a beginner editor to edit 15 short-form videos for Instagram Reels and TikTok. We will provide raw clips. You need to cut them dynamically, add auto-captions with colorful text overlays, insert sound effects, and trim according to trending hooks. Fun and creative project. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$200 - $400",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Color Grading",
+      "Adobe Premiere Pro",
+      "DaVinci Resolve",
+      "Sound Design"
+    ],
+    "clientName": "PropTech Innovations Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Solana Token Setup and SPL Metadata Configuration (Ref: #1029)",
+    "description": "Need a developer to create a custom utility token on Solana (SPL standard), set up metadata, and write a simple script to handle batch token transfers to early testers. Clean and straightforward task suitable for a beginner/intermediate Solana developer. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$400 - $800",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Solidity",
+      "Tokenomics",
+      "Cryptography",
+      "Web3.js",
+      "NFTs"
+    ],
+    "clientName": "LogiRoute Global Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Node.js REST API Development and Database Optimization (Ref: #1030)",
+    "description": "Our mobile app backend needs optimization and several new endpoints. We are using Node.js, Express, and PostgreSQL. We need an expert backend engineer to audit our database queries, add indexes, rewrite slow queries, and implement new auth/payment endpoints with robust error handling. Familiarity with Prisma ORM is highly preferred. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Web Development",
+    "budget": "$2000 - $4000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "HTML5",
+      "PostgreSQL",
+      "React"
+    ],
+    "clientName": "GuardCyber Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Bug Fixing and Updates on Android Kotlin App (Ref: #1031)",
+    "description": "Looking for a beginner/intermediate developer to resolve a list of 12 bugs in our existing native Android app. Issues range from layout overlaps on small screens, database sync issues with SQLite, to crashes on Android 13 permissions. Code is fully native Kotlin. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$300 - $600",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "iOS SDK",
+      "React Native",
+      "Java",
+      "Kotlin"
+    ],
+    "clientName": "Nova AI Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "Simple Website Header and Banner Design (Ref: #1032)",
+    "description": "Quick job for a beginner designer to create a beautiful, modern hero header section for our real estate blog. We need 3 layout variations in Figma using provided brand assets and colors. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$100 - $200",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Prototyping",
+      "Adobe XD",
+      "Information Architecture",
+      "Design Systems",
+      "Figma"
+    ],
+    "clientName": "CoinTech Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Scikit-Learn Regression Model for House Price Prediction (Ref: #1033)",
+    "description": "Looking for a beginner data scientist/ML developer to build a machine learning model using Scikit-Learn to forecast real estate prices based on historical CSV data. Clean the dataset, train a random forest model, generate evaluation reports (RMSE, R2), and write a simple script to run inferences. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$400 - $800",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "LLMs",
+      "NLP",
+      "Hugging Face"
+    ],
+    "clientName": "VeloWeb Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "AWS Cloud Infrastructure Setup using Terraform (Ref: #1034)",
+    "description": "We need an expert DevOps engineer to design and implement a secure, scalable AWS infrastructure for our Next.js and Node.js application. Deliverables must be fully written as Terraform code (IaC), including VPC setup, ECS Fargate clusters, RDS PostgreSQL, Auto Scaling, and AWS Secrets Manager integration. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$3000 - $5500",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Linux",
+      "AWS",
+      "Monitoring (Prometheus/Grafana)",
+      "Nginx"
+    ],
+    "clientName": "NexoMobile Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "E-commerce Customer Segmentation & Cohort Analysis (Ref: #1035)",
+    "description": "We have large datasets of customer transactions. We want an expert data scientist to perform RFM analysis, build clustering models (K-Means), and perform cohort analysis to identify high-value customer groups and churn risks. Deliverables should include clean Jupyter notebooks and a detailed presentation slide deck. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Data Science",
+    "budget": "$2000 - $4000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Python",
+      "Big Data",
+      "Power BI",
+      "R",
+      "Statistical Analysis"
+    ],
+    "clientName": "PixelDesign Studio Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "High-Quality Technical Blog Posts for DevOps Platform (Ref: #1036)",
+    "description": "We are looking for an expert technical writer to write a series of 5 deep-dive blog articles (1500-2000 words each) about Docker, Kubernetes, and Kubernetes alternatives. You must be able to write actual configuration code examples and explain complex engineering concepts clearly. SEO optimization is required. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$1000 - $2000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "SEO Writing",
+      "Proofreading",
+      "Copywriting"
+    ],
+    "clientName": "DevOpsGrid Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Lead Generation and Google Ads Campaign Setup (Ref: #1037)",
+    "description": "We are a real estate agency looking to acquire high-intent buyer leads. We need an expert marketing manager to set up Google Ads campaigns, conduct extensive keyword research, write ad copy, configure conversion tracking, and optimize bids. You must have proven case studies of low cost-per-lead. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$1500 - $3000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "HubSpot",
+      "Lead Generation",
+      "Copywriting",
+      "SEO"
+    ],
+    "clientName": "DataPulse Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Promo Video Production and Motion Graphics (Ref: #1038)",
+    "description": "We are launching a mobile app and need an expert video editor to create a 60-second high-energy promotional video. We will provide screenshots and screen recordings. You will design slick 3D/2D mobile device frame mockups, add fluid text transitions, source premium background music, and deliver multiple aspect ratios (16:9, 9:16). Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$1500 - $2800",
+    "duration": "3 weeks",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Sound Design",
+      "After Effects",
+      "Motion Graphics",
+      "TikTok/Reels Editing",
+      "DaVinci Resolve"
+    ],
+    "clientName": "WordCraft Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "Smart Contract Developer for DeFi Staking Protocol (Ref: #1039)",
+    "description": "We are building a decentralized finance protocol and need an expert Solidity developer to write custom staking, locking, and yield generation smart contracts. You must ensure protection against common exploits (reentrancy, flash loan attacks) and provide scripts for deployment. Hardhat/Foundry experience is a must. Code must be gas-optimized and thoroughly unit-tested. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Truffle",
+      "Hardhat",
+      "Ethers.js"
+    ],
+    "clientName": "LeadGenius Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Vue.js Developer to refactor Legacy Frontend Portal (Ref: #1040)",
+    "description": "Looking for a mid-level Vue.js developer to refactor a portion of our user portal from Vue 2 to Vue 3 (Composition API). You will clean up legacy states, migrate styling to CSS modules, and optimize overall page load speed. Good communication and version control hygiene are essential. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Web Development",
+    "budget": "$1200 - $2500",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "JavaScript",
+      "Node.js",
+      "React",
+      "Vue.js"
+    ],
+    "clientName": "RenderCut Studios Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "React Native Developer for Healthcare Booking App (Ref: #1041)",
+    "description": "We are building a telemedicine startup and need a cross-platform React Native developer to complete our patient-facing app. Key features include doctor search, appointment scheduling, push notifications, and video calling integration via Twilio. UI designs are ready in Figma. Expert level required due to strict HIPAA compliance guidelines. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$5000 - $8000",
+    "duration": "3 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "React Native",
+      "Flutter",
+      "Google Play Console",
+      "iOS SDK",
+      "Java"
+    ],
+    "clientName": "SmartContract Lab Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Complete Mobile & Web App Redesign - Fintech Platform (Ref: #1042)",
+    "description": "We are looking for an expert UI/UX designer to completely redesign our mobile wallet application and web dashboard. You will conduct user research, create wireframes, refine our visual identity, and deliver a comprehensive Figma design system with fully interactive prototypes. Experience with complex dashboard design is required. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$4000 - $7000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Wireframing",
+      "Figma",
+      "User Research"
+    ],
+    "clientName": "Acme Corp Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "AI Chatbot Integration with Custom Knowledge Base (RAG) (Ref: #1043)",
+    "description": "We want to build a customer support assistant for our e-commerce brand that answers queries using our detailed help docs. We require an expert ML engineer to implement a RAG (Retrieval-Augmented Generation) pipeline using OpenAI APIs, LangChain, and a vector database (Pinecone or PGVector). Must run fast and contain safety guardrails against hallucinations. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$3500 - $6000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "LangChain",
+      "Machine Learning",
+      "Computer Vision",
+      "LLMs"
+    ],
+    "clientName": "Fintechly Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "CI/CD Pipeline Setup via GitHub Actions for Web App (Ref: #1044)",
+    "description": "Looking for an intermediate DevOps specialist to configure a CI/CD pipeline for our repository. Every pull request should run linting, unit tests, and security scanning. Successful merges to main should automatically deploy build artifacts to AWS Amplify or Vercel and notify Slack. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$500 - $1000",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Ansible",
+      "CI/CD",
+      "GitHub Actions",
+      "Terraform",
+      "Nginx"
+    ],
+    "clientName": "MedCare Solutions Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "SQL Query Optimization and Tableau Dashboard Creation (Ref: #1045)",
+    "description": "Looking for an intermediate data analyst to clean up our raw databases, write highly optimized SQL views, and build an interactive sales dashboard in Tableau. The dashboard must track monthly recurring revenue (MRR), customer acquisition cost (CAC), and lifetime value (LTV). Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Data Science",
+    "budget": "$1000 - $1800",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "SQL",
+      "Jupyter Notebook",
+      "NumPy"
+    ],
+    "clientName": "EduLearn Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "SEO Copywriting for B2B SaaS Website (Ref: #1046)",
+    "description": "Looking for an intermediate SEO writer to write landing page copy, product feature descriptions, and meta tags for our CRM SaaS. We will provide keywords and page structure. You will write engaging, persuasive copy that drives conversions and ranks well on Google. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$500 - $900",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Blog Writing",
+      "Proofreading",
+      "SEO Writing",
+      "Creative Writing"
+    ],
+    "clientName": "ShopifyPlus Partner Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Social Media Manager for Fashion E-commerce Brand (Ref: #1047)",
+    "description": "Looking for an intermediate social media marketer to manage our Instagram, Pinterest, and TikTok channels. Responsibilities include creating a content calendar, posting reels, engaging with followers, and configuring basic influencer outreach templates. Strong visual taste is required. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$800 - $1500",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "HubSpot",
+      "Lead Generation",
+      "Email Marketing",
+      "Growth Hacking",
+      "PPC"
+    ],
+    "clientName": "Apex Digital Agency Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "YouTube Video Editor for Tech Review Channel (Ref: #1048)",
+    "description": "Looking for a reliable, intermediate video editor to edit 2 high-quality YouTube tech videos per week. Raw footage is about 30-40 minutes; final videos should be 10-12 minutes. You will trim dead air, insert B-roll, add subtle text highlights, handle audio levels, and perform basic color correction. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$600 - $1200",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Adobe Premiere Pro",
+      "Storyboarding",
+      "Color Grading"
+    ],
+    "clientName": "SaaSify Inc Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Web3.js/Ethers.js Integration for NFT Minting Dapp (Ref: #1049)",
+    "description": "Looking for an intermediate blockchain developer to connect our completed frontend UI (Next.js) with our deployed ERC-721 smart contract. You will implement wallet connection (Metamask, WalletConnect), read smart contract state (price, total minted), call the mint function, and handle transaction errors smoothly. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$1500 - $3000",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Solidity",
+      "Tokenomics",
+      "DeFi",
+      "Ethereum"
+    ],
+    "clientName": "PropTech Innovations Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Full-Stack Developer for E-commerce Platform Integration (Ref: #1050)",
+    "description": "We are an established e-commerce brand looking to integrate our custom storefront with a new headless CMS and a third-party inventory API. The ideal developer will have strong experience with React, Next.js, Node.js, and integrating RESTful/GraphQL APIs. You must write clean, documented code and perform thorough testing before deployment. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Web Development",
+    "budget": "$3000 - $5000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "GraphQL",
+      "Django",
+      "Tailwind CSS",
+      "Ruby on Rails",
+      "JavaScript"
+    ],
+    "clientName": "LogiRoute Global Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Flutter Developer to build E-learning Mobile App (Ref: #1051)",
+    "description": "Looking for an intermediate Flutter developer to build a mobile learning app. The app contains modular courses, video streaming, quizzes, and a user profile dashboard. We have the backend API ready. You will implement the mobile client, handle offline caching, and package the app for both iOS and Android stores. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$2500 - $4500",
+    "duration": "2 months",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Kotlin",
+      "Mobile UI",
+      "Swift"
+    ],
+    "clientName": "GuardCyber Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Figma Landing Page and Branding Assets Design (Ref: #1052)",
+    "description": "Need an intermediate designer to design a modern, high-converting landing page for a new AI SaaS product. Additionally, we need assistance with logo refinement, social media banners, and email newsletter templates. Deliverable must be a highly structured Figma file with components and styles. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$600 - $1200",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "User Research",
+      "User Testing",
+      "Design Systems",
+      "Sketch"
+    ],
+    "clientName": "Nova AI Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "Fine-tune LLM for Legal Document Summarization (Ref: #1053)",
+    "description": "Looking for a senior AI specialist to fine-tune an open-source model (like Llama 3 or Mistral) on our proprietary dataset of legal contracts. Goal is to generate accurate, high-quality bullet summaries of contract terms. Experience with PyTorch, Hugging Face, and LoRA/QLoRA parameter-efficient tuning is required. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Machine Learning",
+      "LLMs",
+      "TensorFlow",
+      "Neural Networks",
+      "LangChain"
+    ],
+    "clientName": "CoinTech Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Dockerize Multi-Service Node and Python App (Ref: #1054)",
+    "description": "Our current system runs raw Node.js and a Python script on a VPS. We want to containerize the entire application. We need a developer to write optimized Dockerfiles, configure a docker-compose.yml file with database persistence, and document local run commands. Perfect starter project for a junior DevOps enthusiast. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$250 - $500",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Monitoring (Prometheus/Grafana)",
+      "GCP",
+      "CI/CD"
+    ],
+    "clientName": "VeloWeb Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "CSV Data Cleaning and Analysis Script in Python (Ref: #1055)",
+    "description": "We have a messy spreadsheet containing lead information with missing cells, duplicates, and inconsistent formatting. We need a Python developer to write a Pandas script to clean the data, normalize fields, export clean files, and generate a text report of general statistics. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Data Science",
+    "budget": "$150 - $350",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "NumPy",
+      "Statistical Analysis",
+      "Python",
+      "SQL"
+    ],
+    "clientName": "NexoMobile Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Simple Proofreading and Editing of Startup Pitch Deck (Ref: #1056)",
+    "description": "Need a beginner-friendly writer to proofread a 15-slide investment pitch deck. You will check for spelling errors, grammar mistakes, and refine the tone to make it sound professional and crisp. Fast turnaround is required. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$100 - $200",
+    "duration": "3 days",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Whitepapers",
+      "SaaS Content",
+      "Content Strategy",
+      "Blog Writing",
+      "Creative Writing"
+    ],
+    "clientName": "PixelDesign Studio Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Email Newsletter Template and List Warmup (Ref: #1057)",
+    "description": "Need a beginner marketer to help format newsletter campaigns in Mailchimp and write 4 simple email sequences to warm up a small email list of 500 subscribers. Templates and copy must be clean and modern. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$200 - $400",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Google Ads",
+      "Social Media Marketing",
+      "HubSpot"
+    ],
+    "clientName": "DevOpsGrid Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "TikTok and Reels Video Editing (Batch of 15) (Ref: #1058)",
+    "description": "Looking for a beginner editor to edit 15 short-form videos for Instagram Reels and TikTok. We will provide raw clips. You need to cut them dynamically, add auto-captions with colorful text overlays, insert sound effects, and trim according to trending hooks. Fun and creative project. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$200 - $400",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "DaVinci Resolve",
+      "Video Production",
+      "YouTube Editing",
+      "Adobe Premiere Pro"
+    ],
+    "clientName": "DataPulse Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Solana Token Setup and SPL Metadata Configuration (Ref: #1059)",
+    "description": "Need a developer to create a custom utility token on Solana (SPL standard), set up metadata, and write a simple script to handle batch token transfers to early testers. Clean and straightforward task suitable for a beginner/intermediate Solana developer. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$400 - $800",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "IPFS",
+      "Smart Contracts",
+      "Solana",
+      "Ethereum",
+      "DeFi"
+    ],
+    "clientName": "WordCraft Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "Frontend React Developer for SaaS Dashboard UI (Ref: #1060)",
+    "description": "We need an intermediate frontend developer to build several new dashboard views for our B2B SaaS platform. Design mockups are fully complete in Figma. You will be responsible for converting these designs into clean, responsive React components using Tailwind CSS. Must be comfortable with state management (Redux Toolkit or Context API) and connecting to existing backend endpoints. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Web Development",
+    "budget": "$800 - $1500",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "CSS3",
+      "Tailwind CSS",
+      "JavaScript"
+    ],
+    "clientName": "LeadGenius Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Swift Developer for iOS Widget and Extension (Ref: #1061)",
+    "description": "We want to build a lock screen widget and a sharing extension for our existing iOS productivity app. The main codebase is written in Swift and SwiftUI. This is a targeted project requiring deep knowledge of iOS extensions, App Groups for shared data, and widget lifecycles. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$1500 - $3000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Objective-C",
+      "App Store Deployment",
+      "Flutter",
+      "Google Play Console"
+    ],
+    "clientName": "RenderCut Studios Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "User Flow and Wireframe Design for EdTech App (Ref: #1062)",
+    "description": "Looking for a UX designer to map out the complete user journey and wireframes for a new language learning app. Focus is strictly on usability, onboarding optimization, and intuitive navigation. Visual UI design is out of scope for this phase. Output must include detailed flow diagrams and black-and-white wireframes. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$1000 - $2000",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Visual Design",
+      "Sketch",
+      "Design Systems",
+      "Figma",
+      "Information Architecture"
+    ],
+    "clientName": "SmartContract Lab Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "FastAPI Wrapper and Prompt Pipeline for OpenAI API (Ref: #1063)",
+    "description": "We need an intermediate backend developer to build a Python FastAPI service that handles prompts, structures user inputs, calls the OpenAI GPT-4o API, and parses the JSON response. You will implement basic validation, rate limiting, and api key validation. Excellent Python skills are a must. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$800 - $1600",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Prompt Engineering",
+      "Scikit-Learn",
+      "Python"
+    ],
+    "clientName": "Acme Corp Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "AWS Cloud Infrastructure Setup using Terraform (Ref: #1064)",
+    "description": "We need an expert DevOps engineer to design and implement a secure, scalable AWS infrastructure for our Next.js and Node.js application. Deliverables must be fully written as Terraform code (IaC), including VPC setup, ECS Fargate clusters, RDS PostgreSQL, Auto Scaling, and AWS Secrets Manager integration. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$3000 - $5500",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Nginx",
+      "Bash Scripting",
+      "Docker",
+      "Jenkins"
+    ],
+    "clientName": "Fintechly Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "E-commerce Customer Segmentation & Cohort Analysis (Ref: #1065)",
+    "description": "We have large datasets of customer transactions. We want an expert data scientist to perform RFM analysis, build clustering models (K-Means), and perform cohort analysis to identify high-value customer groups and churn risks. Deliverables should include clean Jupyter notebooks and a detailed presentation slide deck. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Data Science",
+    "budget": "$2000 - $4000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Pandas",
+      "Data Cleansing",
+      "Statistical Analysis",
+      "Apache Spark",
+      "Tableau"
+    ],
+    "clientName": "MedCare Solutions Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "High-Quality Technical Blog Posts for DevOps Platform (Ref: #1066)",
+    "description": "We are looking for an expert technical writer to write a series of 5 deep-dive blog articles (1500-2000 words each) about Docker, Kubernetes, and Kubernetes alternatives. You must be able to write actual configuration code examples and explain complex engineering concepts clearly. SEO optimization is required. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$1000 - $2000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Content Strategy",
+      "SaaS Content",
+      "Ghostwriting"
+    ],
+    "clientName": "EduLearn Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "Lead Generation and Google Ads Campaign Setup (Ref: #1067)",
+    "description": "We are a real estate agency looking to acquire high-intent buyer leads. We need an expert marketing manager to set up Google Ads campaigns, conduct extensive keyword research, write ad copy, configure conversion tracking, and optimize bids. You must have proven case studies of low cost-per-lead. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$1500 - $3000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "SEO",
+      "Growth Hacking",
+      "Google Ads",
+      "Social Media Marketing"
+    ],
+    "clientName": "ShopifyPlus Partner Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Promo Video Production and Motion Graphics (Ref: #1068)",
+    "description": "We are launching a mobile app and need an expert video editor to create a 60-second high-energy promotional video. We will provide screenshots and screen recordings. You will design slick 3D/2D mobile device frame mockups, add fluid text transitions, source premium background music, and deliver multiple aspect ratios (16:9, 9:16). Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$1500 - $2800",
+    "duration": "3 weeks",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Final Cut Pro",
+      "Adobe Premiere Pro",
+      "Video Production",
+      "Sound Design",
+      "Color Grading"
+    ],
+    "clientName": "Apex Digital Agency Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "Smart Contract Developer for DeFi Staking Protocol (Ref: #1069)",
+    "description": "We are building a decentralized finance protocol and need an expert Solidity developer to write custom staking, locking, and yield generation smart contracts. You must ensure protection against common exploits (reentrancy, flash loan attacks) and provide scripts for deployment. Hardhat/Foundry experience is a must. Code must be gas-optimized and thoroughly unit-tested. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Hardhat",
+      "Rust",
+      "IPFS"
+    ],
+    "clientName": "SaaSify Inc Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Simple Landing Page Setup with WordPress/Elementor (Ref: #1070)",
+    "description": "Looking for a beginner developer to set up a clean, 3-page landing page for a local tutoring business. We will provide all content and images. You need to configure the domain, host, set up a basic theme using Elementor Pro, and integrate a contact form connected to Mailchimp. Quick project with potential for monthly maintenance. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Web Development",
+    "budget": "$150 - $300",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Prisma",
+      "Redux",
+      "Express",
+      "Django"
+    ],
+    "clientName": "PropTech Innovations Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Bug Fixing and Updates on Android Kotlin App (Ref: #1071)",
+    "description": "Looking for a beginner/intermediate developer to resolve a list of 12 bugs in our existing native Android app. Issues range from layout overlaps on small screens, database sync issues with SQLite, to crashes on Android 13 permissions. Code is fully native Kotlin. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$300 - $600",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Firebase",
+      "Google Play Console",
+      "React Native",
+      "Objective-C",
+      "Java"
+    ],
+    "clientName": "LogiRoute Global Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Simple Website Header and Banner Design (Ref: #1072)",
+    "description": "Quick job for a beginner designer to create a beautiful, modern hero header section for our real estate blog. We need 3 layout variations in Figma using provided brand assets and colors. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$100 - $200",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Prototyping",
+      "Visual Design",
+      "Wireframing"
+    ],
+    "clientName": "GuardCyber Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Scikit-Learn Regression Model for House Price Prediction (Ref: #1073)",
+    "description": "Looking for a beginner data scientist/ML developer to build a machine learning model using Scikit-Learn to forecast real estate prices based on historical CSV data. Clean the dataset, train a random forest model, generate evaluation reports (RMSE, R2), and write a simple script to run inferences. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$400 - $800",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "NLP",
+      "Prompt Engineering",
+      "Computer Vision",
+      "PyTorch"
+    ],
+    "clientName": "Nova AI Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "CI/CD Pipeline Setup via GitHub Actions for Web App (Ref: #1074)",
+    "description": "Looking for an intermediate DevOps specialist to configure a CI/CD pipeline for our repository. Every pull request should run linting, unit tests, and security scanning. Successful merges to main should automatically deploy build artifacts to AWS Amplify or Vercel and notify Slack. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$500 - $1000",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Bash Scripting",
+      "Azure",
+      "CI/CD",
+      "AWS",
+      "Monitoring (Prometheus/Grafana)"
+    ],
+    "clientName": "CoinTech Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "SQL Query Optimization and Tableau Dashboard Creation (Ref: #1075)",
+    "description": "Looking for an intermediate data analyst to clean up our raw databases, write highly optimized SQL views, and build an interactive sales dashboard in Tableau. The dashboard must track monthly recurring revenue (MRR), customer acquisition cost (CAC), and lifetime value (LTV). Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Data Science",
+    "budget": "$1000 - $1800",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Data Cleansing",
+      "NumPy",
+      "Pandas"
+    ],
+    "clientName": "VeloWeb Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "SEO Copywriting for B2B SaaS Website (Ref: #1076)",
+    "description": "Looking for an intermediate SEO writer to write landing page copy, product feature descriptions, and meta tags for our CRM SaaS. We will provide keywords and page structure. You will write engaging, persuasive copy that drives conversions and ranks well on Google. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$500 - $900",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Proofreading",
+      "Content Strategy",
+      "Copywriting",
+      "SEO Writing"
+    ],
+    "clientName": "NexoMobile Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Social Media Manager for Fashion E-commerce Brand (Ref: #1077)",
+    "description": "Looking for an intermediate social media marketer to manage our Instagram, Pinterest, and TikTok channels. Responsibilities include creating a content calendar, posting reels, engaging with followers, and configuring basic influencer outreach templates. Strong visual taste is required. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$800 - $1500",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Facebook Ads",
+      "SEO",
+      "HubSpot",
+      "Social Media Marketing",
+      "Copywriting"
+    ],
+    "clientName": "PixelDesign Studio Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "YouTube Video Editor for Tech Review Channel (Ref: #1078)",
+    "description": "Looking for a reliable, intermediate video editor to edit 2 high-quality YouTube tech videos per week. Raw footage is about 30-40 minutes; final videos should be 10-12 minutes. You will trim dead air, insert B-roll, add subtle text highlights, handle audio levels, and perform basic color correction. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$600 - $1200",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "After Effects",
+      "YouTube Editing",
+      "Motion Graphics"
+    ],
+    "clientName": "DevOpsGrid Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Web3.js/Ethers.js Integration for NFT Minting Dapp (Ref: #1079)",
+    "description": "Looking for an intermediate blockchain developer to connect our completed frontend UI (Next.js) with our deployed ERC-721 smart contract. You will implement wallet connection (Metamask, WalletConnect), read smart contract state (price, total minted), call the mint function, and handle transaction errors smoothly. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$1500 - $3000",
+    "duration": "3 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Ethers.js",
+      "NFTs",
+      "Truffle",
+      "Rust"
+    ],
+    "clientName": "DataPulse Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Node.js REST API Development and Database Optimization (Ref: #1080)",
+    "description": "Our mobile app backend needs optimization and several new endpoints. We are using Node.js, Express, and PostgreSQL. We need an expert backend engineer to audit our database queries, add indexes, rewrite slow queries, and implement new auth/payment endpoints with robust error handling. Familiarity with Prisma ORM is highly preferred. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Web Development",
+    "budget": "$2000 - $4000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Express",
+      "PostgreSQL",
+      "Node.js",
+      "Vue.js",
+      "CSS3"
+    ],
+    "clientName": "WordCraft Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "React Native Developer for Healthcare Booking App (Ref: #1081)",
+    "description": "We are building a telemedicine startup and need a cross-platform React Native developer to complete our patient-facing app. Key features include doctor search, appointment scheduling, push notifications, and video calling integration via Twilio. UI designs are ready in Figma. Expert level required due to strict HIPAA compliance guidelines. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$5000 - $8000",
+    "duration": "3 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Java",
+      "Google Play Console",
+      "Swift"
+    ],
+    "clientName": "LeadGenius Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Complete Mobile & Web App Redesign - Fintech Platform (Ref: #1082)",
+    "description": "We are looking for an expert UI/UX designer to completely redesign our mobile wallet application and web dashboard. You will conduct user research, create wireframes, refine our visual identity, and deliver a comprehensive Figma design system with fully interactive prototypes. Experience with complex dashboard design is required. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$4000 - $7000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Design Systems",
+      "Information Architecture",
+      "Figma",
+      "Adobe XD"
+    ],
+    "clientName": "RenderCut Studios Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "AI Chatbot Integration with Custom Knowledge Base (RAG) (Ref: #1083)",
+    "description": "We want to build a customer support assistant for our e-commerce brand that answers queries using our detailed help docs. We require an expert ML engineer to implement a RAG (Retrieval-Augmented Generation) pipeline using OpenAI APIs, LangChain, and a vector database (Pinecone or PGVector). Must run fast and contain safety guardrails against hallucinations. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$3500 - $6000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "LangChain",
+      "TensorFlow",
+      "Python",
+      "NLP",
+      "FastAPI"
+    ],
+    "clientName": "SmartContract Lab Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Dockerize Multi-Service Node and Python App (Ref: #1084)",
+    "description": "Our current system runs raw Node.js and a Python script on a VPS. We want to containerize the entire application. We need a developer to write optimized Dockerfiles, configure a docker-compose.yml file with database persistence, and document local run commands. Perfect starter project for a junior DevOps enthusiast. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$250 - $500",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Azure",
+      "GitHub Actions",
+      "Monitoring (Prometheus/Grafana)"
+    ],
+    "clientName": "Acme Corp Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "CSV Data Cleaning and Analysis Script in Python (Ref: #1085)",
+    "description": "We have a messy spreadsheet containing lead information with missing cells, duplicates, and inconsistent formatting. We need a Python developer to write a Pandas script to clean the data, normalize fields, export clean files, and generate a text report of general statistics. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Data Science",
+    "budget": "$150 - $350",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Statistical Analysis",
+      "Data Cleansing",
+      "Jupyter Notebook",
+      "Power BI"
+    ],
+    "clientName": "Fintechly Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Simple Proofreading and Editing of Startup Pitch Deck (Ref: #1086)",
+    "description": "Need a beginner-friendly writer to proofread a 15-slide investment pitch deck. You will check for spelling errors, grammar mistakes, and refine the tone to make it sound professional and crisp. Fast turnaround is required. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$100 - $200",
+    "duration": "3 days",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Email Copywriting",
+      "Copywriting",
+      "Technical Writing",
+      "SEO Writing",
+      "Proofreading"
+    ],
+    "clientName": "MedCare Solutions Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "Email Newsletter Template and List Warmup (Ref: #1087)",
+    "description": "Need a beginner marketer to help format newsletter campaigns in Mailchimp and write 4 simple email sequences to warm up a small email list of 500 subscribers. Templates and copy must be clean and modern. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$200 - $400",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Lead Generation",
+      "HubSpot",
+      "PPC"
+    ],
+    "clientName": "EduLearn Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "TikTok and Reels Video Editing (Batch of 15) (Ref: #1088)",
+    "description": "Looking for a beginner editor to edit 15 short-form videos for Instagram Reels and TikTok. We will provide raw clips. You need to cut them dynamically, add auto-captions with colorful text overlays, insert sound effects, and trim according to trending hooks. Fun and creative project. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$200 - $400",
+    "duration": "2 weeks",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "DaVinci Resolve",
+      "YouTube Editing",
+      "Final Cut Pro",
+      "Storyboarding"
+    ],
+    "clientName": "ShopifyPlus Partner Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "Solana Token Setup and SPL Metadata Configuration (Ref: #1089)",
+    "description": "Need a developer to create a custom utility token on Solana (SPL standard), set up metadata, and write a simple script to handle batch token transfers to early testers. Clean and straightforward task suitable for a beginner/intermediate Solana developer. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$400 - $800",
+    "duration": "1 week",
+    "experienceLevel": "Beginner",
+    "requiredSkills": [
+      "Ethereum",
+      "NFTs",
+      "Solidity",
+      "Rust",
+      "Ethers.js"
+    ],
+    "clientName": "Apex Digital Agency Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "Vue.js Developer to refactor Legacy Frontend Portal (Ref: #1090)",
+    "description": "Looking for a mid-level Vue.js developer to refactor a portion of our user portal from Vue 2 to Vue 3 (Composition API). You will clean up legacy states, migrate styling to CSS modules, and optimize overall page load speed. Good communication and version control hygiene are essential. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Web Development",
+    "budget": "$1200 - $2500",
+    "duration": "1 month",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Django",
+      "HTML5",
+      "MongoDB"
+    ],
+    "clientName": "SaaSify Inc Client",
+    "clientIndustry": "SaaS",
+    "country": "United States",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Flutter Developer to build E-learning Mobile App (Ref: #1091)",
+    "description": "Looking for an intermediate Flutter developer to build a mobile learning app. The app contains modular courses, video streaming, quizzes, and a user profile dashboard. We have the backend API ready. You will implement the mobile client, handle offline caching, and package the app for both iOS and Android stores. Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Mobile Development",
+    "budget": "$2500 - $4500",
+    "duration": "2 months",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "React Native",
+      "Flutter",
+      "Objective-C",
+      "Java"
+    ],
+    "clientName": "PropTech Innovations Client",
+    "clientIndustry": "Fintech",
+    "country": "United Kingdom",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Figma Landing Page and Branding Assets Design (Ref: #1092)",
+    "description": "Need an intermediate designer to design a modern, high-converting landing page for a new AI SaaS product. Additionally, we need assistance with logo refinement, social media banners, and email newsletter templates. Deliverable must be a highly structured Figma file with components and styles. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "UI/UX Design",
+    "budget": "$600 - $1200",
+    "duration": "2 weeks",
+    "experienceLevel": "Intermediate",
+    "requiredSkills": [
+      "Design Systems",
+      "Mobile Design",
+      "Responsive Design",
+      "Adobe XD",
+      "Sketch"
+    ],
+    "clientName": "LogiRoute Global Client",
+    "clientIndustry": "Healthcare",
+    "country": "Canada",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "2"
+  },
+  {
+    "title": "Fine-tune LLM for Legal Document Summarization (Ref: #1093)",
+    "description": "Looking for a senior AI specialist to fine-tune an open-source model (like Llama 3 or Mistral) on our proprietary dataset of legal contracts. Goal is to generate accurate, high-quality bullet summaries of contract terms. Experience with PyTorch, Hugging Face, and LoRA/QLoRA parameter-efficient tuning is required. Work is 100% remote. Looking for a dependable professional to start within 3 days of contract award.",
+    "category": "AI/ML",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Scikit-Learn",
+      "Computer Vision",
+      "OpenAI API"
+    ],
+    "clientName": "GuardCyber Client",
+    "clientIndustry": "E-commerce",
+    "country": "Australia",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "3"
+  },
+  {
+    "title": "AWS Cloud Infrastructure Setup using Terraform (Ref: #1094)",
+    "description": "We need an expert DevOps engineer to design and implement a secure, scalable AWS infrastructure for our Next.js and Node.js application. Deliverables must be fully written as Terraform code (IaC), including VPC setup, ECS Fargate clusters, RDS PostgreSQL, Auto Scaling, and AWS Secrets Manager integration. Work is 100% remote. Looking for a dependable professional to start within 4 days of contract award.",
+    "category": "DevOps & Cloud",
+    "budget": "$3000 - $5500",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Terraform",
+      "CI/CD",
+      "Linux",
+      "Monitoring (Prometheus/Grafana)"
+    ],
+    "clientName": "Nova AI Client",
+    "clientIndustry": "Educational",
+    "country": "Germany",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "4"
+  },
+  {
+    "title": "E-commerce Customer Segmentation & Cohort Analysis (Ref: #1095)",
+    "description": "We have large datasets of customer transactions. We want an expert data scientist to perform RFM analysis, build clustering models (K-Means), and perform cohort analysis to identify high-value customer groups and churn risks. Deliverables should include clean Jupyter notebooks and a detailed presentation slide deck. Work is 100% remote. Looking for a dependable professional to start within 5 days of contract award.",
+    "category": "Data Science",
+    "budget": "$2000 - $4000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Power BI",
+      "Apache Spark",
+      "Big Data",
+      "Statistical Analysis",
+      "Python"
+    ],
+    "clientName": "CoinTech Client",
+    "clientIndustry": "Agency",
+    "country": "India",
+    "proposalCount": "Less than 5",
+    "postedDaysAgo": "5"
+  },
+  {
+    "title": "High-Quality Technical Blog Posts for DevOps Platform (Ref: #1096)",
+    "description": "We are looking for an expert technical writer to write a series of 5 deep-dive blog articles (1500-2000 words each) about Docker, Kubernetes, and Kubernetes alternatives. You must be able to write actual configuration code examples and explain complex engineering concepts clearly. SEO optimization is required. Work is 100% remote. Looking for a dependable professional to start within 6 days of contract award.",
+    "category": "Content Writing",
+    "budget": "$1000 - $2000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Ghostwriting",
+      "Technical Writing",
+      "Content Strategy"
+    ],
+    "clientName": "VeloWeb Client",
+    "clientIndustry": "Startup",
+    "country": "Singapore",
+    "proposalCount": "5 to 10",
+    "postedDaysAgo": "6"
+  },
+  {
+    "title": "Lead Generation and Google Ads Campaign Setup (Ref: #1097)",
+    "description": "We are a real estate agency looking to acquire high-intent buyer leads. We need an expert marketing manager to set up Google Ads campaigns, conduct extensive keyword research, write ad copy, configure conversion tracking, and optimize bids. You must have proven case studies of low cost-per-lead. Work is 100% remote. Looking for a dependable professional to start within 7 days of contract award.",
+    "category": "Digital Marketing",
+    "budget": "$1500 - $3000",
+    "duration": "1 month",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Growth Hacking",
+      "SEO",
+      "Lead Generation",
+      "Google Ads"
+    ],
+    "clientName": "NexoMobile Client",
+    "clientIndustry": "Real Estate",
+    "country": "France",
+    "proposalCount": "10 to 15",
+    "postedDaysAgo": "7"
+  },
+  {
+    "title": "Promo Video Production and Motion Graphics (Ref: #1098)",
+    "description": "We are launching a mobile app and need an expert video editor to create a 60-second high-energy promotional video. We will provide screenshots and screen recordings. You will design slick 3D/2D mobile device frame mockups, add fluid text transitions, source premium background music, and deliver multiple aspect ratios (16:9, 9:16). Work is 100% remote. Looking for a dependable professional to start within 1 days of contract award.",
+    "category": "Video Editing",
+    "budget": "$1500 - $2800",
+    "duration": "3 weeks",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "DaVinci Resolve",
+      "Motion Graphics",
+      "Final Cut Pro",
+      "Video Production",
+      "After Effects"
+    ],
+    "clientName": "PixelDesign Studio Client",
+    "clientIndustry": "Logistics",
+    "country": "Netherlands",
+    "proposalCount": "15 to 20",
+    "postedDaysAgo": "1"
+  },
+  {
+    "title": "Smart Contract Developer for DeFi Staking Protocol (Ref: #1099)",
+    "description": "We are building a decentralized finance protocol and need an expert Solidity developer to write custom staking, locking, and yield generation smart contracts. You must ensure protection against common exploits (reentrancy, flash loan attacks) and provide scripts for deployment. Hardhat/Foundry experience is a must. Code must be gas-optimized and thoroughly unit-tested. Work is 100% remote. Looking for a dependable professional to start within 2 days of contract award.",
+    "category": "Blockchain",
+    "budget": "$6000 - $10000",
+    "duration": "2 months",
+    "experienceLevel": "Expert",
+    "requiredSkills": [
+      "Truffle",
+      "Smart Contracts",
+      "Rust"
+    ],
+    "clientName": "DevOpsGrid Client",
+    "clientIndustry": "Cybersecurity",
+    "country": "United Arab Emirates",
+    "proposalCount": "20 to 50",
+    "postedDaysAgo": "2"
+  }
+]

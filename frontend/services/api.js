@@ -70,6 +70,8 @@ export const fetchFreelancerPFI = (freelancerId) =>
   api.get(`/freelancers/${freelancerId}/pfi`);
 export const fetchPFIByMe = (token) =>
   api.get('/freelancers/me/pfi', { headers: getAuthHeaders(token) });
+export const fetchFreelancerDashboardSummary = (token) =>
+  api.get('/freelancers/me/dashboard-summary', { headers: getAuthHeaders(token) });
 export const fetchPFISuggestions = (freelancerId) =>
   api.get(`/freelancers/${freelancerId}/pfi/suggestions`);
 export const listJobs = (params, token) =>
@@ -125,8 +127,8 @@ export const updateProfile = (payload, token) =>
 
 export const fetchProjectById = (projectId, token) =>
   api.get(`/projects/${projectId}`, { headers: getAuthHeaders(token) });
-export const fetchProjectMilestones = (projectId) =>
-  api.get(`/projects/${projectId}/milestones`);
+export const fetchProjectMilestones = (projectId, token) =>
+  api.get(`/projects/${projectId}/milestones`, { headers: getAuthHeaders(token) });
 export const fetchProjectPayments = (projectId) =>
   api.get(`/payments/project/${projectId}`);
 export const fetchEscrowDashboard = (projectId) =>

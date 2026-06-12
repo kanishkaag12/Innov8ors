@@ -2,7 +2,127 @@ const express = require('express');
 const router = express.Router();
 const PFIService = require('../services/pfiService');
 const User = require('../models/User');
+const Contract = require('../models/Contract');
+const Proposal = require('../models/Proposal');
+const Project = require('../models/Project');
+const Conversation = require('../models/Conversation');
+const Transaction = require('../models/Transaction');
+const mongoose = require('mongoose');
 const { authenticateToken } = require('../middleware/authMiddleware');
+
+function buildOnboardingChecklist(user, proposalsSent) {
+  const profile = user?.freelancerProfile || {};
+  const checklist = [
+    { id: 'complete_profile', label: 'Complete Profile', completed: Boolean(profile.headline && profile.bio && profile.location) },
+    { id: 'add_skills', label: 'Add Skills', completed: Array.isArray(profile.skills) && profile.skills.length >= 3 },
+    { id: 'upload_portfolio', label: 'Upload Portfolio', completed: Array.isArray(profile.portfolioLinks) && profile.portfolioLinks.length > 0 },
+    { id: 'verify_identity', label: 'Verify Identity', completed: Boolean(profile.identityVerified || user?.identityVerified) },
+    { id: 'apply_first_job', label: 'Apply To First Job', completed: Number(proposalsSent || 0) > 0 }
+  ];
+
+  const completedCount = checklist.filter((item) => item.completed).length;
+  const progress = Math.round((completedCount / checklist.length) * 100);
+
+  return {
+    checklist,
+    completedCount,
+    totalCount: checklist.length,
+    progress
+  };
+}
+
+// GET /api/freelancers/me/dashboard-summary - Get authenticated freelancer dashboard data
+router.get('/me/dashboard-summary', authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    if (user.role !== 'freelancer') {
+      return res.status(400).json({ message: 'User is not a freelancer' });
+    }
+
+    const freelancerId = String(user._id);
+
+    const [
+      pfiData,
+      activeContracts,
+      proposalsSent,
+      walletUser,
+      conversations,
+      earningsAggregate
+    ] = await Promise.all([
+      PFIService.getPFIScore(freelancerId),
+      Contract.find({ freelancerId: user._id, status: 'active' }).select('projectId status').lean(),
+      Proposal.countDocuments({ freelancerId: user._id }),
+      User.findById(user._id).select('balance escrowLocked freelancerProfile').lean(),
+      Conversation.find({ participants: user._id }).select('unreadCounts').lean(),
+      Transaction.aggregate([
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(freelancerId),
+            type: 'credit'
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$amount' }
+          }
+        }
+      ])
+    ]);
+
+    const projectIds = activeContracts
+      .map((contract) => String(contract.projectId || '').trim())
+      .filter((id) => mongoose.Types.ObjectId.isValid(id));
+
+    const activeProjects = projectIds.length
+      ? await Project.find({ _id: { $in: projectIds } })
+          .select('title description budget createdAt employer_id')
+          .populate('employer_id', 'name email')
+          .sort({ createdAt: -1 })
+          .lean()
+      : [];
+
+    const unreadCount = conversations.reduce((sum, conversation) => {
+      const counts = conversation?.unreadCounts || {};
+      const count = Number(counts[freelancerId] || 0);
+      return sum + (Number.isFinite(count) ? count : 0);
+    }, 0);
+
+    const onboarding = buildOnboardingChecklist(walletUser || user, proposalsSent);
+
+    return res.json({
+      success: true,
+      data: {
+        authenticatedUserId: freelancerId,
+        quickStats: {
+          activeContracts: activeContracts.length,
+          proposalsSent,
+          profileViews: 0,
+          earnings: Number(earningsAggregate?.[0]?.total || 0),
+          escrowBalance: Number(walletUser?.escrowLocked || 0),
+          pfiScore: Number(pfiData?.score || 0),
+          pfiStatus: pfiData?.status || 'Getting Started'
+        },
+        messages: {
+          unreadCount,
+          emptyStateMessage: unreadCount === 0 ? 'No messages yet.' : ''
+        },
+        onboarding,
+        activeProjects: activeProjects.map((project) => ({
+          id: String(project._id),
+          title: project.title,
+          description: project.description,
+          budget: Number(project.budget || 0),
+          employerName: project.employer_id?.name || 'Client',
+          createdAt: project.createdAt
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Get freelancer dashboard summary error:', error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 // GET /api/freelancers/me/pfi - Get current authenticated freelancer PFI score
 router.get('/me/pfi', authenticateToken, async (req, res) => {
@@ -58,14 +178,17 @@ router.get('/me/pfi/suggestions', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'User is not a freelancer' });
     }
 
-    const pfiData = await PFIService.getPFIScore(user._id);
-    const suggestions = PFIService.getImprovementSuggestions(pfiData.factor_breakdown);
+    const pfiData = await PFIService.calculatePFI(user._id);
 
     res.json({
       success: true,
       data: {
         current_score: pfiData.score,
-        suggestions
+        breakdown: pfiData.breakdown,
+        suggestions: pfiData.recommendations.map((text) => ({
+          title: text,
+          description: text
+        }))
       }
     });
   } catch (error) {
@@ -76,6 +199,7 @@ router.get('/me/pfi/suggestions', authenticateToken, async (req, res) => {
     });
   }
 });
+
 
 // GET /api/freelancers/:freelancerId/pfi - Get current PFI score
 router.get('/:freelancerId/pfi', async (req, res) => {

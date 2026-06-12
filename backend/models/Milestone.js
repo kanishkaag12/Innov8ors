@@ -76,4 +76,19 @@ const milestoneSchema = new mongoose.Schema(
   }
 );
 
+milestoneSchema.post('save', function (doc) {
+  setImmediate(async () => {
+    try {
+      const Contract = require('./Contract');
+      const PFIService = require('../services/pfiService');
+      const contract = await Contract.findOne({ projectId: String(doc.project_id) }).select('freelancerId').lean();
+      if (contract && contract.freelancerId) {
+        await PFIService.calculatePFIScore(String(contract.freelancerId), 'milestone_completed', ['milestone_completed']);
+      }
+    } catch (err) {
+      console.error('[PFI Hook] Failed to recalculate PFI after milestone save:', err.message);
+    }
+  });
+});
+
 module.exports = mongoose.model('Milestone', milestoneSchema);

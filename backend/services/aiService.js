@@ -2,10 +2,145 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 require("dotenv").config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+function hasUsableGeminiKey() {
+  return Boolean(
+    GEMINI_API_KEY &&
+      !['your_existing_key', 'your_api_key', 'replace_me'].includes(String(GEMINI_API_KEY).trim().toLowerCase())
+  );
+}
+
+function buildProjectTitle(description = '') {
+  const cleaned = String(description)
+    .replace(/\s+/g, ' ')
+    .replace(/[^\w\s-]/g, '')
+    .trim();
+
+  if (!cleaned) {
+    return 'Software Development Project';
+  }
+
+  const words = cleaned.split(' ').filter(Boolean).slice(0, 7);
+  return words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function buildFallbackMilestones(description = '') {
+  const lowerDescription = String(description).toLowerCase();
+  const isSimpleSite = /(website|landing|portfolio|cafe|restaurant|menu|gallery)/.test(lowerDescription);
+  const isApp = /(app|platform|dashboard|backend|api|full[-\s]?stack|mobile|web app)/.test(lowerDescription);
+
+  if (isSimpleSite && !isApp) {
+    return {
+      project_title: buildProjectTitle(description),
+      milestones: normalizeMilestones([
+        {
+          title: 'Requirements & Site Structure',
+          description: 'Confirm page list, content sections, visual direction, and user flows before implementation.',
+          deliverable: 'Approved sitemap, content outline, and implementation checklist.',
+          estimated_time: '2-3 days',
+          complexity: 'Low',
+          payout_percentage: 20
+        },
+        {
+          title: 'Core Website Build',
+          description: 'Build the main responsive pages with reusable sections, navigation, and polished styling.',
+          deliverable: 'Responsive website pages matching the agreed structure.',
+          estimated_time: '4-6 days',
+          complexity: 'Medium',
+          payout_percentage: 40
+        },
+        {
+          title: 'Forms, Media & Content Integration',
+          description: 'Add contact handling, menu or gallery content, media assets, and required business details.',
+          deliverable: 'Functional contact flow and complete content/media integration.',
+          estimated_time: '2-4 days',
+          complexity: 'Medium',
+          payout_percentage: 25
+        },
+        {
+          title: 'Testing, Revisions & Launch Prep',
+          description: 'Test across devices, fix content or layout issues, optimize performance, and prepare deployment.',
+          deliverable: 'QA-tested launch-ready website.',
+          estimated_time: '2-3 days',
+          complexity: 'Low',
+          payout_percentage: 15
+        }
+      ])
+    };
+  }
+
+  return {
+    project_title: buildProjectTitle(description),
+    milestones: normalizeMilestones([
+      {
+        title: 'Discovery & Technical Planning',
+        description: 'Clarify scope, define core features, identify integrations, and prepare the technical delivery plan.',
+        deliverable: 'Feature breakdown, architecture notes, and milestone acceptance criteria.',
+        estimated_time: '3-5 days',
+        complexity: 'Medium',
+        payout_percentage: 20
+      },
+      {
+        title: 'Foundation & Core Architecture',
+        description: 'Set up the project structure, data models, authentication or access flow, and core infrastructure.',
+        deliverable: 'Working project foundation with core modules wired together.',
+        estimated_time: '1-2 weeks',
+        complexity: 'High',
+        payout_percentage: 30
+      },
+      {
+        title: 'Feature Implementation',
+        description: 'Build the main user-facing workflows, business logic, API endpoints, and required integrations.',
+        deliverable: 'Functional implementation of the primary project features.',
+        estimated_time: '2-3 weeks',
+        complexity: 'High',
+        payout_percentage: 35
+      },
+      {
+        title: 'QA, Polish & Handover',
+        description: 'Test critical flows, fix defects, improve usability, document handover notes, and prepare release.',
+        deliverable: 'Tested release candidate with handover documentation.',
+        estimated_time: '1 week',
+        complexity: 'Medium',
+        payout_percentage: 15
+      }
+    ])
+  };
+}
+
+function normalizePayoutPercentages(milestones) {
+  if (!milestones.length) {
+    return milestones;
+  }
+
+  const total = milestones.reduce((sum, milestone) => sum + Number(milestone.payout_percentage || 0), 0);
+  if (total <= 0) {
+    const base = Math.floor(100 / milestones.length);
+    let remaining = 100;
+    return milestones.map((milestone, index) => {
+      const payout = index === milestones.length - 1 ? remaining : base;
+      remaining -= payout;
+      return { ...milestone, payout_percentage: payout };
+    });
+  }
+
+  let assigned = 0;
+  return milestones.map((milestone, index) => {
+    const payout =
+      index === milestones.length - 1
+        ? 100 - assigned
+        : Math.max(1, Math.round((Number(milestone.payout_percentage || 0) / total) * 100));
+    assigned += payout;
+    return { ...milestone, payout_percentage: payout };
+  });
+}
 
 function normalizeMilestones(rawMilestones = []) {
-  return rawMilestones
+  const milestones = rawMilestones
     .map((milestone) => ({
       title: String(milestone?.title || milestone?.name || '').trim(),
       description: String(milestone?.description || '').trim(),
@@ -15,6 +150,8 @@ function normalizeMilestones(rawMilestones = []) {
       payout_percentage: Number(milestone?.payout_percentage || milestone?.payout || 0)
     }))
     .filter((milestone) => milestone.title && milestone.description);
+
+  return normalizePayoutPercentages(milestones);
 }
 
 function extractJsonPayload(text) {
@@ -22,10 +159,25 @@ function extractJsonPayload(text) {
   const fencedMatch = trimmed.match(/```json\s*([\s\S]*?)\s*```/i);
   const jsonCandidate = fencedMatch ? fencedMatch[1] : trimmed;
 
-  return JSON.parse(jsonCandidate);
+  try {
+    return JSON.parse(jsonCandidate);
+  } catch (error) {
+    const firstBrace = jsonCandidate.indexOf('{');
+    const lastBrace = jsonCandidate.lastIndexOf('}');
+
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      return JSON.parse(jsonCandidate.slice(firstBrace, lastBrace + 1));
+    }
+
+    throw error;
+  }
 }
 
 async function generateMilestones(description) {
+  if (!hasUsableGeminiKey()) {
+    return buildFallbackMilestones(description);
+  }
+
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash"
   });
@@ -60,15 +212,24 @@ Rules:
 Project:
 ${description}`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const parsed = extractJsonPayload(response.text());
-  const milestones = normalizeMilestones(parsed?.milestones);
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const parsed = extractJsonPayload(response.text());
+    const milestones = normalizeMilestones(parsed?.milestones);
 
-  return {
-    project_title: String(parsed?.project_title || 'AI Generated Project Plan').trim(),
-    milestones
-  };
+    if (!milestones.length) {
+      throw new Error('Gemini returned no usable milestones');
+    }
+
+    return {
+      project_title: String(parsed?.project_title || buildProjectTitle(description)).trim(),
+      milestones
+    };
+  } catch (error) {
+    console.error('Gemini milestone generation failed, using fallback milestones:', error.message);
+    return buildFallbackMilestones(description);
+  }
 }
 
 async function generateProposal(job, freelancerProfile) {
@@ -84,7 +245,7 @@ async function generateProposal(job, freelancerProfile) {
     'If helpful, I can start with a short kickoff outline and first milestone immediately.'
   ].filter(Boolean).join(' ');
 
-  if (!process.env.GEMINI_API_KEY) {
+  if (!hasUsableGeminiKey()) {
     return fallbackProposal;
   }
 

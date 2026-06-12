@@ -278,8 +278,132 @@ async function getSavedJobIds(freelancerId) {
   return new Set(savedJobs.map((item) => String(item.jobId)));
 }
 
+function extractCategoryAndSkills(title, description) {
+  const combined = `${title} ${description}`.toLowerCase();
+  
+  // Categorization logic
+  let category = 'Web Development';
+  if (/\b(ai|artificial intelligence|llm|chatgpt|openai|gemini|claude|rag|langchain|transformer|bert|model|bot|neural|nlp)\b/.test(combined)) {
+    category = 'AI Development';
+  } else if (/\b(data|python|pandas|numpy|sql|postgres|database|analytics|prediction|regression|classification|clustering|xgb|xgboost|tensorflow|pytorch|ml|machine learning)\b/.test(combined)) {
+    category = 'Data Science';
+  } else if (/\b(design|ui|ux|figma|adobe|illustrator|photoshop|canvas|wireframe|mockup|prototype|logo|creative)\b/.test(combined)) {
+    category = 'Design & Product';
+  } else if (/\b(devops|ci\/cd|aws|docker|kubernetes|terraform|cloud|pipeline|deploy|ansible|jenkins|azure|gcp)\b/.test(combined)) {
+    category = 'DevOps';
+  }
+
+  // Skill extraction
+  const skillKeywords = [
+    'React', 'Next.js', 'Tailwind', 'Node.js', 'Express', 'Python', 'FastAPI', 'MongoDB', 
+    'PostgreSQL', 'Docker', 'AWS', 'Java', 'C++', 'HTML', 'CSS', 'JavaScript', 'TypeScript', 
+    'GitHub', 'Git', 'XGBoost', 'Figma', 'UI/UX', 'CI/CD', 'Kubernetes', 'Redux', 'GraphQL'
+  ];
+  
+  const requiredSkills = [];
+  for (const skill of skillKeywords) {
+    const escaped = skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+    if (regex.test(combined)) {
+      requiredSkills.push(skill);
+    }
+  }
+
+  if (requiredSkills.length === 0) {
+    if (category === 'Web Development') {
+      requiredSkills.push('JavaScript', 'React', 'HTML', 'CSS');
+    } else if (category === 'AI Development') {
+      requiredSkills.push('Python', 'OpenAI API', 'Prompt Engineering');
+    } else if (category === 'Data Science') {
+      requiredSkills.push('Python', 'Machine Learning', 'Data Analysis');
+    } else if (category === 'Design & Product') {
+      requiredSkills.push('Figma', 'UI/UX Design', 'Wireframing');
+    } else if (category === 'DevOps') {
+      requiredSkills.push('Docker', 'CI/CD', 'AWS');
+    } else {
+      requiredSkills.push('Software Development');
+    }
+  }
+
+  return { category, requiredSkills };
+}
+
+async function syncProjectsToJobs() {
+  try {
+    const Project = require('../models/Project');
+    const User = require('../models/User');
+
+    // Find all projects in database
+    const allProjects = await Project.find({});
+    for (const project of allProjects) {
+      if (project.freelancer_id) {
+        // Project already has a freelancer assigned, remove from Job search listing
+        await Job.deleteOne({ _id: project._id });
+        continue;
+      }
+
+      const existingJob = await Job.findById(project._id);
+      if (!existingJob) {
+        console.log(`🔄 Syncing Project "${project.title}" (${project._id}) to Jobs collection...`);
+        const employer = await User.findById(project.employer_id);
+        const employerName = employer ? (employer.employerProfile?.fullName || employer.name) : 'SynapEscrow Client';
+        const employerCompanyName = employer ? (employer.employerProfile?.companyName || '') : '';
+        const location = employer ? (employer.employerProfile?.location || 'Remote') : 'Remote';
+
+        const { category, requiredSkills } = extractCategoryAndSkills(project.title, project.description);
+
+        const newJob = new Job({
+          _id: project._id,
+          title: project.title,
+          description: project.description,
+          requiredSkills,
+          category,
+          experienceLevel: 'mid',
+          budgetMin: project.budget,
+          budgetMax: project.budget,
+          projectType: 'fixed',
+          location,
+          employerName,
+          employerCompanyName,
+          isRemote: true,
+          status: 'open',
+          createdAt: project.createdAt
+        });
+
+        newJob.matchingText = buildJobMatchingText(newJob);
+        try {
+          newJob.jobEmbedding = await generateEmbedding(newJob.matchingText);
+        } catch (embErr) {
+          console.error(`Failed to generate embedding for synced project ${project._id}:`, embErr.message);
+        }
+
+        await newJob.save();
+        console.log(`✅ Synced Project "${project.title}" successfully.`);
+      } else {
+        // Update basic attributes if project was modified
+        let needsSave = false;
+        if (existingJob.status !== 'open') {
+          existingJob.status = 'open';
+          needsSave = true;
+        }
+        if (existingJob.budgetMin !== project.budget) {
+          existingJob.budgetMin = project.budget;
+          existingJob.budgetMax = project.budget;
+          needsSave = true;
+        }
+        if (needsSave) {
+          await existingJob.save();
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error in syncProjectsToJobs:', error);
+  }
+}
+
 async function listJobs({ freelancerId, filters = {}, limit = 20 }) {
   await ensureMockJobs();
+  await syncProjectsToJobs();
 
   const query = buildMongoFilters(filters);
   const jobs = await Job.find(query)
@@ -298,6 +422,7 @@ async function listJobs({ freelancerId, filters = {}, limit = 20 }) {
 
 async function getMatches({ freelancerId, filters = {}, limit = 20 }) {
   await ensureMockJobs();
+  await syncProjectsToJobs();
 
   const user = await User.findById(freelancerId);
   if (!user || user.role !== 'freelancer') {
@@ -338,7 +463,7 @@ async function getMatches({ freelancerId, filters = {}, limit = 20 }) {
       (budgetFit ? 0.05 : 0)
     ) * 40; // Max 40% from rules
     
-    const totalScore = Math.round((embeddingSim * 0.6 + ruleScore) * 100);
+    const totalScore = Math.min(100, Math.max(0, Math.round(embeddingSim * 60 + ruleScore)));
     
     const scores = {
       skillsOverlap: overlapCount,
@@ -350,10 +475,14 @@ async function getMatches({ freelancerId, filters = {}, limit = 20 }) {
     
     const matchReasons = calculateMatchReasons(user.freelancerProfile, job, scores);
     
+    const overlappingSkills = jobSkills.filter(skill => freelancerSkills.includes(skill));
+    const missingSkills = jobSkills.filter(skill => !freelancerSkills.includes(skill));
+
     ranked.push({
       ...job.toObject(),
       saved: savedIds.has(String(job._id)),
-      overlappingSkills: jobSkills.filter(skill => freelancerSkills.includes(skill)),
+      overlappingSkills,
+      missingSkills,
       matchScore: totalScore,
       matchReasons
     });

@@ -208,8 +208,8 @@ export default function MessagesPage() {
                 className={`w-full p-4 text-left transition ${selectedConversation?.id === conv.id ? 'bg-emerald-50' : 'hover:bg-slate-50'}`}
               >
                 <div className="flex gap-3">
-                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-sm">
-                    {conv.projectTitle?.charAt(0) || 'C'}
+                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 text-white font-bold text-sm shadow-sm">
+                    {(conv.otherParticipantName || conv.projectTitle)?.charAt(0) || 'C'}
                     {conv.hasUnread && (
                       <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-red-500" />
                     )}
@@ -217,7 +217,7 @@ export default function MessagesPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <p className={`truncate text-sm ${conv.hasUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
-                        {conv.projectTitle}
+                        {conv.otherParticipantName || conv.projectTitle}
                       </p>
                       <p className="text-[11px] text-slate-400">{new Date(conv.lastMessageAt).toLocaleDateString()}</p>
                     </div>
@@ -244,31 +244,31 @@ export default function MessagesPage() {
       </div>
 
       <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-100 bg-white flex items-center justify-between shadow-sm z-10 shrink-0">
           <div>
-            <h3 className="font-bold text-slate-900 leading-tight">
-              {selectedConversation ? selectedConversation.projectTitle : 'Select a conversation'}
+            <h3 className="font-bold text-slate-900 leading-tight text-base">
+              {selectedConversation ? `${selectedConversation.projectTitle} (${selectedConversation.otherParticipantName})` : 'Select a conversation'}
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 mt-0.5">
               {selectedConversation
-                ? `Project chat for ${selectedConversation.projectTitle}`
+                ? `Project chat with ${selectedConversation.otherParticipantName}`
                 : 'Chat opens after an accepted proposal creates a conversation.'}
             </p>
           </div>
           {selectedConversation && (
-            <button className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition">
+            <button className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl transition border border-emerald-100 shadow-sm">
               View Contract
             </button>
           )}
         </div>
 
-        <div className="flex-1 p-6 overflow-y-auto bg-slate-50 space-y-6">
+        <div className="flex-1 p-6 overflow-y-auto bg-[#efeae2] bg-gradient-to-b from-[#efeae2] to-[#e5ddd5] space-y-4 relative">
           {error ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">{error}</div>
           ) : null}
 
           {conversationLoading ? (
-            <div className="text-sm text-slate-500">Loading conversation...</div>
+            <div className="text-sm text-slate-600 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full w-max mx-auto shadow-sm">Loading conversation...</div>
           ) : selectedConversation ? (
             messages.length ? (
               messages.map((message) => {
@@ -276,19 +276,25 @@ export default function MessagesPage() {
                 return (
                   <div
                     key={message.id}
-                    className={`flex gap-3 ${isSender ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${isSender ? 'justify-end' : 'justify-start'} w-full animate-in fade-in slide-in-from-bottom-2 duration-200`}
                   >
-                    {!isSender && (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-xs font-bold">
-                        {message.sender?.name?.charAt(0) || 'U'}
-                      </div>
-                    )}
-                    <div className={`max-w-[85%] rounded-3xl p-4 text-sm shadow-sm ${isSender ? 'bg-emerald-600 text-white rounded-br-sm' : 'bg-white text-slate-800 rounded-bl-sm'}`}>
-                      <p>{message.text}</p>
-                      <div className={`mt-2 flex items-center gap-1 text-[11px] ${isSender ? 'text-emerald-100' : 'text-slate-400'}`}>
-                        <span>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        {isSender && message.isRead && (
-                          <CheckCheck size={12} className="ml-1 text-emerald-200" />
+                    <div 
+                      className={`max-w-[75%] rounded-[1rem] px-3.5 py-2 text-[13.5px] leading-relaxed shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] relative ${
+                        isSender 
+                          ? 'bg-[#d9fdd3] text-[#111b21] rounded-tr-none' 
+                          : 'bg-white text-[#111b21] rounded-tl-none'
+                      }`}
+                    >
+                      {!isSender && (
+                        <p className="text-[11px] font-extrabold text-emerald-600 mb-0.5 tracking-wide">
+                          {message.sender?.name}
+                        </p>
+                      )}
+                      <p className="whitespace-pre-wrap pr-12 pb-1.5">{message.text}</p>
+                      <div className="absolute bottom-1 right-2.5 flex items-center gap-1 text-[10px] text-[#667781] select-none font-medium">
+                        <span>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                        {isSender && (
+                          <CheckCheck size={14} className={message.isRead ? 'text-[#53bdeb]' : 'text-[#8696a0]'} />
                         )}
                       </div>
                     </div>
@@ -296,15 +302,15 @@ export default function MessagesPage() {
                 );
               })
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 text-center max-w-sm mx-auto shadow-sm">
                 No messages yet. Send the first message to start this conversation.
               </div>
             )
           ) : (
             <div className="flex h-full items-center justify-center text-center text-slate-500">
-              <div>
-                <p className="text-lg font-semibold">No conversation selected</p>
-                <p className="mt-2 text-sm">Choose a conversation on the left or accept a proposal to begin chatting.</p>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-100 max-w-sm shadow-sm">
+                <p className="text-lg font-bold text-slate-900">No conversation selected</p>
+                <p className="mt-2 text-sm text-slate-600">Choose a conversation on the left or accept a proposal to begin chatting.</p>
               </div>
             </div>
           )}

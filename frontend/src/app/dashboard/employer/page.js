@@ -220,11 +220,24 @@ function loadRazorpayScript() {
   }
 
   return new Promise((resolve) => {
+    const existingScript = document.getElementById('razorpay-checkout-js');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    const timeout = window.setTimeout(() => resolve(false), 15000);
     const script = document.createElement('script');
+    script.id = 'razorpay-checkout-js';
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
+    script.onload = () => {
+      window.clearTimeout(timeout);
+      resolve(true);
+    };
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      resolve(false);
+    };
     document.body.appendChild(script);
   });
 }
@@ -738,85 +751,91 @@ export default function EmployerDashboardPage() {
       milestones: generatedPlan.milestones
     };
 
-    const razorpay = new window.Razorpay({
-      key: RAZORPAY_KEY_ID,
-      amount,
-      currency: 'INR',
-      name: 'SynapEscrow',
-      description: generatedPlan.projectTitle,
-      image: undefined,
-      handler: async (response) => {
-        const auth = getStoredAuth();
-        let finalizedProject = projectRecord;
+    try {
+      const razorpay = new window.Razorpay({
+        key: RAZORPAY_KEY_ID,
+        amount,
+        currency: 'INR',
+        name: 'SynapEscrow',
+        description: generatedPlan.projectTitle,
+        image: undefined,
+        handler: async (response) => {
+          const auth = getStoredAuth();
+          let finalizedProject = projectRecord;
 
-        try {
-          if (auth?.token) {
-            const created = await createProject(
-              {
-                title: projectRecord.title,
-                description: projectRecord.description,
-                budget: projectRecord.budget,
-                deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
-                milestones: generatedPlan?.milestones || []
-              },
-              auth.token
-            );
+          try {
+            if (auth?.token) {
+              const created = await createProject(
+                {
+                  title: projectRecord.title,
+                  description: projectRecord.description,
+                  budget: projectRecord.budget,
+                  deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+                  milestones: generatedPlan?.milestones || []
+                },
+                auth.token
+              );
 
-            const createdProject = created?.data?.project;
-            if (createdProject?._id) {
-              finalizedProject = {
-                ...projectRecord,
-                id: String(createdProject._id),
-                _id: createdProject._id,
-                source: 'backend'
-              };
-              
+              const createdProject = created?.data?.project;
+              if (createdProject?._id) {
+                finalizedProject = {
+                  ...projectRecord,
+                  id: String(createdProject._id),
+                  _id: createdProject._id,
+                  source: 'backend'
+                };
+
+                try {
+                  await createEscrow({
+                    projectId: createdProject._id,
+                    clientId: user?.id || user?._id,
+                    amount: Number(projectRecord.budget)
+                  }, auth.token);
+                } catch (escrowErr) {
+                  console.error('Escrow creation failed:', escrowErr);
+                }
+              }
+
               try {
-                await createEscrow({
-                  projectId: createdProject._id,
-                  clientId: user?.id || user?._id,
-                  totalAmount: Number(projectRecord.budget)
-                }, auth.token);
-              } catch (escrowErr) {
-                console.error('Escrow creation failed:', escrowErr);
+                await refreshBackendProjects(auth.token);
+              } catch {
+                // Keep local state if refresh fails.
               }
             }
-
-            try {
-              await refreshBackendProjects(auth.token);
-            } catch {
-              // Keep local state if refresh fails.
-            }
+          } catch {
+            // Fallback to local-only project record when backend create fails.
           }
-        } catch {
-          // Fallback to local-only project record when backend create fails.
-        }
 
-        const nextProjects = [finalizedProject, ...postedProjects];
-        setPostedProjects(nextProjects);
-        saveStoredProjects(projectStorageKey, nextProjects);
-        setPaymentSuccess({
-          ...finalizedProject,
-          paymentId: response?.razorpay_payment_id || 'test_payment'
-        });
-        setIsPaying(false);
-      },
-      prefill: {
-        name: user?.name || 'Client',
-        email: user?.email || '',
-        contact: user?.phone || ''
-      },
-      theme: {
-        color: '#10b981'
-      },
-      modal: {
-        ondismiss: () => {
+          const nextProjects = [finalizedProject, ...postedProjects];
+          setPostedProjects(nextProjects);
+          saveStoredProjects(projectStorageKey, nextProjects);
+          setPaymentSuccess({
+            ...finalizedProject,
+            paymentId: response?.razorpay_payment_id || 'test_payment'
+          });
           setIsPaying(false);
+        },
+        prefill: {
+          name: user?.name || 'Client',
+          email: user?.email || '',
+          contact: user?.phone || ''
+        },
+        theme: {
+          color: '#10b981'
+        },
+        modal: {
+          ondismiss: () => {
+            setIsPaying(false);
+          }
         }
-      }
-    });
+      });
 
-    razorpay.open();
+      razorpay.open();
+    } catch (error) {
+      console.error('Razorpay checkout failed to open:', error);
+      setPlannerError(error?.message || 'Razorpay checkout failed to open. Check your Razorpay key and network connection.');
+      setIsPaying(false);
+    }
   };
 
   const handleApplicantStatus = async (projectId, email, status) => {

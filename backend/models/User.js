@@ -94,4 +94,30 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.post('save', function (doc) {
+  if (doc.role === 'freelancer') {
+    setImmediate(async () => {
+      try {
+        const PFIService = require('../services/pfiService');
+        await PFIService.calculatePFIScore(String(doc._id), 'profile_update', ['profile_completed']);
+      } catch (err) {
+        console.error('[PFI Hook] Failed to recalculate PFI after user save:', err.message);
+      }
+    });
+  }
+});
+
+userSchema.post('findOneAndUpdate', function (doc) {
+  if (doc && doc.role === 'freelancer') {
+    setImmediate(async () => {
+      try {
+        const PFIService = require('../services/pfiService');
+        await PFIService.calculatePFIScore(String(doc._id), 'profile_update', ['profile_completed']);
+      } catch (err) {
+        console.error('[PFI Hook] Failed to recalculate PFI after user update:', err.message);
+      }
+    });
+  }
+});
+
 module.exports = mongoose.model('User', userSchema);

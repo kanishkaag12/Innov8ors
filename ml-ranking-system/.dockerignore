@@ -1,0 +1,16 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+Dockerfile
+*.log
+# Jupyter artifacts
+*.ipynb_checkpoints
+# Heavy docs not needed in container
+*.md
+# React component – frontend only, not part of the Python service
+07_RankedFreelancersDashboard.jsx
+07_RankedFreelancersDashboard.css

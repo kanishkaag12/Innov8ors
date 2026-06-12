@@ -5,20 +5,20 @@ const Project = require('../models/Project');
 const Milestone = require('../models/Milestone');
 const Submission = require('../models/Submission');
 const Payment = require('../models/Payment');
+const Proposal = require('../models/Proposal');
+const Contract = require('../models/Contract');
+const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 
 class PFIService {
   // PFI Scoring Weights (total = 100)
   static WEIGHTS = {
-    PROFILE_COMPLETENESS: 20,
-    VERIFICATION: 15,
-    PROPOSAL_ACCEPTANCE: 10,
+    PROFILE_COMPLETENESS: 30,
+    PROPOSAL_ACCEPTANCE: 20,
     MILESTONE_COMPLETION: 20,
     ON_TIME_DELIVERY: 15,
     CLIENT_RATINGS: 10,
-    REVIEW_SENTIMENT: 5,
-    REHIRE_RATE: 10,
-    RESPONSIVENESS: 10,
-    RISK_PENALTY: -25 // negative weight = penalty
+    PLATFORM_ACTIVITY: 5
   };
 
   /**
@@ -72,7 +72,7 @@ class PFIService {
       return {
         score: Math.round(finalScore),
         factor_breakdown: factorScores,
-        status: this.getScoreStatus(finalScore),
+        status: this.getScoreStatus(finalScore, this.isNewFreelancer(metrics)),
         trend: this.calculateTrend(previousHistory?.score, finalScore),
         last_updated: new Date()
       };
@@ -116,19 +116,25 @@ class PFIService {
     if (!user) return { score: 0, last_updated: new Date() };
 
     let completeness = 0;
-    const totalFields = 6;
+    const profile = user.freelancerProfile || {};
+    const checks = [
+      Boolean(user.name),
+      Boolean(user.email),
+      Boolean(profile.headline),
+      Boolean(profile.bio),
+      Boolean(profile.location),
+      Boolean(profile.primaryCategory),
+      Array.isArray(profile.skills) && profile.skills.length > 0,
+      Array.isArray(profile.portfolioLinks) && profile.portfolioLinks.length > 0,
+      Array.isArray(profile.languages) && profile.languages.length > 0,
+      Boolean(profile.availability)
+    ];
 
-    // Basic profile fields
-    if (user.name) completeness += 1;
-    if (user.email) completeness += 1;
+    for (const passed of checks) {
+      if (passed) completeness += 1;
+    }
 
-    // Freelancer profile fields
-    if (user.freelancerProfile?.category) completeness += 1;
-    if (user.freelancerProfile?.skills?.length > 0) completeness += 1;
-    if (user.companyName) completeness += 1;
-    if (user.website) completeness += 1;
-
-    const score = (completeness / totalFields) * 100;
+    const score = (completeness / checks.length) * 100;
     return { score: Math.round(score), last_updated: new Date() };
   }
 
@@ -141,19 +147,28 @@ class PFIService {
 
     // For now, assume verification based on profile data
     // In production, this would check against verification services
-    const githubVerified = user.freelancerProfile?.githubLink ? true : false;
-    const portfolioVerified = user.website ? true : false;
-    const identityVerified = false; // Would require KYC integration
+    const profile = user.freelancerProfile || {};
+    const skills = Array.isArray(profile.skills) ? profile.skills : [];
+    const portfolioLinks = Array.isArray(profile.portfolioLinks) ? profile.portfolioLinks : [];
+
+    const githubVerified = portfolioLinks.some((link) => String(link).toLowerCase().includes('github.com'));
+    const portfolioVerified = portfolioLinks.length > 0 || Boolean(user.website);
+    const identityVerified = Boolean(profile.identityVerified || user.identityVerified);
+
+    const skillVerificationScore = skills.length >= 8 ? 100 : skills.length >= 5 ? 80 : skills.length >= 3 ? 60 : skills.length > 0 ? 40 : 0;
+    const identityScore = identityVerified ? 100 : 0;
 
     let score = 0;
-    if (githubVerified) score += 40;
-    if (portfolioVerified) score += 30;
-    if (identityVerified) score += 30;
+    if (githubVerified) score += 35;
+    if (portfolioVerified) score += 25;
+    if (identityVerified) score += 40;
 
     return {
       github_verified: githubVerified,
       portfolio_verified: portfolioVerified,
       identity_verified: identityVerified,
+      identity_score: identityScore,
+      skill_score: skillVerificationScore,
       score,
       last_updated: new Date()
     };
@@ -163,14 +178,26 @@ class PFIService {
    * Calculate performance metrics
    */
   static async calculatePerformanceMetrics(freelancerId) {
-    // Get all projects where freelancer is assigned
-    const projects = await Project.find({ freelancer_id: freelancerId });
+    const [
+      totalProposals,
+      acceptedProposals,
+      contracts
+    ] = await Promise.all([
+      Proposal.countDocuments({ freelancerId }),
+      Proposal.countDocuments({ freelancerId, status: 'accepted' }),
+      Contract.find({ freelancerId }).select('projectId status').lean()
+    ]);
 
-    if (projects.length === 0) {
+    const acceptedProjects = contracts
+      .filter((contract) => String(contract.status || '').toLowerCase() !== 'cancelled')
+      .map((contract) => String(contract.projectId || '').trim())
+      .filter(Boolean);
+
+    if (acceptedProjects.length === 0) {
       return {
-        total_proposals: 0,
-        accepted_proposals: 0,
-        proposal_acceptance_rate: 0,
+        total_proposals: totalProposals,
+        accepted_proposals: acceptedProposals,
+        proposal_acceptance_rate: totalProposals > 0 ? Math.round((acceptedProposals / totalProposals) * 100) : 0,
         total_milestones: 0,
         completed_milestones: 0,
         milestone_completion_rate: 0,
@@ -181,22 +208,19 @@ class PFIService {
       };
     }
 
-    // For now, assume all assigned projects = accepted proposals
-    // In production, you'd track actual proposals vs acceptances
-    const totalProposals = projects.length;
-    const acceptedProposals = projects.length;
     const proposalAcceptanceRate = totalProposals > 0 ? (acceptedProposals / totalProposals) * 100 : 0;
 
-    // Milestone metrics
-    const projectIds = projects.map(p => p._id);
-    const milestones = await Milestone.find({ project_id: { $in: projectIds } });
-    const completedMilestones = milestones.filter(m => m.status === 'completed').length;
+    const milestones = await Milestone.find({ project_id: { $in: acceptedProjects } }).lean();
+    const completedMilestones = milestones.filter(
+      (milestone) =>
+        String(milestone.status || '').toLowerCase() === 'completed' ||
+        String(milestone.payment_status || '').toLowerCase() === 'paid'
+    ).length;
     const milestoneCompletionRate = milestones.length > 0 ? (completedMilestones / milestones.length) * 100 : 0;
 
-    // On-time delivery (simplified - would need deadline tracking)
-    const submissions = await Submission.find({ freelancer_id: freelancerId });
-    const onTimeDeliveries = submissions.length; // Assume all on time for now
-    const onTimeDeliveryRate = submissions.length > 0 ? 100 : 0; // Simplified
+    const submissions = await Submission.find({ freelancer_id: freelancerId }).lean();
+    const onTimeDeliveries = Math.min(submissions.length, completedMilestones);
+    const onTimeDeliveryRate = completedMilestones > 0 ? (onTimeDeliveries / completedMilestones) * 100 : 0;
 
     return {
       total_proposals: totalProposals,
@@ -216,16 +240,26 @@ class PFIService {
    * Calculate client feedback metrics
    */
   static async calculateClientFeedback(freelancerId) {
-    // For now, return default values
-    // In production, you'd have a Reviews/Ratings model
+    const contracts = await Contract.find({ freelancerId, status: 'completed' }).select('employerId').lean();
+
+    const employerCounts = contracts.reduce((acc, contract) => {
+      const key = String(contract.employerId || '');
+      if (!key) return acc;
+      acc.set(key, (acc.get(key) || 0) + 1);
+      return acc;
+    }, new Map());
+
+    const rehiredEmployers = Array.from(employerCounts.values()).filter((count) => count > 1).length;
+    const rehireRate = contracts.length > 0 ? Math.round((rehiredEmployers / contracts.length) * 100) : 0;
+
     return {
       total_ratings: 0,
       average_rating: 0,
       total_reviews: 0,
       positive_reviews: 0,
-      review_sentiment_score: 50, // Neutral
-      total_rehires: 0,
-      rehire_rate: 0,
+      review_sentiment_score: 0,
+      total_rehires: rehiredEmployers,
+      rehire_rate: rehireRate,
       last_updated: new Date()
     };
   }
@@ -234,12 +268,29 @@ class PFIService {
    * Calculate responsiveness score
    */
   static async calculateResponsiveness(freelancerId) {
-    // For now, return default values
-    // In production, you'd track response times to messages/queries
+    const conversations = await Conversation.find({ participants: freelancerId }).select('_id').lean();
+    const conversationIds = conversations.map((conversation) => conversation._id);
+
+    if (!conversationIds.length) {
+      return {
+        average_response_time_hours: null,
+        response_rate: 0,
+        score: 0,
+        last_updated: new Date()
+      };
+    }
+
+    const [incomingMessages, sentMessages] = await Promise.all([
+      Message.countDocuments({ conversationId: { $in: conversationIds }, senderId: { $ne: freelancerId } }),
+      Message.countDocuments({ conversationId: { $in: conversationIds }, senderId: freelancerId })
+    ]);
+
+    const responseRate = incomingMessages > 0 ? Math.min(100, Math.round((sentMessages / incomingMessages) * 100)) : 100;
+
     return {
-      average_response_time_hours: 24,
-      response_rate: 80,
-      score: 70, // 70% responsiveness score
+      average_response_time_hours: null,
+      response_rate: responseRate,
+      score: responseRate,
       last_updated: new Date()
     };
   }
@@ -269,16 +320,12 @@ class PFIService {
    */
   static calculateFactorScores(metrics) {
     return {
-      profile_completeness: metrics.profile_completeness.score,
-      verification: metrics.verification_status.score,
-      proposal_acceptance: metrics.performance_metrics.proposal_acceptance_rate,
-      milestone_completion: metrics.performance_metrics.milestone_completion_rate,
-      on_time_delivery: metrics.performance_metrics.on_time_delivery_rate,
-      client_ratings: Math.round((metrics.client_feedback.average_rating / 5) * 100), // Convert 5-star to percentage
-      review_sentiment: metrics.client_feedback.review_sentiment_score,
-      rehire_rate: metrics.client_feedback.rehire_rate,
-      responsiveness: metrics.responsiveness.score,
-      risk_penalty: metrics.risk_metrics.penalty_score
+      profile_completeness: Number(metrics.profile_completeness.score || 0),
+      proposal_acceptance: Number(metrics.performance_metrics.proposal_acceptance_rate || 0),
+      milestone_completion: Number(metrics.performance_metrics.milestone_completion_rate || 0),
+      on_time_delivery: Number(metrics.performance_metrics.on_time_delivery_rate || 0),
+      client_ratings: Math.round((Number(metrics.client_feedback.average_rating || 0) / 5) * 100),
+      platform_activity: Number(metrics.responsiveness.response_rate || 0)
     };
   }
 
@@ -289,28 +336,16 @@ class PFIService {
     const weights = this.WEIGHTS;
 
     let totalScore = 0;
-    let totalWeight = 0;
 
     // Add positive factors
     totalScore += (factorScores.profile_completeness * weights.PROFILE_COMPLETENESS);
-    totalScore += (factorScores.verification * weights.VERIFICATION);
     totalScore += (factorScores.proposal_acceptance * weights.PROPOSAL_ACCEPTANCE);
     totalScore += (factorScores.milestone_completion * weights.MILESTONE_COMPLETION);
     totalScore += (factorScores.on_time_delivery * weights.ON_TIME_DELIVERY);
     totalScore += (factorScores.client_ratings * weights.CLIENT_RATINGS);
-    totalScore += (factorScores.review_sentiment * weights.REVIEW_SENTIMENT);
-    totalScore += (factorScores.rehire_rate * weights.REHIRE_RATE);
-    totalScore += (factorScores.responsiveness * weights.RESPONSIVENESS);
+    totalScore += (factorScores.platform_activity * weights.PLATFORM_ACTIVITY);
 
-    // Apply penalty score as a reduction
-    totalScore += (factorScores.risk_penalty * weights.RISK_PENALTY);
-
-    // Calculate total weight (excluding penalty since it's negative)
-    totalWeight = weights.PROFILE_COMPLETENESS + weights.VERIFICATION + weights.PROPOSAL_ACCEPTANCE +
-                  weights.MILESTONE_COMPLETION + weights.ON_TIME_DELIVERY + weights.CLIENT_RATINGS +
-                  weights.REVIEW_SENTIMENT + weights.REHIRE_RATE + weights.RESPONSIVENESS;
-
-    const finalScore = totalScore / totalWeight;
+    const finalScore = totalScore / 100;
 
     // Ensure score is between 0-100
     return Math.max(0, Math.min(100, finalScore));
@@ -319,7 +354,8 @@ class PFIService {
   /**
    * Get status label based on score
    */
-  static getScoreStatus(score) {
+  static getScoreStatus(score, isGettingStarted = false) {
+    if (isGettingStarted) return 'Getting Started';
     if (score >= 90) return 'Excellent';
     if (score >= 80) return 'Very Good';
     if (score >= 70) return 'Good';
@@ -356,10 +392,23 @@ class PFIService {
     return {
       score: history.score,
       factor_breakdown: history.factor_breakdown,
-      status: this.getScoreStatus(history.score),
+      status: this.getScoreStatus(
+        history.score,
+        Number(history?.factor_breakdown?.proposal_acceptance || 0) === 0 &&
+          Number(history?.factor_breakdown?.milestone_completion || 0) === 0 &&
+          Number(history?.factor_breakdown?.client_ratings || 0) === 0
+      ),
       trend: this.calculateTrend(history.previous_score, history.score),
       last_updated: history.createdAt
     };
+  }
+
+  static isNewFreelancer(metrics) {
+    return (
+      Number(metrics?.performance_metrics?.total_proposals || 0) === 0 &&
+      Number(metrics?.performance_metrics?.total_milestones || 0) === 0 &&
+      Number(metrics?.client_feedback?.total_ratings || 0) === 0
+    );
   }
 
   /**
@@ -372,12 +421,96 @@ class PFIService {
   }
 
   /**
-   * Get improvement suggestions based on factor scores
+   * New calculatePFI utility that returns structured output
+   */
+  static async calculatePFI(userId) {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('Freelancer not found');
+
+    // Always recompute fresh data for AI usage
+    const pfiData = await this.calculatePFIScore(userId, 'manual_recompute');
+    const breakdown = {
+      profile: Number(pfiData.factor_breakdown.profile_completeness || 0),
+      proposals: Number(pfiData.factor_breakdown.proposal_acceptance || 0),
+      milestones: Number(pfiData.factor_breakdown.milestone_completion || 0),
+      delivery: Number(pfiData.factor_breakdown.on_time_delivery || 0),
+      ratings: Number(pfiData.factor_breakdown.client_ratings || 0),
+      activity: Number(pfiData.factor_breakdown.platform_activity || 0)
+    };
+
+    const recommendations = [];
+
+    // Missing profile fields
+    const missingFields = [];
+    const profile = user.freelancerProfile || {};
+    if (!user.name) missingFields.push('name');
+    if (!profile.headline) missingFields.push('headline');
+    if (!profile.bio) missingFields.push('bio');
+    if (!profile.location) missingFields.push('location');
+    if (!profile.primaryCategory) missingFields.push('primary category');
+    if (!profile.portfolioLinks || profile.portfolioLinks.length === 0) missingFields.push('portfolio links');
+    if (!Array.isArray(profile.languages) || profile.languages.length === 0) missingFields.push('languages');
+    if (missingFields.length > 0) {
+      recommendations.push(`Complete your profile — missing: ${missingFields.join(', ')}.`);
+    }
+
+    // Missing skills
+    const skillsCount = Array.isArray(profile.skills) ? profile.skills.length : 0;
+    if (skillsCount === 0) {
+      recommendations.push('Add your core skills to your profile so clients can find you and improve your job match score.');
+    } else if (skillsCount < 3) {
+      recommendations.push(`You have ${skillsCount} skill${skillsCount === 1 ? '' : 's'} listed. Add at least 3 service-specific skills to unlock better job matches.`);
+    } else if (skillsCount < 6) {
+      recommendations.push(`Consider adding more skills (you have ${skillsCount}). Freelancers with 6+ skills get significantly more matches.`);
+    }
+
+    // Proposal acceptance rate
+    if (breakdown.proposals === 0) {
+      recommendations.push('Apply to your first job! Browse recommended jobs below and send a tailored proposal to get started.');
+    } else if (breakdown.proposals < 20) {
+      recommendations.push(`Your proposal acceptance rate is low (${breakdown.proposals}%). Open with a quantified result from past work and reference the client's scope directly.`);
+    } else if (breakdown.proposals < 40) {
+      recommendations.push(`Your proposal acceptance rate is ${breakdown.proposals}%. Try referencing the client's project scope in your first 2 lines to stand out.`);
+    }
+
+    // Milestone completion rate
+    if (breakdown.milestones > 0 && breakdown.milestones < 60) {
+      recommendations.push(`Your milestone completion rate is ${breakdown.milestones}%. Break deliverables into smaller tasks to increase approval rates.`);
+    } else if (breakdown.milestones >= 60 && breakdown.milestones < 80) {
+      recommendations.push(`Your milestone completion rate is ${breakdown.milestones}%. Focus on clearly defined deliverables and communicate early if scope changes.`);
+    }
+
+    // Delivery performance
+    if (breakdown.delivery > 0 && breakdown.delivery < 70) {
+      recommendations.push(`Your on-time delivery rate is ${breakdown.delivery}%. Propose realistic timelines and flag delays proactively to protect your rating.`);
+    } else if (breakdown.delivery >= 70 && breakdown.delivery < 90) {
+      recommendations.push(`Your on-time delivery rate is ${breakdown.delivery}%. Add buffer time to your estimates to consistently meet deadlines.`);
+    }
+
+    // Platform activity
+    if (breakdown.activity < 50) {
+      recommendations.push('Boost your platform activity by responding to messages promptly — aim to reply within 24 hours.');
+    }
+
+    // Fallback if no recommendations
+    if (recommendations.length === 0) {
+      recommendations.push('Excellent work! Keep applying to jobs and maintaining your high delivery and ratings streak.');
+    }
+
+    return {
+      score: pfiData.score,
+      breakdown,
+      recommendations
+    };
+  }
+
+  /**
+   * Get improvement suggestions (legacy — kept for backwards compatibility)
    */
   static getImprovementSuggestions(factorBreakdown) {
     const suggestions = [];
 
-    if (factorBreakdown.profile_completeness < 80) {
+    if ((factorBreakdown.profile_completeness || 0) < 80) {
       suggestions.push({
         factor: 'profile_completeness',
         title: 'Complete your profile',
@@ -386,30 +519,12 @@ class PFIService {
       });
     }
 
-    if (factorBreakdown.verification < 60) {
+    if ((factorBreakdown.proposal_acceptance || 0) < 50) {
       suggestions.push({
-        factor: 'verification',
-        title: 'Get verified',
-        description: 'Connect your GitHub account and add a portfolio website to build trust.',
+        factor: 'proposal_acceptance',
+        title: 'Improve Proposal Success',
+        description: 'Refine your pitch to increase your proposal acceptance rate.',
         impact: 'High'
-      });
-    }
-
-    if (factorBreakdown.milestone_completion < 90) {
-      suggestions.push({
-        factor: 'milestone_completion',
-        title: 'Complete more milestones',
-        description: 'Focus on delivering high-quality work and completing assigned milestones.',
-        impact: 'High'
-      });
-    }
-
-    if (factorBreakdown.responsiveness < 70) {
-      suggestions.push({
-        factor: 'responsiveness',
-        title: 'Improve response time',
-        description: 'Respond to client messages within 24 hours to show reliability.',
-        impact: 'Medium'
       });
     }
 

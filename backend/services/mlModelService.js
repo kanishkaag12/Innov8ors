@@ -2,8 +2,10 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
-const ML_SYSTEM_DIR = path.join(PROJECT_ROOT, 'ml-ranking-system');
-const PYTHON_EXECUTABLE = process.env.ML_PYTHON_PATH || 'python';
+// In Docker, ML_SYSTEM_DIR is set to /ml-ranking-system (volume mount).
+// Locally it resolves to the sibling ml-ranking-system/ folder.
+const ML_SYSTEM_DIR = process.env.ML_SYSTEM_DIR || path.join(PROJECT_ROOT, 'ml-ranking-system');
+const PYTHON_EXECUTABLE = process.env.ML_PYTHON_PATH || 'python3';
 const PREDICT_SCRIPT_PATH = path.join(ML_SYSTEM_DIR, '08_model_predict.py');
 const MODEL_PATH = process.env.ML_MODEL_PATH || path.join(ML_SYSTEM_DIR, 'ranking_model.pkl');
 const SCALER_PATH = process.env.ML_SCALER_PATH || path.join(ML_SYSTEM_DIR, 'scaler.pkl');
