@@ -1,7 +1,7 @@
 # Graph Report - .  (2026-06-12)
 
 ## Corpus Check
-- 173 files · ~161,097 words
+- 173 files · ~161,950 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -195,16 +195,16 @@ Cohesion: 0.04
 Nodes (73): main(), Batch inference bridge for SynapEscrow backend. Reads feature rows from stdin J, _safe_float(), analyzeRequirement(), generateProposalController(), acceptProposal(), approvePartialEscrow(), completeProfile() (+65 more)
 
 ### Community 4 - "Community 4"
+Cohesion: 0.06
+Nodes (63): #n(), #a(), apiKey(), bm(), bu(), connect(), deserialize(), di() (+55 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.11
 Nodes (61): ac(), addErrorMessage(), addField(), addSuggestion(), ao(), asObject(), cc(), co() (+53 more)
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.05
 Nodes (36): isPreviewFeatureOn(), isRawAction(), EmployerDashboard(), c(), k(), EmployerDashboardPage(), FindWorkPage(), formatBudget() (+28 more)
-
-### Community 6 - "Community 6"
-Cohesion: 0.07
-Nodes (55): #n(), #a(), apiKey(), bu(), connect(), deserialize(), di(), Dp() (+47 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.12
@@ -227,60 +227,60 @@ Cohesion: 0.09
 Nodes (34): chatBotController(), buildFallbackMilestones(), buildProjectTitle(), chatWithAI(), extractJsonPayload(), generateMilestones(), generateProposal(), hasUsableGeminiKey() (+26 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.07
-Nodes (34): verifyRazorpaySignature(), ad(), alloc(), allocUnsafe(), Ba(), clone(), _cloneInto(), cm() (+26 more)
+Cohesion: 0.12
+Nodes (31): Br(), concat(), de(), ep(), findField(), fp(), fs(), Gc() (+23 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.11
-Nodes (34): N(), Br(), Bs(), concat(), de(), ep(), findField(), fp() (+26 more)
-
-### Community 14 - "Community 14"
 Cohesion: 0.09
 Nodes (29): os(), resolveFreelancerId(), addItem(), allocUnsafeSlow(), Am(), Bt(), byteLength(), construct() (+21 more)
 
+### Community 14 - "Community 14"
+Cohesion: 0.08
+Nodes (30): N(), ad(), Bs(), clone(), _cloneInto(), cm(), constructor(), Do() (+22 more)
+
 ### Community 15 - "Community 15"
-Cohesion: 0.09
-Nodes (29): mergeCandidateLists(), as(), bp(), Ds(), ei(), Ga(), getAllClientExtensions(), getAllComputedFields() (+21 more)
+Cohesion: 0.08
+Nodes (28): mergeCandidateLists(), as(), bp(), Ds(), ei(), Ga(), getAllClientExtensions(), getAllComputedFields() (+20 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.16
 Nodes (22): generateEmbedding(), buildFreelancerMatchingText(), buildJobMatchingText(), buildMongoFilters(), calculateMatchReasons(), cosineSimilarity(), ensureFreelancerEmbedding(), ensureJobEmbedding() (+14 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.13
-Nodes (22): verifyMilestone(), build(), commitTransaction(), dispatchEngineSpans(), #f(), fl(), getActiveContext(), getTraceParent() (+14 more)
+Cohesion: 0.11
+Nodes (25): verifyMilestone(), build(), commitTransaction(), dispatchEngineSpans(), #f(), fl(), getActiveContext(), getConnectionInfo() (+17 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.24
 Nodes (19): runModelPrediction(), getFreelancerInsightByProject(), getRankedFreelancers(), recomputeProjectRanking(), buildFeatureRows(), buildInsights(), buildSingleFeatureRow(), clamp() (+11 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.16
-Nodes (20): findActiveModel(), _(), Ao(), au(), cu(), G(), he(), io() (+12 more)
+Cohesion: 0.17
+Nodes (19): findActiveModel(), _(), Ao(), au(), cu(), G(), he(), io() (+11 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.2
 Nodes (1): PFIService
 
 ### Community 21 - "Community 21"
-Cohesion: 0.13
-Nodes (16): handleAndLogRequestError(), ap(), El(), emit(), handleAndLogRequestError(), handleRequestError(), hu(), im() (+8 more)
+Cohesion: 0.15
+Nodes (16): verifyRazorpaySignature(), alloc(), allocUnsafe(), Ba(), destroy(), digest(), digestInto(), fill() (+8 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.14
-Nodes (15): bm(), Do(), Fi(), mapQueryEngineResult(), Mm(), $n(), ot(), qu() (+7 more)
+Cohesion: 0.13
+Nodes (16): handleAndLogRequestError(), ap(), El(), emit(), handleAndLogRequestError(), handleRequestError(), hu(), im() (+8 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.29
 Nodes (12): buildFreelancerBlueprints(), ensureEmployer(), ensureMongoUri(), ensureProject(), main(), parseArgs(), pickExperienceLevel(), resolveProject() (+4 more)
 
 ### Community 24 - "Community 24"
-Cohesion: 0.24
-Nodes (12): Bd(), cr(), em(), Hd(), jd(), ki(), kt(), Nu() (+4 more)
-
-### Community 25 - "Community 25"
 Cohesion: 0.27
 Nodes (2): decodeBase64AsWasm(), $()
+
+### Community 25 - "Community 25"
+Cohesion: 0.33
+Nodes (9): Bd(), cr(), em(), kt(), Nu(), qd(), tm(), Un() (+1 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.39
@@ -955,12 +955,12 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `get()` connect `Community 3` to `Community 1`, `Community 2`, `Community 6`, `Community 7`, `Community 8`, `Community 12`, `Community 15`, `Community 18`, `Community 22`, `Community 23`, `Community 24`?**
-  _High betweenness centrality (0.122) - this node is a cross-community bridge._
-- **Why does `execute()` connect `Community 1` to `Community 2`, `Community 6`, `Community 10`, `Community 12`, `Community 13`, `Community 17`?**
-  _High betweenness centrality (0.114) - this node is a cross-community bridge._
-- **Why does `includes()` connect `Community 5` to `Community 0`, `Community 2`, `Community 3`, `Community 6`, `Community 9`, `Community 11`, `Community 13`, `Community 16`, `Community 17`, `Community 22`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `execute()` connect `Community 1` to `Community 2`, `Community 4`, `Community 10`, `Community 12`, `Community 14`, `Community 17`?**
+  _High betweenness centrality (0.134) - this node is a cross-community bridge._
+- **Why does `get()` connect `Community 3` to `Community 1`, `Community 2`, `Community 4`, `Community 7`, `Community 8`, `Community 14`, `Community 15`, `Community 18`, `Community 23`, `Community 25`?**
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Why does `includes()` connect `Community 6` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 9`, `Community 11`, `Community 12`, `Community 14`, `Community 16`, `Community 17`?**
+  _High betweenness centrality (0.070) - this node is a cross-community bridge._
 - **Are the 37 inferred relationships involving `get()` (e.g. with `listProjects()` and `w()`) actually correct?**
   _`get()` has 37 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 31 inferred relationships involving `execute()` (e.g. with `.execute_query()` and `.generate_users_and_freelancers()`) actually correct?**
